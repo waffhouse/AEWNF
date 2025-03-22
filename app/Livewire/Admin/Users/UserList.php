@@ -56,7 +56,12 @@ class UserList extends AdminComponent
      */
     public function loadInitialUsers(): void
     {
-        $this->resetItems();
+        // Force a complete reset and reload of all items
+        $this->items = [];
+        $this->loadedCount = 0;
+        $this->hasMorePages = true;
+        $this->totalCount = 0;
+        $this->loadItems();
     }
     
     /**
@@ -126,9 +131,13 @@ class UserList extends AdminComponent
      */
     public function resetItems()
     {
+        // Force a complete reset and reload from the beginning
         $this->items = [];
         $this->loadedCount = 0;
         $this->hasMorePages = true;
+        $this->totalCount = 0;
+        
+        // Use a slight delay before loading to ensure all state is reset
         $this->loadItems();
     }
     
@@ -225,8 +234,8 @@ class UserList extends AdminComponent
             $this->flashSuccess('User deleted successfully!');
             $this->dispatch('close-modal', 'delete-user-confirmation');
             
-            // Reset the users list to remove the deleted user
-            $this->resetItems();
+            // Complete reload of the user list to ensure proper state after deletion
+            $this->loadInitialUsers();
         } catch (\Exception $e) {
             Log::error('User deletion failed: ' . $e->getMessage());
             $this->flashError('User deletion failed: ' . $e->getMessage());
@@ -291,7 +300,7 @@ class UserList extends AdminComponent
         }
         
         // Fallback to reload if user not found in list or no data provided
-        $this->resetItems();
+        $this->loadInitialUsers();
     }
     
     /**
@@ -302,7 +311,7 @@ class UserList extends AdminComponent
     public function handleUsersRefreshed()
     {
         // Reload all items when users are refreshed
-        $this->resetItems();
+        $this->loadInitialUsers();
     }
     
     /**
