@@ -16,6 +16,8 @@ class CartPage extends Component
     public $cart;
     public $cartItems = [];
     public $notes = '';
+    public $viewingOrderDetails = false;
+    public $selectedOrder = null;
     
     public function mount()
     {
@@ -112,6 +114,23 @@ class CartPage extends Component
         }
     }
     
+    public function viewOrderDetails($orderId)
+    {
+        $this->selectedOrder = Order::with(['items.inventory', 'user'])
+            ->where('user_id', Auth::id())
+            ->findOrFail($orderId);
+        $this->viewingOrderDetails = true;
+    }
+    
+    public function closeOrderDetails()
+    {
+        // Remove the body lock through inline JavaScript for immediate effect
+        $this->js('document.body.classList.remove("overflow-hidden")'); 
+        
+        $this->viewingOrderDetails = false;
+        $this->selectedOrder = null;
+    }
+    
     public function checkout()
     {
         // Check if the user has permission to place orders
@@ -173,9 +192,8 @@ class CartPage extends Component
             // Reset form 
             $this->notes = '';
             
-            // Redirect to order details page with success message
-            return redirect()->route('customer.order.details', ['order' => $order->id])
-                ->with('message', 'Order placed successfully! Your order #' . $order->id . ' has been received.');
+            // Show order details directly in a modal
+            $this->viewOrderDetails($order->id);
             
         } catch (\Exception $e) {
             DB::rollBack();

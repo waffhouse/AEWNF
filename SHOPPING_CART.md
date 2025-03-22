@@ -73,11 +73,11 @@ All permissions are checked at multiple levels:
 1. ✅ Created checkout process functionality in CartPage component
 2. ✅ Implemented order creation from cart items
 3. ✅ Added cart clearing after successful order 
-4. ✅ Integrated direct redirect to order details with success message
-5. ✅ Made checkout process more streamlined by removing separate success page
+4. ✅ Implemented modal-based order details view after checkout
+5. ✅ Made checkout process more streamlined and user-friendly
 
 ### ✅ Phase 4: Order History & Management (Completed)
-1. ✅ Created customer order history page
+1. ✅ Created customer order history page with modal details view
 2. ✅ Built staff/admin order management dashboard
 3. ✅ Implemented order status updates for staff
 4. ✅ Added filtering and sorting for orders
@@ -98,7 +98,7 @@ All permissions are checked at multiple levels:
 - Real-time cart counter updates in navigation
 - Consistent experience across desktop and mobile
 - Tax exemption indication for B2B transactions
-- Streamlined checkout flow with direct redirect to order details
+- Streamlined checkout flow with modal-based order confirmation
 
 ### Add to Cart Component
 - Permission checks before adding to cart
@@ -118,7 +118,7 @@ All permissions are checked at multiple levels:
 - Streamlined interface showing all orders with pending orders always at the top
 - Clear status count summary for quick overview of order statuses
 - Search functionality by order ID, customer name, email, or customer number
-- View detailed order information (items, quantities, prices)
+- View detailed order information (items, quantities, prices) in modal
 - Update order status (complete or cancel)
 - Real-time status updates with notifications
 - Responsive design for both desktop and mobile devices
@@ -129,20 +129,22 @@ All permissions are checked at multiple levels:
 
 1. ✅ Order placement workflow
    - ✅ Initial implementation with separate order success page
-   - ✅ Streamlined to direct redirect to order details with success message
+   - ✅ Streamlined to use modal-based order confirmation
    - ✅ Added tax exemption indication for B2B transactions
 2. ✅ Create order history view for customers
    - ✅ Built basic table-based layout
    - ✅ Enhanced with responsive design for mobile
-   - ✅ Added clear status indicators and detail links
+   - ✅ Added modal-based order details view
+   - ✅ Added clear status indicators
 3. ✅ Create order management dashboard for staff
    - ✅ Integrated into admin dashboard
    - ✅ Added filtering and status management
+   - ✅ Implemented modal-based order details view
 4. ✅ Improve responsive design for mobile users
    - ✅ Converted order management tab to use card-based layout instead of tables
    - ✅ Made order details modal responsive for small screens
    - ✅ Updated order history to use card-based layout on small screens
-   - ✅ Enhanced order details page with responsive design
+   - ✅ Enhanced order details view with responsive design
    - ✅ Eliminated horizontal scrolling throughout order screens
    - ✅ Improved button styling with icons and better placement
 5. ✅ Fix UI/UX issues
@@ -152,6 +154,7 @@ All permissions are checked at multiple levels:
    - ✅ Added cart total display alongside item count for better user feedback
    - ✅ Created persistent cart icon in mobile header for improved accessibility
    - ✅ Implemented scroll-to-top functionality for improved catalog browsing
+   - ✅ Created consistent modal-based experience for order details across the application
 6. ✅ Test the complete order flow with different user types
 
 ## Permission Enforcement
@@ -179,17 +182,6 @@ The cart counter in the navigation bar wasn't updating reliably when items were 
 - Used Livewire events to communicate between cart components 
 - Added Alpine.js integration for consistent UI updates across page navigations
 
-### 4. Cart Visibility and UX
-**Issue**: ✅ RESOLVED
-Mobile users needed to open the hamburger menu to access their cart, and had no way to quickly see their cart total.
-
-**Solution Implemented**:
-- Added a persistent cart icon in the mobile header that's always visible
-- Enhanced cart counter to display total price alongside item count
-- Positioned the cart total elegantly next to count badges throughout the UI
-- Made the cart icon immediately accessible without opening the full navigation menu
-- Updated UI to prominently display cart status for better shopping experience
-
 ### 2. Mobile Responsiveness
 **Issue**: ✅ RESOLVED
 Some screens weren't optimized for mobile viewing, particularly the order management dashboard, shopping cart, order history and order details pages.
@@ -204,8 +196,9 @@ Some screens weren't optimized for mobile viewing, particularly the order manage
 - Replaced cart table with card-based layout on small screens
 - Made cart item information better organized for small screens
 - Created sticky order summary with consistent positioning on scroll
-- Converted order history and order details to use card-based layouts on small screens
-- Eliminated horizontal scrolling on order history and order details pages
+- Converted order history to use card-based layouts on small screens
+- Created modal-based order details view with responsive design
+- Eliminated horizontal scrolling on order history page
 - Made buttons stack vertically on mobile for better touch targets
 - Added clear icons to buttons for better visual guidance
 - Created consistent responsive patterns across all order-related screens
@@ -225,3 +218,28 @@ Initial implementation lacked workflow efficiency and was difficult to access fo
 - Added staff access to order management while preserving role-based permissions
 - Made order management accessible to staff users without full admin privileges
 - Uses infinite scrolling for better performance with large order sets
+
+### 4. Cart Visibility and UX
+**Issue**: ✅ RESOLVED
+Mobile users needed to open the hamburger menu to access their cart, and had no way to quickly see their cart total.
+
+**Solution Implemented**:
+- Added a persistent cart icon in the mobile header that's always visible
+- Enhanced cart counter to display total price alongside item count
+- Positioned the cart total elegantly next to count badges throughout the UI
+- Made the cart icon immediately accessible without opening the full navigation menu
+- Updated UI to prominently display cart status for better shopping experience
+
+### 5. Order Details Workflow
+**Issue**: ✅ RESOLVED
+Previously, order details were displayed on a separate page, requiring navigation away from the order list. After checkout, users were redirected to a separate order details page.
+
+**Solution Implemented**:
+- Converted order details to use a modal-based interface throughout the application
+- Order details are now displayed in a responsive modal overlay
+- After checkout, order details are immediately displayed in a modal
+- Order history page now shows order details in a modal
+- Admin order management now uses the same modal pattern
+- Created consistent experience across all order-related features
+- Eliminated unnecessary page redirects for a more fluid user experience
+- Made all order details modals responsive for all screen sizes
