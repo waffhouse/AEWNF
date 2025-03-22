@@ -1,4 +1,7 @@
 <div>
+    <!-- Scroll to top button -->
+    <x-scroll-to-top />
+    
     <div class="flex justify-between items-center mb-3">
         <h2 class="text-lg font-semibold flex items-center text-blue-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,7 +96,7 @@
                                 @endforeach
                             </td>
                             <td class="px-3 py-2 text-sm text-gray-500 hidden lg:table-cell">
-                                @if($user->hasRole('customer') && $user->customer_number)
+                                @if($user->customer_number)
                                     <span class="font-mono">{{ $user->customer_number }}</span>
                                 @else
                                     <span class="text-gray-400">-</span>
@@ -284,14 +287,14 @@
                         @error('userRole') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     
-                    @can('create users')
-                        <div x-data="{ show: false }" x-init="$watch('$wire.userRole', value => show = value === 'customer')" x-show="show">
+                    @if(auth()->user()->hasAnyPermission(['create users', 'edit users']))
+                        <div x-data="{ show: false }" x-init="$watch('$wire.userRole', value => show = (value === 'customer' || value === 'florida customer' || value === 'georgia customer'))" x-show="show">
                             <label for="customer_number" class="block text-sm font-medium text-gray-700 mb-1">Customer Number (4 digits)</label>
                             <input wire:model="customer_number" id="customer_number" type="text" maxlength="4" placeholder="e.g. 1234" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             <div class="text-xs text-gray-500 mt-1">Unique identifier for customer (must be 4 digits and unique)</div>
                             @error('customer_number') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
-                    @endcan
+                    @endif
                 </div>
                 
                 <div class="flex justify-end gap-2">

@@ -1,4 +1,7 @@
 <div>
+    <!-- Scroll to top button -->
+    <x-scroll-to-top />
+    
     <div class="mb-6">
         <h3 class="text-lg font-medium text-gray-900 mb-2">Order Management</h3>
         <p class="text-sm text-gray-600">View and manage customer orders. Update status, view details, and track history.</p>
@@ -53,23 +56,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 <span class="text-sm text-gray-800 font-medium">{{ $pendingCount + $completedCount + $cancelledCount }} Total Orders</span>
-            </div>
-        </div>
-        
-        <!-- Items Per Page -->
-        <div class="flex justify-end">
-            <div class="w-36">
-                <label for="per-page" class="sr-only">Items Per Page</label>
-                <select 
-                    id="per-page" 
-                    wire:model.live="perPage" 
-                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                >
-                    <option value="10">10 per page</option>
-                    <option value="25">25 per page</option>
-                    <option value="50">50 per page</option>
-                    <option value="100">100 per page</option>
-                </select>
             </div>
         </div>
     </div>
@@ -263,44 +249,6 @@
         </div>
     </div>
     
-    <!-- Return to Top Button -->
-    <div 
-        x-data="{ 
-            showScrollToTop: false,
-            scrollToTop() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            },
-            init() {
-                window.addEventListener('scroll', () => {
-                    // Show scroll to top button when scrolled down
-                    this.showScrollToTop = window.scrollY > 500;
-                });
-            }
-        }"
-    >
-        <button
-            x-show="showScrollToTop"
-            x-cloak
-            @click="scrollToTop()"
-            class="fixed bottom-20 right-4 z-40 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md shadow-lg transition-all duration-300 flex items-center"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-4"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0" 
-            x-transition:leave-end="opacity-0 transform translate-y-4"
-            aria-label="Return to top"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-            </svg>
-            <span class="text-sm font-medium">Top</span>
-        </button>
-    </div>
-
     <!-- Order Details Modal -->
     @if($viewingOrderDetails && $selectedOrder)
         <div

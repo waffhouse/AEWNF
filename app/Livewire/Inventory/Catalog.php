@@ -181,21 +181,18 @@ class Catalog extends Component
     {
         $this->filtersApplied = true;
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     public function updatedBrand()
     {
         $this->filtersApplied = true;
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     public function updatedClass()
     {
         $this->filtersApplied = true;
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     public function updatedState()
@@ -208,14 +205,12 @@ class Catalog extends Component
             $this->filtersApplied = !empty($this->search) || !empty($this->brand) || !empty($this->class);
         }
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     public function updatedPerPage()
     {
         $this->filtersApplied = true;
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     public function resetProducts()
@@ -235,7 +230,6 @@ class Catalog extends Component
         $this->perPage = 25;
         $this->filtersApplied = false;
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     public function removeFilter($type)
@@ -264,7 +258,6 @@ class Catalog extends Component
         }
         
         $this->resetProducts();
-        $this->dispatch('scrollToTop');
     }
     
     // This method is kept for backward compatibility but will always return false

@@ -185,8 +185,9 @@ class UserManagement extends AdminComponent
             'password' => Hash::make($this->password),
         ];
         
-        // Only users with create users permission can set customer numbers, and only for customers
-        if (auth()->user()->hasPermissionTo('create users') && $this->userRole === 'customer') {
+        // Only users with create users permission can set customer numbers, and only for customer roles
+        if (auth()->user()->hasPermissionTo('create users') && 
+            (strpos($this->userRole, 'customer') !== false)) {
             $userData['customer_number'] = $this->customer_number;
         }
         
@@ -255,10 +256,11 @@ class UserManagement extends AdminComponent
             'email' => $this->email,
         ];
         
-        // Only users with edit users permission can update customer numbers, and only for customers
-        if (auth()->user()->hasPermissionTo('edit users') && $this->userRole === 'customer') {
+        // Only users with edit users permission can update customer numbers, and only for customer roles
+        if (auth()->user()->hasPermissionTo('edit users') && 
+            (strpos($this->userRole, 'customer') !== false)) {
             $userData['customer_number'] = $this->customer_number;
-        } elseif ($this->userRole !== 'customer') {
+        } elseif (strpos($this->userRole, 'customer') === false) {
             // If changing role away from customer, remove customer number
             $userData['customer_number'] = null;
         }

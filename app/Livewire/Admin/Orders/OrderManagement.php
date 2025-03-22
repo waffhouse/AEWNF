@@ -1,27 +1,22 @@
 <?php
-
 namespace App\Livewire\Admin\Orders;
-
 use App\Models\Order;
 use App\Models\User;
 use App\Traits\AdminAuthorization;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
-
 class OrderManagement extends Component
 {
     use AdminAuthorization;
-
     // For infinite scroll
     public $orders = [];
     public $hasMorePages = true;
     public $isLoading = false;
     public $totalCount = 0;
     public $loadedCount = 0;
-
     public $search = '';
-    public int $perPage = 10;
+    public int $perPage = 25; // Fixed value for infinite scrolling (no user selection)
     public $selectedOrder = null;
     public $viewingOrderDetails = false;
     
@@ -40,20 +35,11 @@ class OrderManagement extends Component
             $this->dispatch('error', 'You do not have permission to manage orders');
             $this->redirect(route('dashboard'));
         }
-
         // Load initial orders
         $this->loadOrders();
     }
     
     public function updatingSearch()
-    {
-        $this->resetOrders();
-        $this->dispatch('resetOrders');
-    }
-    
-    // Status filter removed
-
-    public function updatingPerPage()
     {
         $this->resetOrders();
         $this->dispatch('resetOrders');
@@ -116,7 +102,6 @@ class OrderManagement extends Component
             ]);
         }
     }
-
     public function loadOrders()
     {
         $this->isLoading = true;
@@ -164,7 +149,6 @@ class OrderManagement extends Component
         $this->hasMorePages = true;
         $this->loadOrders();
     }
-
     protected function getFilteredQuery()
     {
         $query = Order::query()->with('user');

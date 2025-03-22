@@ -2,20 +2,10 @@
     x-data="{ 
         showStickyFilter: false,
         showMobileFilterModal: false,
-        showScrollToTop: false,
-        scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        },
         init() {
             window.addEventListener('scroll', () => {
                 // Show sticky filter only when we've scrolled past the main filter section
                 this.showStickyFilter = window.scrollY > 300;
-                
-                // Show scroll to top button when scrolled down
-                this.showScrollToTop = window.scrollY > 500;
                 
                 // Add bottom padding when filter is shown to prevent content being hidden
                 if (this.showStickyFilter) {
@@ -24,15 +14,12 @@
                     document.body.classList.remove('pb-sticky-filter');
                 }
             });
-            
-            // Add event listener for scrollToTop
-            Livewire.on('scrollToTop', () => {
-                this.scrollToTop();
-            });
         }
     }" 
     class="py-6"
 >
+    <!-- Scroll to top button -->
+    <x-scroll-to-top />
     <!-- Sticky Filter at Bottom (appears when scrolling) -->
     <div 
         x-show="showStickyFilter" 
@@ -516,26 +503,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Return to Top Button -->
-    <button
-        x-show="showScrollToTop"
-        x-cloak
-        @click="scrollToTop()"
-        class="fixed bottom-20 right-4 z-40 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md shadow-lg transition-all duration-300 flex items-center"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate-y-4"
-        x-transition:enter-end="opacity-100 transform translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate-y-0" 
-        x-transition:leave-end="opacity-0 transform translate-y-4"
-        aria-label="Return to top"
-    >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-        </svg>
-        <span class="text-sm font-medium">Top</span>
-    </button>
     
     <!-- Mobile Filter Modal -->
     <div 
