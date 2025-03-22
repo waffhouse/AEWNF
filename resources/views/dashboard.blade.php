@@ -27,7 +27,8 @@
                             'view users' => [
                                 'title' => 'Users List',
                                 'description' => 'View all users in the system with their roles.',
-                                'route' => 'staff.users_list',
+                                'route' => 'admin.dashboard',
+                                'route_hash' => '#users',
                                 'button_text' => 'View Users',
                                 'color' => 'blue'
                             ],
@@ -50,7 +51,7 @@
                                     <p class="text-gray-600">{{ $card['description'] }}</p>
                                 </div>
                                 <div class="mt-6 pt-3">
-                                    <a href="{{ route($card['route']) }}" 
+                                    <a href="{{ route($card['route']) }}{{ isset($card['route_hash']) ? $card['route_hash'] : '' }}" 
                                        class="inline-flex items-center px-4 py-2 bg-{{ $card['color'] }}-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-{{ $card['color'] }}-700 focus:bg-{{ $card['color'] }}-700 active:bg-{{ $card['color'] }}-900 focus:outline-none focus:ring-2 focus:ring-{{ $card['color'] }}-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         {{ $card['button_text'] }}
                                     </a>
