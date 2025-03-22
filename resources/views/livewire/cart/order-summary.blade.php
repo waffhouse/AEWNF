@@ -1,4 +1,4 @@
-<div class="bg-gray-50 p-6 rounded-lg border border-gray-200 sticky top-20">
+<div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
     
     <div class="border-t border-gray-200 pt-4">
@@ -31,11 +31,12 @@
             </div>
             
             <button 
+                id="place-order-btn"
                 type="button"
                 wire:click="checkout"
                 wire:loading.attr="disabled"
                 wire:confirm="Are you sure you want to place this order?"
-                class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center justify-center"
+                class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center justify-center hidden md:flex"
             >
                 <span wire:loading.remove wire:target="checkout">Place Order</span>
                 <span wire:loading wire:target="checkout">Processing...</span>

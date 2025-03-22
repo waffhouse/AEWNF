@@ -28,20 +28,18 @@
                 @if(count($cartItems) === 0)
                     <livewire:cart.cart-items :cartItems="$cartItems" />
                 @else
-                    <div class="flex flex-col md:flex-row gap-6">
-                        <!-- Cart Items -->
-                        <div class="w-full md:w-2/3">
-                            <livewire:cart.cart-items :cartItems="$cartItems" />
-                        </div>
-                        
-                        <!-- Order Summary -->
-                        <div class="w-full md:w-1/3">
-                            <livewire:cart.order-summary 
-                                :cart="$cart" 
-                                :total="$total" 
-                                :itemCount="$itemCount" 
-                            />
-                        </div>
+                    <!-- Regular layout - full width for both sections -->
+                    <div class="w-full">
+                        <livewire:cart.cart-items :cartItems="$cartItems" />
+                    </div>
+                    
+                    <!-- Hidden order summary - only needed for form submission -->
+                    <div class="hidden">
+                        <livewire:cart.order-summary 
+                            :cart="$cart" 
+                            :total="$total" 
+                            :itemCount="$itemCount" 
+                        />
                     </div>
                 @endif
             </div>
@@ -50,4 +48,32 @@
 
     <!-- Order Confirmation Modal -->
     <livewire:cart.order-confirmation />
+    
+    <!-- Fixed Action Button (visible on all screen sizes) -->
+    @if(count($cartItems) > 0)
+        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 shadow-lg z-10">
+            <div class="container mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm">
+                        <div class="font-bold">Total: ${{ number_format($total, 2) }}</div>
+                        <div class="text-xs text-gray-600">{{ $itemCount }} item(s)</div>
+                    </div>
+                    <button 
+                        id="checkout-button"
+                        type="button"
+                        wire:click="checkout"
+                        wire:loading.attr="disabled"
+                        wire:confirm="Are you sure you want to place this order?"
+                        class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center justify-center"
+                    >
+                        <span wire:loading.remove wire:target="checkout">Place Order</span>
+                        <span wire:loading wire:target="checkout">Processing...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add bottom padding to avoid content being hidden behind fixed bar -->
+        <div class="h-20"></div>
+    @endif
 </div>
