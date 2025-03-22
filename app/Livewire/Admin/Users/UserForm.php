@@ -18,7 +18,6 @@ class UserForm extends AdminComponent
     public $password;
     public $userRole;
     public $customer_number;
-    public $state;
     
     // UserService instance
     protected UserService $userService;
@@ -166,10 +165,6 @@ class UserForm extends AdminComponent
                     $userData['customer_number'] = $this->customer_number;
                 }
                 
-                if ($this->state) {
-                    $userData['state'] = $this->state;
-                }
-                
                 // Use the UserService to create the user
                 $user = $this->userService->createUser($userData, $this->userRole);
                 
@@ -222,7 +217,6 @@ class UserForm extends AdminComponent
         $this->email = $user->email;
         $this->password = '';
         $this->customer_number = $user->customer_number;
-        $this->state = $user->state;
         $this->userRole = $user->roles->first() ? $user->roles->first()->name : '';
     }
     
@@ -261,10 +255,6 @@ class UserForm extends AdminComponent
                     $userData['customer_number'] = $this->customer_number;
                 }
                 
-                if ($this->state) {
-                    $userData['state'] = $this->state;
-                }
-                
                 // Use the UserService to update the user
                 $user = $this->userService->updateUser($this->editId, $userData, $this->userRole);
                 
@@ -288,7 +278,7 @@ class UserForm extends AdminComponent
      */
     public function resetForm(): void
     {
-        $this->reset(['name', 'email', 'password', 'userRole', 'customer_number', 'state']);
+        $this->reset(['name', 'email', 'password', 'userRole', 'customer_number']);
         $this->formErrors = []; // Reset form errors directly
     }
 }

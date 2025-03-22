@@ -79,16 +79,6 @@
                 @error('customer_number') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
             
-            <!-- State field -->
-            <div>
-                <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
-                <select wire:model="state" id="state" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    <option value="">Select state (optional)</option>
-                    <option value="FL">Florida</option>
-                    <option value="GA">Georgia</option>
-                </select>
-                @error('state') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-            </div>
         </div>
     </x-modals.form-modal>
 </div>

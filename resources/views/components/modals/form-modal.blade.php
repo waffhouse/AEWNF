@@ -45,13 +45,9 @@ $submitWireMethod = $attributes->wire('submit')->value() ?? $submitMethod;
         nextFocusableIndex() { return (this.focusables().indexOf(document.activeElement) + 1) % (this.focusables().length + 1) },
         prevFocusableIndex() { return Math.max(0, this.focusables().indexOf(document.activeElement)) -1 },
         autofocus() { 
-            // Focus the first input if it exists
-            const firstInput = this.$el.querySelector('input:not([type=hidden]):not([disabled]), textarea:not([disabled]), select:not([disabled])');
-            if (firstInput) {
-                setTimeout(() => firstInput.focus(), 100);
-            } else {
-                this.firstFocusable().focus();
-            }
+            // Don't auto-focus any input by default
+            // Just focus the modal container for accessibility
+            this.$el.focus();
         }
     }"
     x-init="$watch('show', value => {
@@ -96,6 +92,7 @@ $submitWireMethod = $attributes->wire('submit')->value() ?? $submitMethod;
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         @click.outside="$dispatch('close-modal', '{{ $name }}')"
+        tabindex="-1"
     >
         <!-- Header -->
         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 sm:px-6 sm:flex sm:justify-between sm:items-center">

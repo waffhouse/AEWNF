@@ -83,10 +83,6 @@ class UserService
             });
         }
         
-        // Apply state filter
-        if (isset($filters['state']) && !empty($filters['state'])) {
-            $query->where('state', $filters['state']);
-        }
         
         // Apply sorting
         $orderBy = $options['orderBy'] ?? 'name';
@@ -339,7 +335,6 @@ class UserService
             'password' => 'required|min:8',
             'role' => 'required|exists:roles,name',
             'customer_number' => 'nullable|string|max:10|regex:/^\d{4}$/|unique:users,customer_number',
-            'state' => 'nullable|string|max:2',
         ];
     }
     
@@ -357,7 +352,6 @@ class UserService
             'password' => 'nullable|min:8',
             'role' => 'required|exists:roles,name',
             'customer_number' => 'nullable|string|max:10|regex:/^\d{4}$/|unique:users,customer_number,' . $userId,
-            'state' => 'nullable|string|max:2',
         ];
     }
     
