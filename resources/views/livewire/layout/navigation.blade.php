@@ -59,11 +59,7 @@ new class extends Component
                         {{ __('Product Catalog') }}
                     </x-nav-link>
                     
-                    @can('view own orders')
-                    <x-nav-link :href="route('customer.orders')" :active="request()->routeIs('customer.orders*')" wire:navigate>
-                        {{ __('My Orders') }}
-                    </x-nav-link>
-                    @endcan
+                    <!-- My Orders moved to dropdown menu only -->
                     
                     @can('add to cart')
                     <x-nav-link :href="route('customer.cart')" :active="request()->routeIs('customer.cart')" wire:navigate class="flex items-center">
@@ -177,11 +173,7 @@ new class extends Component
                 {{ __('Product Catalog') }}
             </x-responsive-nav-link>
             
-            @can('view own orders')
-            <x-responsive-nav-link :href="route('customer.orders')" :active="request()->routeIs('customer.orders*')" wire:navigate @click="open = false">
-                {{ __('My Orders') }}
-            </x-responsive-nav-link>
-            @endcan
+            <!-- My Orders moved to profile section only -->
             
             @can('add to cart')
             <x-responsive-nav-link :href="route('customer.cart')" :active="request()->routeIs('customer.cart')" wire:navigate @click="open = false" class="flex items-center justify-between">

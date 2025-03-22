@@ -92,32 +92,32 @@
                             
                             <!-- Desktop Table (hidden on mobile) -->
                             <div class="hidden md:block overflow-x-auto border border-gray-200 rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200 table-fixed">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-1/2">Product</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase w-1/6">SKU</th>
+                                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase w-1/12">Price</th>
+                                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase w-1/12">Qty</th>
+                                            <th scope="col" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase w-1/6">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         @foreach($selectedOrder->items as $item)
                                             <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {{ $item->product_name }}
+                                                <td class="px-4 py-2 text-sm text-gray-900">
+                                                    <div class="truncate pr-4" title="{{ $item->product_name }}">{{ $item->product_name }}</div>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td class="px-4 py-2 text-sm text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {{ $item->product_sku }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td class="px-4 py-2 text-sm text-gray-500 text-right whitespace-nowrap">
                                                     ${{ number_format($item->price, 2) }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td class="px-4 py-2 text-sm text-gray-500 text-right whitespace-nowrap">
                                                     {{ $item->quantity }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900 text-right whitespace-nowrap">
                                                     ${{ number_format($item->price * $item->quantity, 2) }}
                                                 </td>
                                             </tr>
@@ -125,8 +125,8 @@
                                     </tbody>
                                     <tfoot class="bg-gray-50">
                                         <tr>
-                                            <td colspan="4" class="px-6 py-4 text-right text-sm font-medium text-gray-900">Order Total:</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${{ number_format($selectedOrder->total, 2) }}</td>
+                                            <td colspan="4" class="px-4 py-2 text-right text-sm font-medium text-gray-900">Order Total:</td>
+                                            <td class="px-4 py-2 text-right text-sm font-bold text-gray-900">${{ number_format($selectedOrder->total, 2) }}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -135,23 +135,19 @@
                             <!-- Mobile Card View (shown only on small screens) -->
                             <div class="md:hidden space-y-3">
                                 @foreach($selectedOrder->items as $item)
-                                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                        <div class="flex justify-between">
-                                            <span class="font-medium text-gray-900">{{ $item->product_name }}</span>
-                                            <span class="font-bold text-gray-900">${{ number_format($item->price * $item->quantity, 2) }}</span>
-                                        </div>
-                                        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-                                            <div>
-                                                <span class="text-gray-500">SKU:</span>
-                                                <span class="text-gray-700">{{ $item->product_sku }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-gray-500">Price:</span>
-                                                <span class="text-gray-700">${{ number_format($item->price, 2) }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-gray-500">Quantity:</span>
-                                                <span class="text-gray-700">{{ $item->quantity }}</span>
+                                    <div class="p-3 border rounded">
+                                        <div class="mb-1">
+                                            <span class="text-sm font-medium block mb-1">{{ $item->product_name }}</span>
+                                            <div class="flex justify-between border-t border-gray-100 pt-1">
+                                                <div class="text-xs text-gray-500">
+                                                    <div>SKU: <span class="font-medium">{{ $item->product_sku }}</span></div>
+                                                    <div>Price: <span class="font-medium">${{ number_format($item->price, 2) }}</span></div>
+                                                    <div>Qty: <span class="font-medium">{{ $item->quantity }}</span></div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <div class="text-xs text-gray-500">Subtotal</div>
+                                                    <div class="text-sm font-bold text-gray-900">${{ number_format($item->price * $item->quantity, 2) }}</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

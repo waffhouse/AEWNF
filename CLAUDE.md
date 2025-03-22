@@ -5,7 +5,9 @@
 - **All-in-One Dev**: `composer run dev` (runs server, queue, logs, and vite concurrently)
 - **Asset Compilation**: `npm run dev` (development) or `npm run build` (production)
 - **Code Linting**: `./vendor/bin/pint` (Laravel Pint for PSR-12 formatting)
+- **Type Checking**: `php artisan dusk:check` (if available)
 - **Clear Cache**: `php artisan cache:clear && php artisan view:clear && php artisan route:clear`
+- **Debug Mode**: Set `APP_DEBUG=true` in .env for detailed error messages
 
 ## Testing Commands
 - **Run All Tests**: `php artisan test` or `./vendor/bin/phpunit`
@@ -29,8 +31,7 @@
 
 ## Styling Guide
 - **Color Palette**: The project uses a customized Tailwind configuration
-  - **Important**: `indigo` colors are remapped to red shades (see tailwind.config.js)
-  - Use `text-red-400` for accent text (replaces what would typically be blue/indigo in standard Tailwind)
+  - Primary accent colors: Use `text-red-500` and `bg-red-500` for main accent elements
   - Use `bg-gray-900` for dark backgrounds (headers, footers)
   - Use `text-gray-100` for light text on dark backgrounds
 - **Components**:
