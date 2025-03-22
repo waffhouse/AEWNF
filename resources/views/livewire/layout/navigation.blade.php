@@ -59,6 +59,12 @@ new class extends Component
                         {{ __('Product Catalog') }}
                     </x-nav-link>
                     
+                    @can('view own orders')
+                    <x-nav-link :href="route('customer.orders')" :active="request()->routeIs('customer.orders*')" wire:navigate>
+                        {{ __('My Orders') }}
+                    </x-nav-link>
+                    @endcan
+                    
                     @can('add to cart')
                     <x-nav-link :href="route('customer.cart')" :active="request()->routeIs('customer.cart')" wire:navigate class="flex items-center">
                         <span>{{ __('Cart') }}</span>
@@ -87,6 +93,12 @@ new class extends Component
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
+                        
+                        @can('view own orders')
+                        <x-dropdown-link :href="route('customer.orders')" wire:navigate>
+                            {{ __('My Orders') }}
+                        </x-dropdown-link>
+                        @endcan
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
@@ -165,6 +177,12 @@ new class extends Component
                 {{ __('Product Catalog') }}
             </x-responsive-nav-link>
             
+            @can('view own orders')
+            <x-responsive-nav-link :href="route('customer.orders')" :active="request()->routeIs('customer.orders*')" wire:navigate @click="open = false">
+                {{ __('My Orders') }}
+            </x-responsive-nav-link>
+            @endcan
+            
             @can('add to cart')
             <x-responsive-nav-link :href="route('customer.cart')" :active="request()->routeIs('customer.cart')" wire:navigate @click="open = false" class="flex items-center justify-between">
                 <span>{{ __('Cart') }}</span>
@@ -184,6 +202,12 @@ new class extends Component
                 <x-responsive-nav-link :href="route('profile')" wire:navigate @click="open = false">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+                
+                @can('view own orders')
+                <x-responsive-nav-link :href="route('customer.orders')" wire:navigate @click="open = false">
+                    {{ __('My Orders') }}
+                </x-responsive-nav-link>
+                @endcan
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start" @click="open = false">

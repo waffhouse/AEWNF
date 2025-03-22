@@ -170,12 +170,12 @@ class CartPage extends Component
                 'message' => 'Order placed successfully'
             ]);
             
-            // Reset form and refresh cart
+            // Reset form 
             $this->notes = '';
-            $this->refreshCart();
             
-            // Redirect to order success page
-            return redirect()->route('customer.orders.success', ['order' => $order->id]);
+            // Redirect to order details page with success message
+            return redirect()->route('customer.order.details', ['order' => $order->id])
+                ->with('message', 'Order placed successfully! Your order #' . $order->id . ' has been received.');
             
         } catch (\Exception $e) {
             DB::rollBack();

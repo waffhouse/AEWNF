@@ -47,18 +47,13 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     
     // Order routes - users with 'view own orders' permission
     Route::middleware(['permission:view own orders'])->group(function () {
-        Route::get('/orders', function () {
-            return view('customer.orders');
-        })->name('customer.orders');
+        Route::get('/orders', \App\Livewire\Cart\OrdersList::class)->name('orders');
         
-        Route::get('/orders/{order}/success', function (\App\Models\Order $order) {
-            // Check that the order belongs to the authenticated user
-            if ($order->user_id !== auth()->id()) {
-                abort(403, 'Unauthorized');
-            }
-            return view('customer.order-success', ['order' => $order]);
-        })->name('customer.orders.success');
+        // Order details page
+        Route::get('/orders/{order}', \App\Livewire\Cart\OrderDetails::class)->name('order.details');
     });
+        
+    // Order success functionality has been removed - users are now redirected directly to order details
 });
 
 // NetSuite inventory API route - users with view catalog permission

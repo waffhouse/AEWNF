@@ -219,9 +219,8 @@
                                         <span class="text-sm font-medium text-gray-900">${{ number_format($total, 2) }}</span>
                                     </div>
                                     
-                                    <div class="flex justify-between mb-2">
-                                        <span class="text-sm text-gray-600">Tax</span>
-                                        <span class="text-sm font-medium text-gray-900">Calculated at checkout</span>
+                                    <div class="mb-2 text-xs text-gray-500 italic">
+                                        Tax exempt - Resale transactions
                                     </div>
                                     
                                     <div class="border-t border-gray-200 my-4"></div>
@@ -268,4 +267,6 @@
             </div>
         </div>
     </div>
+
+    <!-- Order success redirect is now handled directly in the CartPage component -->
 </div>
