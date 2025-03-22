@@ -136,7 +136,7 @@
                     if (!empty($search)) $activeFilterCount++;
                     if (!empty($brand)) $activeFilterCount++;
                     if (!empty($class)) $activeFilterCount++;
-                    if ($this->isStateFilterActive()) $activeFilterCount++;
+                    if ($state !== 'all') $activeFilterCount++;
                 @endphp
                 @if($activeFilterCount > 0)
                     <span class="ml-1.5 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
@@ -148,7 +148,7 @@
     </div>
 
     <!-- Active Filters Section -->
-    @if(!empty($search) || !empty($brand) || !empty($class) || ($filtersApplied && $state !== 'all'))
+    @if(!empty($search) || !empty($brand) || !empty($class))
     <div class="mb-4 flex flex-wrap gap-2">
         <span class="text-sm font-medium text-gray-700">Active Filters:</span>
         @if(!empty($search))
@@ -177,17 +177,6 @@
             <span class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 Category: {{ $class }}
                 <button type="button" wire:click="removeFilter('class')" class="ml-1 text-blue-500 hover:text-blue-600">
-                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </span>
-        @endif
-        
-        @if($this->isStateFilterActive())
-            <span class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                State: {{ ucfirst($state) }}
-                <button type="button" wire:click="removeFilter('state')" class="ml-1 text-blue-500 hover:text-blue-600">
                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>

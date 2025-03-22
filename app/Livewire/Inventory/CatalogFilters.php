@@ -79,13 +79,24 @@ class CatalogFilters extends Component
      */
     public function resetItems(): void
     {
-        // Notify the parent component to reset items
+        // Dispatch a global event for all components to listen for
+        $this->dispatch('global-filter-changed', [
+            'search' => $this->search,
+            'brand' => $this->brand,
+            'class' => $this->class,
+            'state' => $this->state
+        ]);
+        
+        // Also send the filter-changed event for backward compatibility
         $this->dispatch('filter-changed', [
             'search' => $this->search,
             'brand' => $this->brand,
             'class' => $this->class,
             'state' => $this->state
         ]);
+        
+        // Also close any mobile filter modal using Alpine event
+        $this->dispatch('closeFilterModal');
     }
     
     /**

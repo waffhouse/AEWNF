@@ -52,6 +52,21 @@ class ProductGrid extends Component
         
         // Load initial products
         $this->loadProducts();
+        
+        return $this;
+    }
+    
+    /**
+     * Get products for display (used by Catalog component)
+     */
+    public function getProducts()
+    {
+        return [
+            'products' => $this->products,
+            'hasMorePages' => $this->hasMorePages,
+            'totalCount' => $this->totalCount,
+            'loadedCount' => $this->loadedCount
+        ];
     }
     
     /**

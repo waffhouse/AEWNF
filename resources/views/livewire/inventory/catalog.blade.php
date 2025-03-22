@@ -19,6 +19,14 @@
             window.addEventListener('open-mobile-filters', () => {
                 this.showMobileFilterModal = true;
             });
+            
+            // Close mobile filters when a filter is applied or when explicitly requested
+            Livewire.on('filter-changed', () => {
+                this.showMobileFilterModal = false;
+            });
+            Livewire.on('closeFilterModal', () => {
+                this.showMobileFilterModal = false;
+            });
         }
     }" 
     class="py-6"
@@ -45,7 +53,7 @@
                 <div class="relative w-full sm:w-64 mr-2 hidden sm:block">
                     <input 
                         type="search" 
-                        wire:model.live.debounce.300ms="$parent.search" 
+                        wire:model.live.debounce.300ms="search" 
                         placeholder="Search products..." 
                         class="w-full pl-8 py-1.5 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     >
@@ -61,7 +69,7 @@
                     <div class="relative w-full flex items-center">
                         <input 
                             type="search" 
-                            wire:model="$parent.search" 
+                            wire:model.live="search" 
                             placeholder="Search products..." 
                             class="w-full pr-10 py-1.5 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         >
@@ -77,7 +85,7 @@
                 <div class="hidden md:flex md:flex-1 md:items-center md:space-x-2">
                     <!-- Quick Brand Filter -->
                     <select 
-                        wire:model.live="$parent.brand" 
+                        wire:model.live="brand" 
                         class="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 py-1.5"
                     >
                         <option value="">All Brands</option>
@@ -90,9 +98,9 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-2">
                     <!-- Clear Filters Button (only shows when filters are applied) -->
-                    @if($filtersApplied || !empty($search) || !empty($brand) || !empty($class) || ($filtersApplied && $state !== 'all'))
+                    @if($filtersApplied || !empty($search) || !empty($brand) || !empty($class))
                         <button 
-                            wire:click="$dispatch('clear-all-filters')"
+                            wire:click="clearFilters"
                             type="button" 
                             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 flex items-center"
                             aria-label="Clear all filters"
@@ -145,17 +153,19 @@
                     </div>
                 </div>
                 
-                <!-- Filters Component -->
-                <livewire:inventory.catalog-filters />
+                <!-- Filters Section -->
+                @include('livewire.inventory.catalog-filters')
                 
-                <!-- Product Grid Component -->
-                <livewire:inventory.product-grid 
-                    :search="$search"
-                    :brand="$brand"
-                    :class="$class"
-                    :state="$state"
-                    wire:key="product-grid-component"
-                />
+                <!-- Product Grid Section -->
+                <div wire:key="product-grid" wire:loading.class="opacity-50">
+                    @include('livewire.inventory.product-grid', [
+                        'products' => $products,
+                        'hasMorePages' => $hasMorePages,
+                        'totalCount' => $totalCount,
+                        'loadedCount' => $loadedCount,
+                        'isLoading' => $isLoading
+                    ])
+                </div>
             </div>
         </div>
     </div>
@@ -203,7 +213,7 @@
                             <input 
                                 type="search" 
                                 id="modal-search" 
-                                wire:model="$parent.search" 
+                                wire:model.live="search" 
                                 placeholder="Search products..." 
                                 class="block w-full pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             >
@@ -221,7 +231,7 @@
                     <label for="modal-brand" class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
                     <select 
                         id="modal-brand" 
-                        wire:model.live="$parent.brand" 
+                        wire:model.live="brand" 
                         class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="">All Brands</option>
@@ -236,7 +246,7 @@
                     <label for="modal-class" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                     <select 
                         id="modal-class" 
-                        wire:model.live="$parent.class" 
+                        wire:model.live="class" 
                         class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="">All Categories</option>
@@ -286,7 +296,7 @@
                         @if(!empty($search))
                             <span class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 Search: {{ $search }}
-                                <button type="button" wire:click="$dispatch('remove-filter', { filter: 'search' })" class="ml-1 text-blue-500 hover:text-blue-600">
+                                <button type="button" wire:click="removeFilter('search')" class="ml-1 text-blue-500 hover:text-blue-600">
                                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -297,7 +307,7 @@
                         @if(!empty($brand))
                             <span class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 Brand: {{ $brand }}
-                                <button type="button" wire:click="$dispatch('remove-filter', { filter: 'brand' })" class="ml-1 text-blue-500 hover:text-blue-600">
+                                <button type="button" wire:click="removeFilter('brand')" class="ml-1 text-blue-500 hover:text-blue-600">
                                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -308,7 +318,7 @@
                         @if(!empty($class))
                             <span class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 Category: {{ $class }}
-                                <button type="button" wire:click="$dispatch('remove-filter', { filter: 'class' })" class="ml-1 text-blue-500 hover:text-blue-600">
+                                <button type="button" wire:click="removeFilter('class')" class="ml-1 text-blue-500 hover:text-blue-600">
                                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -323,7 +333,7 @@
                 <div class="flex space-x-2 pt-4">
                     <button 
                         type="button"
-                        wire:click="$dispatch('clear-all-filters')"
+                        wire:click="clearFilters"
                         @click="showMobileFilterModal = false" 
                         class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 flex justify-center items-center"
                     >
@@ -340,7 +350,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Done
+                        Apply Filters
                     </button>
                 </div>
             </div>

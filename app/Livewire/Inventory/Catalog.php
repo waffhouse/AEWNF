@@ -76,6 +76,9 @@ class Catalog extends Component
         $this->viewModel = new CatalogViewModel();
         $this->brands = $this->viewModel->getBrands();
         $this->classes = $this->viewModel->getClasses();
+        
+        // Load initial products
+        $this->loadProducts();
     }
     
     /**
@@ -85,12 +88,13 @@ class Catalog extends Component
      */
     public function resetItems(): void
     {
-        $this->dispatch('filter-changed', [
-            'search' => $this->search,
-            'brand' => $this->brand,
-            'class' => $this->class,
-            'state' => $this->state
-        ]);
+        // Reset product grid state
+        $this->products = [];
+        $this->loadedCount = 0;
+        $this->hasMorePages = true;
+        
+        // Load products with the new filters
+        $this->loadProducts();
     }
     
     /**
@@ -109,6 +113,23 @@ class Catalog extends Component
     public function removeSpecificFilter($filter)
     {
         $this->removeFilter($filter);
+    }
+    
+    /**
+     * Listen for global filter changes from CatalogFilters component
+     */
+    #[On('global-filter-changed')]
+    public function handleGlobalFilterChanged($data)
+    {
+        $this->search = $data['search'] ?? '';
+        $this->brand = $data['brand'] ?? '';
+        $this->class = $data['class'] ?? '';
+        $this->state = $data['state'] ?? 'all';
+        
+        // Mark filters as applied
+        $this->filtersApplied = !empty($this->search) || !empty($this->brand) || !empty($this->class) || $this->state !== 'all';
+        
+        // No need to call resetItems as it would create a loop of events
     }
     
     /**
@@ -151,6 +172,73 @@ class Catalog extends Component
             $this->filtersApplied = !empty($this->search) || !empty($this->brand) || !empty($this->class);
         }
         $this->resetItems();
+    }
+    
+    
+    // Properties for product grid functionality
+    public $products = [];
+    public $hasMorePages = true;
+    public $isLoading = false;
+    public $totalCount = 0;
+    public $loadedCount = 0;
+    public $perPage = 25;
+    public $viewMode = 'card';
+    
+    /**
+     * Load products using the view model
+     */
+    public function loadProducts()
+    {
+        $this->isLoading = true;
+        
+        // Get filter parameters
+        $filters = [
+            'search' => $this->search,
+            'brand' => $this->brand,
+            'class' => $this->class,
+            'state' => $this->state,
+        ];
+        
+        // Get products from view model
+        $result = $this->viewModel->getProducts(
+            $filters, 
+            $this->loadedCount, 
+            $this->perPage, 
+            ['orderBy' => 'brand', 'direction' => 'asc']
+        );
+        
+        // Update component properties
+        $this->totalCount = $result['totalCount'];
+        $this->hasMorePages = $result['hasMorePages'];
+        
+        // Append new products to existing collection
+        foreach ($result['products'] as $product) {
+            $this->products[] = $product;
+        }
+        
+        // Update loaded count
+        $this->loadedCount += count($result['products']);
+        $this->isLoading = false;
+    }
+    
+    /**
+     * Load more products when scrolling (called from the view)
+     */
+    public function loadMore()
+    {
+        if ($this->hasMorePages && !$this->isLoading) {
+            $this->loadProducts();
+        }
+    }
+    
+    /**
+     * This method is kept for UI display but will always return false
+     * since state filtering is managed through user roles
+     */
+    public function isStateFilterActive()
+    {
+        // Always return false since state filter is not shown in the UI
+        return false;
     }
     
     /**
