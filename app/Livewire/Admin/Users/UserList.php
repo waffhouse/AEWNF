@@ -77,7 +77,7 @@ class UserList extends AdminComponent
             $perPage = isset($this->perPage) ? $this->perPage : 10;
             $paginator = $query->simplePaginate(
                 $perPage, 
-                ['id', 'name', 'email', 'customer_number', 'state', 'created_at', 'updated_at'], 
+                ['id', 'name', 'email', 'customer_number', 'created_at', 'updated_at', 'last_refreshed_at'], 
                 'page', 
                 ceil($this->loadedCount / $perPage) + 1
             );
@@ -157,7 +157,7 @@ class UserList extends AdminComponent
             ['search' => $this->userSearch],
             [
                 // Only select necessary fields to reduce data transfer
-                'fields' => ['id', 'name', 'email', 'customer_number', 'state', 'created_at', 'updated_at'],
+                'fields' => ['id', 'name', 'email', 'customer_number', 'created_at', 'updated_at', 'last_refreshed_at'],
                 // Optimize eager loading to only fetch role name
                 'with' => ['roles'],
                 'orderBy' => $this->sortField,
@@ -245,7 +245,7 @@ class UserList extends AdminComponent
             $newUser = $this->userService->getUserById(
                 $userData['id'], 
                 ['roles'], 
-                ['id', 'name', 'email', 'customer_number', 'state', 'created_at', 'updated_at']
+                ['id', 'name', 'email', 'customer_number', 'created_at', 'updated_at', 'last_refreshed_at']
             );
             
             if ($newUser) {
@@ -276,7 +276,7 @@ class UserList extends AdminComponent
             $updatedUser = $this->userService->getUserById(
                 $userData['id'], 
                 ['roles'], 
-                ['id', 'name', 'email', 'customer_number', 'state', 'created_at', 'updated_at']
+                ['id', 'name', 'email', 'customer_number', 'created_at', 'updated_at', 'last_refreshed_at']
             );
             
             if ($updatedUser) {

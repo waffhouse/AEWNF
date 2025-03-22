@@ -40,7 +40,7 @@ class UserService
             $query->select($fields);
         } else {
             // Default select - only include necessary fields
-            $query->select(['id', 'name', 'email', 'customer_number', 'state', 'created_at', 'updated_at']);
+            $query->select(['id', 'name', 'email', 'customer_number', 'created_at', 'updated_at', 'last_refreshed_at']);
         }
         
         // Apply optimized eager loading
