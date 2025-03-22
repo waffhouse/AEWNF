@@ -93,6 +93,12 @@ class UserSync extends AdminComponent
                 $this->dispatch('error', 'Sync failed: ' . $this->syncResults['error']);
             } else {
                 $this->dispatch('message', 'User data refresh completed successfully in ' . $this->syncResults['duration']);
+                
+                // Notify other components that the user data has been refreshed
+                $this->dispatch('users-refreshed');
+                
+                // Switch tab to user list after successful sync
+                $this->dispatch('switch-to-user-list');
             }
         } catch (\Exception $e) {
             $this->dispatch('error', 'Error during sync: ' . $e->getMessage());

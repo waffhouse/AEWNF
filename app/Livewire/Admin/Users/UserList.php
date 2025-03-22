@@ -295,6 +295,17 @@ class UserList extends AdminComponent
     }
     
     /**
+     * Listen for users-refreshed event from the sync component
+     * Reload the entire list when users are refreshed
+     */
+    #[On('users-refreshed')]
+    public function handleUsersRefreshed()
+    {
+        // Reload all items when users are refreshed
+        $this->resetItems();
+    }
+    
+    /**
      * Render the component
      */
     public function render()

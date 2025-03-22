@@ -4,6 +4,7 @@
     
     <div 
         x-data="{ activeSection: 'list' }"
+        x-on:switch-to-user-list.window="activeSection = 'list'"
         class="space-y-6"
     >
         <!-- Section Tabs -->
