@@ -10,6 +10,8 @@
             <input 
                 wire:model.live.debounce.300ms="roleSearch" 
                 type="text" 
+                id="role-search" 
+                name="role-search" 
                 placeholder="Search roles..." 
                 class="flex-1 px-3 py-2 text-sm focus:outline-none border-none"
             >

@@ -10,6 +10,8 @@
             <input 
                 wire:model.live.debounce.300ms="userSearch" 
                 type="text" 
+                id="user-search" 
+                name="user-search" 
                 placeholder="Search users by name or email..." 
                 class="flex-1 px-3 py-2 text-sm focus:outline-none border-none"
             >

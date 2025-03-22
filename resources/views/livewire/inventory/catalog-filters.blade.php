@@ -27,6 +27,7 @@
                         <input 
                             type="search" 
                             id="search-mobile" 
+                            name="search-mobile"
                             wire:model="search"
                             placeholder="Search products..." 
                             class="block w-full pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
