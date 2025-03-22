@@ -1,19 +1,37 @@
 <div 
     x-data="{ 
-        showStickyFilter: false,
+        showStickyFilter: true, // Always show on small screens, controlled by media queries on larger screens
         showMobileFilterModal: false,
         init() {
-            window.addEventListener('scroll', () => {
-                // Show sticky filter only when we've scrolled past the main filter section
-                this.showStickyFilter = window.scrollY > 300;
-                
-                // Add bottom padding when filter is shown to prevent content being hidden
-                if (this.showStickyFilter) {
-                    document.body.classList.add('pb-sticky-filter');
+            // Only use scroll behavior on medium and larger screens
+            const mediaQuery = window.matchMedia('(min-width: 768px)');
+            
+            const handleScroll = () => {
+                if (mediaQuery.matches) {
+                    // On desktop: Show sticky filter only when we've scrolled past the main filter section
+                    this.showStickyFilter = window.scrollY > 300;
+                    
+                    // Add bottom padding when filter is shown to prevent content being hidden
+                    if (this.showStickyFilter) {
+                        document.body.classList.add('pb-sticky-filter');
+                    } else {
+                        document.body.classList.remove('pb-sticky-filter');
+                    }
                 } else {
-                    document.body.classList.remove('pb-sticky-filter');
+                    // On mobile: Always show
+                    this.showStickyFilter = true;
+                    document.body.classList.add('pb-sticky-filter');
                 }
-            });
+            };
+            
+            // Initial check
+            handleScroll();
+            
+            // Add scroll listener
+            window.addEventListener('scroll', handleScroll);
+            
+            // Also check when window is resized
+            window.addEventListener('resize', handleScroll);
 
             // Listen for the mobile filters open event
             window.addEventListener('open-mobile-filters', () => {
@@ -34,11 +52,11 @@
     <!-- Scroll to top button -->
     <x-scroll-to-top />
     
-    <!-- Sticky Filter at Bottom (appears when scrolling) -->
+    <!-- Sticky Filter at Bottom (always visible on mobile, appears when scrolling on desktop) -->
     <div 
         x-show="showStickyFilter" 
         x-cloak
-        class="fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 shadow-lg"
+        class="fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 shadow-lg md:transition"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 transform translate-y-full"
         x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -48,7 +66,6 @@
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex items-center justify-between space-x-2">
-                <!-- Quick Search (visible on all devices) -->
                 <!-- Desktop Search (hidden on small screens) -->
                 <div class="relative w-full sm:w-64 mr-2 hidden sm:block">
                     <input 
@@ -65,21 +82,19 @@
                 </div>
                 
                 <!-- Mobile Search Form (visible only on small screens) -->
-                <form class="relative w-full mr-2 flex items-center sm:hidden" wire:submit.prevent="$refresh">
-                    <div class="relative w-full flex items-center">
-                        <input 
-                            type="search" 
-                            wire:model.live="search" 
-                            placeholder="Search products..." 
-                            class="w-full pr-10 py-1.5 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        >
-                        <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:text-blue-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </button>
+                <div class="relative w-full mr-2 flex items-center sm:hidden">
+                    <input 
+                        type="search" 
+                        wire:model.live.debounce.300ms="search" 
+                        placeholder="Search products..." 
+                        class="w-full pl-8 py-2 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
                     </div>
-                </form>
+                </div>
                 
                 <!-- Desktop Quick Filters (hidden on mobile) -->
                 <div class="hidden md:flex md:flex-1 md:items-center md:space-x-2">
@@ -102,13 +117,13 @@
                         <button 
                             wire:click="clearFilters"
                             type="button" 
-                            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 flex items-center"
+                            class="sm:px-3 p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 flex items-center"
                             aria-label="Clear all filters"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            <span class="hidden md:inline-block md:ml-1">Clear</span>
+                            <span class="hidden sm:inline-block sm:ml-1">Clear</span>
                         </button>
                     @endif
                     
@@ -116,13 +131,13 @@
                     <button 
                         @click="showMobileFilterModal = true"
                         type="button" 
-                        class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md shadow-sm hover:bg-red-50 flex items-center"
+                        class="sm:px-3 p-2 relative text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md shadow-sm hover:bg-red-50 flex items-center"
                         aria-label="Show more filter options"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                         </svg>
-                        <span class="ml-1">Filters</span>
+                        <span class="hidden sm:inline-block sm:ml-1">Filters</span>
                         @php
                             $activeFilterCount = 0;
                             if (!empty($search)) $activeFilterCount++;
@@ -130,7 +145,7 @@
                             if (!empty($class)) $activeFilterCount++;
                         @endphp
                         @if($activeFilterCount > 0)
-                            <span class="ml-1.5 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                            <span class="sm:ml-1.5 absolute sm:static sm:inline-flex top-0 right-0 items-center justify-center w-4 h-4 sm:w-auto sm:h-auto text-xs font-medium rounded-full bg-red-500 sm:bg-red-100 text-white sm:text-red-800 sm:px-2 sm:py-0.5 transform translate-x-1/3 -translate-y-1/3 sm:transform-none">
                                 {{ $activeFilterCount }}
                             </span>
                         @endif
@@ -153,8 +168,10 @@
                     </div>
                 </div>
                 
-                <!-- Filters Section -->
-                @include('livewire.inventory.catalog-filters')
+                <!-- Filters Section (hidden on small screens) -->
+                <div class="hidden md:block">
+                    @include('livewire.inventory.catalog-filters')
+                </div>
                 
                 <!-- Product Grid Section -->
                 <div wire:key="product-grid" wire:loading.class="opacity-50">
