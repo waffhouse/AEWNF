@@ -2,15 +2,12 @@
 
 namespace App\Livewire\Inventory;
 
-use App\Models\Inventory;
+use Livewire\Component;
+use Livewire\Attributes\Url;
 use App\Traits\Filterable;
 use App\ViewModels\CatalogViewModel;
-use Livewire\Component;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Url;
-use Livewire\Attributes\On;
 
-class Catalog extends Component
+class CatalogFilters extends Component
 {
     use Filterable;
     
@@ -73,18 +70,16 @@ class Catalog extends Component
     public function mount()
     {
         // Load filter options from view model
-        $this->viewModel = new CatalogViewModel();
         $this->brands = $this->viewModel->getBrands();
         $this->classes = $this->viewModel->getClasses();
     }
     
     /**
-     * Reset items when filters change
-     * 
      * Implementation of the abstract method from Filterable trait
      */
     public function resetItems(): void
     {
+        // Notify the parent component to reset items
         $this->dispatch('filter-changed', [
             'search' => $this->search,
             'brand' => $this->brand,
@@ -94,25 +89,7 @@ class Catalog extends Component
     }
     
     /**
-     * Handle the clear all filters event
-     */
-    #[On('clear-all-filters')]
-    public function clearAllFilters()
-    {
-        $this->clearFilters();
-    }
-    
-    /**
-     * Handle removing a specific filter
-     */
-    #[On('remove-filter')]
-    public function removeSpecificFilter($filter)
-    {
-        $this->removeFilter($filter);
-    }
-    
-    /**
-     * When search changes, reset the product list
+     * When search changes, notify the parent component
      */
     public function updatedSearch()
     {
@@ -121,7 +98,7 @@ class Catalog extends Component
     }
     
     /**
-     * When brand changes, reset the product list
+     * When brand changes, notify the parent component
      */
     public function updatedBrand()
     {
@@ -130,7 +107,7 @@ class Catalog extends Component
     }
     
     /**
-     * When class changes, reset the product list
+     * When class changes, notify the parent component
      */
     public function updatedClass()
     {
@@ -139,7 +116,7 @@ class Catalog extends Component
     }
     
     /**
-     * When state changes, reset the product list
+     * When state changes, notify the parent component
      */
     public function updatedState()
     {
@@ -154,17 +131,40 @@ class Catalog extends Component
     }
     
     /**
+     * This method is kept for backward compatibility but will always return false
+     * since we no longer show the state filter to users
+     */
+    public function isStateFilterActive()
+    {
+        // Always return false since state filter is removed from UI
+        return false;
+    }
+    
+    /**
+     * Override clearFilters method from Filterable trait
+     */
+    public function clearFilters(): void
+    {
+        // Reset each filter to its default value
+        foreach ($this->filterConfig as $filter => $config) {
+            $defaultValue = $config['default'] ?? '';
+            $this->{$filter} = $defaultValue;
+        }
+        
+        $this->filtersApplied = false;
+        
+        // This will call resetItems which will notify the parent
+        $this->resetItems();
+    }
+    
+    /**
      * Render the component
      */
-    #[Title('Product Catalog')]
     public function render()
     {
-        // Determine layout based on authentication status
-        $layout = auth()->check() ? 'layouts.app' : 'layouts.guest-catalog';
-        
-        return view('livewire.inventory.catalog', [
+        return view('livewire.inventory.catalog-filters', [
             'brands' => $this->brands,
             'classes' => $this->classes,
-        ])->layout($layout);
+        ]);
     }
 }

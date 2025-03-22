@@ -12,6 +12,7 @@
 - **Run Single Test**: `php artisan test --filter TestName`
 - **Test Specific File**: `php artisan test tests/Feature/Auth/RegistrationTest.php`
 - **Test Specific Method**: `php artisan test tests/Feature/Auth/RegistrationTest.php::test_new_users_can_register`
+- **With Coverage**: `php artisan test --coverage`
 
 ## Code Style Guidelines
 - **PHP Standard**: PSR-12 (enforced by Laravel Pint)
@@ -24,7 +25,9 @@
 - **Error Handling**: Use try/catch with appropriate logging, never expose exceptions to users
 - **Permission Enforcement**: Implement at component methods, render methods, blade templates, and router middleware
 - **UI Components**: Follow existing patterns for modals, tables, cards, and responsive designs
+- **Livewire Components**: Use form validation traits and appropriate lifecycle hooks
 
 ## Database Commands
 - **Run Migrations**: `php artisan migrate` (add `--seed` to seed)
 - **Fresh Database**: `php artisan migrate:fresh --seed` (rebuild with seeds)
+- **Create Migration**: `php artisan make:migration create_tablename_table`

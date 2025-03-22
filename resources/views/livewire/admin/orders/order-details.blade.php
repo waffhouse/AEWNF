@@ -1,0 +1,1 @@
+<x-order-details-modal :order="$order" />

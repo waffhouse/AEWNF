@@ -5,9 +5,8 @@ namespace App\Livewire\Cart;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
-use App\Models\OrderItem;
+use App\Services\OrderService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -18,6 +17,22 @@ class CartPage extends Component
     public $notes = '';
     public $viewingOrderDetails = false;
     public $selectedOrder = null;
+    
+    protected OrderService $orderService;
+    
+    public function boot(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
+    }
+    
+    protected function getListeners()
+    {
+        return [
+            'initiateCheckout' => 'checkout',
+            'cartItemUpdated' => 'refreshCart',
+            'cartItemRemoved' => 'refreshCart'
+        ];
+    }
     
     public function mount()
     {
@@ -125,14 +140,17 @@ class CartPage extends Component
     public function closeOrderDetails()
     {
         // Remove the body lock through inline JavaScript for immediate effect
-        $this->js('document.body.classList.remove("overflow-hidden")'); 
+        $this->js('document.body.classList.remove("overflow-hidden")');
         
         $this->viewingOrderDetails = false;
         $this->selectedOrder = null;
     }
     
-    public function checkout()
+    public function checkout($data = [])
     {
+        // Extract notes from event data if available
+        $notes = isset($data['notes']) ? $data['notes'] : $this->notes;
+        
         // Check if the user has permission to place orders
         if (!Auth::user()->can('place orders')) {
             $this->dispatch('notification', [
@@ -152,36 +170,13 @@ class CartPage extends Component
         }
         
         try {
-            DB::beginTransaction();
+            // Use OrderService to create the order
+            $order = $this->orderService->createOrder(Auth::user(), $notes);
             
-            // Create a new order
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'total' => $this->cart->getTotal(),
-                'status' => Order::STATUS_PENDING,
-                'notes' => $this->notes,
-            ]);
+            // Refresh the cart to show it's now empty
+            $this->refreshCart();
             
-            // Add cart items to order
-            foreach ($this->cartItems as $cartItem) {
-                $inventory = $cartItem->inventory;
-                
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'inventory_id' => $cartItem->inventory_id,
-                    'quantity' => $cartItem->quantity,
-                    'price' => $cartItem->price,
-                    'product_name' => $inventory->description,
-                    'product_sku' => $inventory->sku,
-                ]);
-            }
-            
-            // Clear the cart
-            $this->cart->items()->delete();
-            
-            DB::commit();
-            
-            // Update cart count
+            // Update cart count for other components
             $this->dispatch('cart-updated');
             
             $this->dispatch('notification', [
@@ -192,12 +187,10 @@ class CartPage extends Component
             // Reset form 
             $this->notes = '';
             
-            // Show order details directly in a modal
-            $this->viewOrderDetails($order->id);
+            // Show order details directly in a modal - need to specify the component name
+            $this->dispatch('showOrderDetails', ['orderId' => $order->id])->to('cart.order-confirmation');
             
         } catch (\Exception $e) {
-            DB::rollBack();
-            
             $this->dispatch('notification', [
                 'type' => 'error',
                 'message' => 'Error placing order: ' . $e->getMessage()
