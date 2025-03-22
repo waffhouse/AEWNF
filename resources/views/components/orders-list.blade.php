@@ -37,15 +37,24 @@
         </div>
     @else
         <!-- Accordion-style Orders List -->
-        <div class="space-y-4">
+        <div 
+            x-data="{ 
+                expandedId: null,
+                reset() {
+                    this.expandedId = null;
+                }
+            }"
+            @order-status-updated.window="reset()"
+            class="space-y-4"
+        >
             @foreach($orders as $order)
+                @php $orderId = is_array($order) ? $order['id'] : $order->id; @endphp
                 <div 
-                    x-data="{ expanded: false }" 
                     class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
                     <!-- Order Header (Always Visible) -->
                     <div 
-                        @click="expanded = !expanded" 
+                        @click="expandedId = (expandedId === {{ $orderId }}) ? null : {{ $orderId }}" 
                         class="px-4 py-4 flex flex-wrap justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors duration-150"
                     >
                         <div class="flex items-center space-x-3">
@@ -59,7 +68,7 @@
                                 <span class="text-xs text-gray-500 mt-1">@formatdate(is_array($order) ? $order['created_at'] : $order->created_at)</span>
                             </div>
                             
-                            <div class="hidden sm:block">
+                            <div>
                                 @if((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -89,7 +98,7 @@
                             <div class="flex items-center">
                                 <span class="mr-2 font-medium text-gray-900">${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</span>
                                 <span 
-                                    x-bind:class="expanded ? 'rotate-180' : ''" 
+                                    x-bind:class="expandedId === {{ $orderId }} ? 'rotate-180' : ''" 
                                     class="transform transition-transform duration-200 text-gray-500"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +110,7 @@
                     </div>
                     
                     <!-- Expandable Content (Order Details & Actions) -->
-                    <div x-show="expanded" x-collapse class="border-t border-gray-100">
+                    <div x-show="expandedId === {{ $orderId }}" x-collapse class="border-t border-gray-100">
                         <div class="p-4">
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                                 <!-- Order Info -->
@@ -173,7 +182,12 @@
                                             @can('manage orders')
                                                 <!-- Complete Order Button -->
                                                 <button 
-                                                    onclick="if(confirm('Are you sure you want to mark this order as completed?')) { Livewire.dispatch('updateStatus', { orderId: {{ is_array($order) ? $order['id'] : $order->id }}, status: '{{ \App\Models\Order::STATUS_COMPLETED }}' }) }" 
+                                                    onclick="if(confirm('Are you sure you want to mark this order as completed?')) { 
+                                                        Livewire.dispatch('updateStatus', { 
+                                                            orderId: {{ is_array($order) ? $order['id'] : $order->id }}, 
+                                                            status: '{{ \App\Models\Order::STATUS_COMPLETED }}' 
+                                                        }); 
+                                                    }" 
                                                     class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,7 +198,12 @@
                                                 
                                                 <!-- Cancel Order Button -->
                                                 <button 
-                                                    onclick="if(confirm('Are you sure you want to cancel this order?')) { Livewire.dispatch('updateStatus', { orderId: {{ is_array($order) ? $order['id'] : $order->id }}, status: '{{ \App\Models\Order::STATUS_CANCELLED }}' }) }" 
+                                                    onclick="if(confirm('Are you sure you want to cancel this order?')) { 
+                                                        Livewire.dispatch('updateStatus', { 
+                                                            orderId: {{ is_array($order) ? $order['id'] : $order->id }}, 
+                                                            status: '{{ \App\Models\Order::STATUS_CANCELLED }}' 
+                                                        }); 
+                                                    }" 
                                                     class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -27,6 +27,26 @@
 - **UI Components**: Follow existing patterns for modals, tables, cards, and responsive designs
 - **Livewire Components**: Use form validation traits and appropriate lifecycle hooks
 
+## Styling Guide
+- **Color Palette**: The project uses a customized Tailwind configuration
+  - **Important**: `indigo` colors are remapped to red shades (see tailwind.config.js)
+  - Use `text-red-400` for accent text (replaces what would typically be blue/indigo in standard Tailwind)
+  - Use `bg-gray-900` for dark backgrounds (headers, footers)
+  - Use `text-gray-100` for light text on dark backgrounds
+- **Components**:
+  - Modals: Use the standard modal structure with a solid color header
+  - Cards: Use `rounded-lg`, `shadow-sm`, and `border border-gray-200` for consistency
+  - Buttons: Use `rounded-md` with appropriate color classes based on action type
+  - Accordions: Use Alpine.js with parent state management (`expandedId` pattern) to ensure only one accordion is open at a time
+- **Responsive Design**:
+  - Always implement both desktop and mobile views
+  - Use accordion patterns for complex data display on smaller screens
+  - Card-based layouts for mobile, table-based layouts for desktop
+- **Interactive Elements**:
+  - Use Alpine.js for client-side interactions
+  - Reset accordion states after status changes with `@order-status-updated.window` listener
+  - Implement "click outside" behavior for dropdowns and modals
+
 ## Database Commands
 - **Run Migrations**: `php artisan migrate` (add `--seed` to seed)
 - **Fresh Database**: `php artisan migrate:fresh --seed` (rebuild with seeds)
