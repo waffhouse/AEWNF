@@ -143,7 +143,7 @@ class OrderManagement extends Component
             // Update any component that displays orders
             $this->dispatch('ordersUpdated', $orders);
             
-            // Trigger Alpine.js event to reset expanded accordion
+            // Trigger events to reset expanded accordion in all possible ways
             $this->dispatch('order-status-updated');
             
             // Also update order statistics in UI

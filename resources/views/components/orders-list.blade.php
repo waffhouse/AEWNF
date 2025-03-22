@@ -1,4 +1,39 @@
 <div>
+    <!-- Alpine.js Component Definition -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('ordersAccordion', () => ({
+                expandedId: null,
+                
+                init() {
+                    this.$watch('expandedId', value => {
+                        console.log('Expanded ID changed to:', value);
+                    });
+                    
+                    // Listen for order status updates
+                    Livewire.on('order-status-updated', () => {
+                        console.log('Order status updated, clearing expandedId');
+                        this.expandedId = null;
+                    });
+                    
+                    Livewire.on('ordersUpdated', () => {
+                        console.log('Orders updated, clearing expandedId');
+                        this.expandedId = null;
+                    });
+                },
+                
+                toggle(id) {
+                    console.log('Toggle called for ID:', id, 'Current expandedId:', this.expandedId);
+                    this.expandedId = (this.expandedId === id) ? null : id;
+                },
+                
+                isExpanded(id) {
+                    return this.expandedId === id;
+                }
+            }));
+        });
+    </script>
+
     @if(empty($orders) || (is_countable($orders) && count($orders) === 0))
         <div class="text-center py-12 bg-gray-50 rounded-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,13 +73,8 @@
     @else
         <!-- Accordion-style Orders List -->
         <div 
-            x-data="{ 
-                expandedId: null,
-                reset() {
-                    this.expandedId = null;
-                }
-            }"
-            @order-status-updated.window="reset()"
+            wire:key="orders-list-{{ count($orders) }}-{{ time() }}"
+            x-data="ordersAccordion()"
             class="space-y-4"
         >
             @foreach($orders as $order)
@@ -54,7 +84,7 @@
                 >
                     <!-- Order Header (Always Visible) -->
                     <div 
-                        @click="expandedId = (expandedId === {{ $orderId }}) ? null : {{ $orderId }}" 
+                        @click="toggle({{ $orderId }})" 
                         class="px-4 py-4 flex flex-wrap justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors duration-150"
                     >
                         <div class="flex items-center space-x-3">
@@ -98,7 +128,7 @@
                             <div class="flex items-center">
                                 <span class="mr-2 font-medium text-gray-900">${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</span>
                                 <span 
-                                    x-bind:class="expandedId === {{ $orderId }} ? 'rotate-180' : ''" 
+                                    x-bind:class="isExpanded({{ $orderId }}) ? 'rotate-180' : ''" 
                                     class="transform transition-transform duration-200 text-gray-500"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,7 +140,7 @@
                     </div>
                     
                     <!-- Expandable Content (Order Details & Actions) -->
-                    <div x-show="expandedId === {{ $orderId }}" x-collapse class="border-t border-gray-100">
+                    <div x-show="isExpanded({{ $orderId }})" x-collapse class="border-t border-gray-100">
                         <div class="p-4">
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                                 <!-- Order Info -->
@@ -182,11 +212,12 @@
                                             @can('manage orders')
                                                 <!-- Complete Order Button -->
                                                 <button 
-                                                    onclick="if(confirm('Are you sure you want to mark this order as completed?')) { 
+                                                    @click.stop="if(confirm('Are you sure you want to mark this order as completed?')) { 
+                                                        expandedId = null;
                                                         Livewire.dispatch('updateStatus', { 
                                                             orderId: {{ is_array($order) ? $order['id'] : $order->id }}, 
                                                             status: '{{ \App\Models\Order::STATUS_COMPLETED }}' 
-                                                        }); 
+                                                        });
                                                     }" 
                                                     class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                                 >
@@ -198,11 +229,12 @@
                                                 
                                                 <!-- Cancel Order Button -->
                                                 <button 
-                                                    onclick="if(confirm('Are you sure you want to cancel this order?')) { 
+                                                    @click.stop="if(confirm('Are you sure you want to cancel this order?')) { 
+                                                        expandedId = null;
                                                         Livewire.dispatch('updateStatus', { 
                                                             orderId: {{ is_array($order) ? $order['id'] : $order->id }}, 
                                                             status: '{{ \App\Models\Order::STATUS_CANCELLED }}' 
-                                                        }); 
+                                                        });
                                                     }" 
                                                     class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                 >
