@@ -62,6 +62,9 @@ class UserList extends AdminComponent
         $this->hasMorePages = true;
         $this->totalCount = 0;
         $this->loadItems();
+        
+        // Reset the infinite scroll observer to ensure it works with new items
+        $this->dispatch('resetInfiniteScroll');
     }
     
     /**
@@ -137,8 +140,11 @@ class UserList extends AdminComponent
         $this->hasMorePages = true;
         $this->totalCount = 0;
         
-        // Use a slight delay before loading to ensure all state is reset
+        // Load items
         $this->loadItems();
+        
+        // Reset the infinite scroll observer to ensure it works with new items
+        $this->dispatch('resetInfiniteScroll');
     }
     
     /**

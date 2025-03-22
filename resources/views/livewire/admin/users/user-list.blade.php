@@ -148,6 +148,11 @@
             init() {
                 // Initialize the observer
                 this.setupObserver();
+                
+                // Listen for reset event
+                window.addEventListener('resetInfiniteScroll', () => {
+                    this.setupObserver();
+                });
             },
             setupObserver() {
                 // Clean up any existing observer
