@@ -113,6 +113,9 @@ class ProductGrid extends Component
     {
         if ($this->hasMorePages && !$this->isLoading) {
             $this->loadProducts();
+            
+            // Force refresh the Livewire components for proper initialization
+            $this->dispatch('products-loaded');
         }
     }
     

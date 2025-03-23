@@ -74,7 +74,7 @@
                         <div class="flex items-center space-x-1" @click.stop>
                             <livewire:cart.add-to-cart 
                                 :inventory-id="$product['id']" 
-                                :wire:key="'card-add-to-cart-'.$product['id']"
+                                :wire:key="'card-add-to-cart-'.$product['id'].'-'.uniqid()"
                                 quantity-input-type="stepper"
                                 variant="compact"
                                 show-quantity="true"

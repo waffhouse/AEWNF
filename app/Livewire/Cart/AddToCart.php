@@ -182,6 +182,22 @@ class AddToCart extends Component
         }
     }
     
+    #[On('products-loaded')]
+    public function refreshState()
+    {
+        // Check if this item is already in the user's cart
+        if (Auth::check()) {
+            $cart = Auth::user()->cart;
+            if ($cart) {
+                $cartItem = $cart->items()->where('inventory_id', $this->inventoryId)->first();
+                if ($cartItem) {
+                    $this->isInCart = true;
+                    $this->quantity = $cartItem->quantity;
+                }
+            }
+        }
+    }
+    
     public function render()
     {
         return view('livewire.cart.add-to-cart');
