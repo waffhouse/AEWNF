@@ -1,4 +1,4 @@
-<div wire:poll.10s>
+<div wire:poll.10s class="cart-counter {{ $count > 0 ? '' : 'hidden' }}">
     @if($location == 'mobile-icon')
         <!-- Special styling for mobile icon in header -->
         <div class="flex flex-col items-end">
@@ -8,7 +8,7 @@
                 wire:key="cart-count-{{ $location }}-{{ time() }}"
                 x-init="$nextTick(() => { $dispatch('cart-counter-updated', { count: {{ $count }}, total: {{ $total }} }) })"
             >
-                {{ $count }}
+                <span class="count">{{ $count }}</span>
             </span>
             
             <!-- Total Display -->
@@ -26,7 +26,7 @@
                 wire:key="cart-count-{{ $location }}-{{ time() }}"
                 x-init="$nextTick(() => { $dispatch('cart-counter-updated', { count: {{ $count }}, total: {{ $total }} }) })"
             >
-                {{ $count }}
+                <span class="count">{{ $count }}</span>
             </span>
             <span class="ml-1.5 text-xs font-medium text-gray-700">
                 ${{ number_format($total, 2) }}
@@ -39,7 +39,7 @@
             wire:key="cart-count-{{ $location }}-{{ time() }}"
             x-init="$nextTick(() => { $dispatch('cart-counter-updated', { count: {{ $count }}, total: {{ $total }} }) })"
         >
-            {{ $count }}
+            <span class="count">{{ $count }}</span>
         </span>
     @endif
 </div>

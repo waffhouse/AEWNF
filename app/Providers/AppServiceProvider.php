@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\CartService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -17,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../../config/netsuite.php', 'netsuite'
         );
+        
+        // Register CartService as a singleton
+        $this->app->singleton(CartService::class, function ($app) {
+            return new CartService();
+        });
     }
 
     /**

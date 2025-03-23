@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Services\CartService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -39,6 +40,9 @@ class LoginForm extends Form
         }
 
         RateLimiter::clear($this->throttleKey());
+        
+        // Sync the cart from session to the logged-in user's database cart
+        app(CartService::class)->syncFromSessionToUser(Auth::user());
     }
 
     /**

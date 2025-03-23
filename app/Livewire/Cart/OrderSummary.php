@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Cart;
 
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -25,9 +26,9 @@ class OrderSummary extends Component
     
     public function refreshSummary()
     {
-        $this->cart = Auth::user()->getOrCreateCart();
-        $this->total = $this->cart ? $this->cart->getTotal() : 0;
-        $this->itemCount = $this->cart ? $this->cart->getTotalItems() : 0;
+        $cartService = app(CartService::class);
+        $this->total = $cartService->getCartTotal();
+        $this->itemCount = $cartService->getCartCount();
     }
     
     public function checkout()

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Cart;
 
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -24,27 +25,15 @@ class CartCounter extends Component
     #[On('cart-updated')]
     public function updateCartData()
     {
-        if (Auth::check()) {
-            // Fetch fresh cart data from the database to ensure accuracy
-            $user = Auth::user();
-            $user->refresh();
-            $cart = $user->getOrCreateCart();
-            $this->count = $cart->getTotalItems();
-            $this->total = $cart->getTotal();
-        } else {
-            $this->count = 0;
-            $this->total = 0;
-        }
+        $cartService = app(CartService::class);
+        $this->count = $cartService->getCartCount();
+        $this->total = $cartService->getCartTotal();
     }
     
     public function render()
     {
-        // Ensure count and total are up-to-date on each render
-        if (Auth::check()) {
-            $cart = Auth::user()->getOrCreateCart();
-            $this->count = $cart->getTotalItems();
-            $this->total = $cart->getTotal();
-        }
+        // Always get fresh cart data on render for real-time updates
+        $this->updateCartData();
         
         return view('livewire.cart.cart-counter');
     }
