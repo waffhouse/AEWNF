@@ -242,6 +242,18 @@ class Catalog extends Component
     }
     
     /**
+     * Handle search form submission (especially for mobile)
+     * This prevents the keyboard from staying open when searching
+     */
+    public function submitSearch()
+    {
+        // This method triggers a refresh with the current search term
+        // The search property is already updated through wire:model
+        $this->filtersApplied = !empty($this->search);
+        $this->resetItems();
+    }
+    
+    /**
      * Render the component
      */
     #[Title('Product Catalog')]

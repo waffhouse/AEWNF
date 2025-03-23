@@ -169,6 +169,17 @@ class CatalogFilters extends Component
     }
     
     /**
+     * Handle mobile search form submission
+     */
+    public function submitSearch()
+    {
+        // This method triggers a refresh with the current search term
+        // Since the search term is already bound to the property, we just need to trigger resetItems
+        $this->filtersApplied = !empty($this->search);
+        $this->resetItems();
+    }
+    
+    /**
      * Render the component
      */
     public function render()
