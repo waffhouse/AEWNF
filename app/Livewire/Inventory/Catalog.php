@@ -112,7 +112,15 @@ class Catalog extends Component
     public function clearAllFilters()
     {
         $this->clearFilters();
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
+    
+    /**
+     * We don't need to override clearFilters anymore because we're handling
+     * the scroll behavior directly in the button click handlers.
+     */
     
     /**
      * Handle removing a specific filter
@@ -121,7 +129,15 @@ class Catalog extends Component
     public function removeSpecificFilter($filter)
     {
         $this->removeFilter($filter);
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
+    
+    /**
+     * We don't need to override removeFilter anymore because we're handling
+     * the scroll behavior directly in the button click handlers.
+     */
     
     /**
      * Listen for global filter changes from CatalogFilters component
@@ -150,6 +166,9 @@ class Catalog extends Component
         
         // Dispatch a browser event to collapse the filter area after search is entered
         $this->dispatch('collapse-filter-area');
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
     
     /**
@@ -162,6 +181,9 @@ class Catalog extends Component
         
         // Collapse filter area after selection
         $this->dispatch('collapse-filter-area');
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
     
     /**
@@ -174,6 +196,9 @@ class Catalog extends Component
         
         // Collapse filter area after selection
         $this->dispatch('collapse-filter-area');
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
     
     /**
@@ -189,6 +214,9 @@ class Catalog extends Component
             $this->filtersApplied = !empty($this->search) || !empty($this->brand) || !empty($this->class);
         }
         $this->resetItems();
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
     
     
@@ -268,6 +296,9 @@ class Catalog extends Component
         // The search property is already updated through wire:model
         $this->filtersApplied = !empty($this->search);
         $this->resetItems();
+        
+        // Dispatch event to scroll to top
+        $this->dispatch('scroll-to-top');
     }
     
     /**

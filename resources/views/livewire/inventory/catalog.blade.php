@@ -1,7 +1,6 @@
 <div 
     x-data="{ 
         showStickyFilter: true,
-        showFilterModal: false,
         isExpanded: false,
         ticking: false,
         scrollListeners: [],
@@ -43,11 +42,7 @@
             this.scrollListeners.push(requestTick);
             this.resizeListeners.push(requestTick);
             
-            // Event listeners for modal control (legacy support)
-            const openMobileFiltersHandler = () => {
-                this.showFilterModal = true;
-            };
-            window.addEventListener('open-mobile-filters', openMobileFiltersHandler);
+            // Mobile filter modal has been removed - no need for these event listeners
             
             // Listen for filter area events
             const expandFilterAreaHandler = () => {
@@ -62,13 +57,7 @@
             
             // Setup Livewire event listeners if Livewire is available
             if (window.Livewire) {
-                // Close modal on filter change
-                Livewire.on('filter-changed', () => {
-                    this.showFilterModal = false;
-                });
-                Livewire.on('closeFilterModal', () => {
-                    this.showFilterModal = false;
-                });
+                // Modal-related events have been removed as the modal is no longer used
             }
             
             // Add cleanup function to remove all event listeners
@@ -99,6 +88,22 @@
                 console.log('Alpine reinit detected in catalog, reinitializing events');
                 this.initializeEvents();
             });
+            
+            // Listen for scroll-to-top events
+            if (window.Livewire) {
+                window.Livewire.on('scroll-to-top', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+                
+                // Listen for delayed scroll-to-top events (used for clearing filters)
+                window.Livewire.on('scroll-to-top-delayed', () => {
+                    // Use a timeout to ensure the DOM has updated before scrolling
+                    setTimeout(() => {
+                        console.log('Executing delayed scroll to top');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 50);
+                });
+            }
         },
         
         toggleExpand() {
@@ -176,6 +181,25 @@
                             {{ $activeFilterCount }}
                         </span>
                     @endif
+                    
+                    <!-- Loading Indicators integrated into filter header -->
+                    <!-- For initial product loading or filter changes -->
+                    <div wire:loading.flex wire:target="loadProducts, resetProducts" class="hidden items-center ml-3">
+                        <svg class="animate-spin h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="ml-2 text-xs font-medium text-red-600">Loading products...</span>
+                    </div>
+                    
+                    <!-- For infinite scroll loading -->
+                    <div wire:loading.flex wire:target="loadMore" class="hidden items-center ml-3">
+                        <svg class="animate-spin h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="ml-2 text-xs font-medium text-red-600">Loading more...</span>
+                    </div>
                 </div>
                 
                 <div class="flex items-center gap-3">
@@ -259,7 +283,7 @@
                         @if(!empty($search))
                             <button 
                                 type="button" 
-                                wire:click="removeFilter('search')" 
+                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.removeFilter('search'))" 
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap hover:bg-blue-200 transition-colors focus:outline-none"
                                 aria-label="Remove search filter"
                             >
@@ -275,7 +299,7 @@
                         @if(!empty($brand))
                             <button 
                                 type="button" 
-                                wire:click="removeFilter('brand')" 
+                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.removeFilter('brand'))" 
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap hover:bg-green-200 transition-colors focus:outline-none"
                                 aria-label="Remove brand filter"
                             >
@@ -291,7 +315,7 @@
                         @if(!empty($class))
                             <button 
                                 type="button" 
-                                wire:click="removeFilter('class')" 
+                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.removeFilter('class'))" 
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap hover:bg-purple-200 transition-colors focus:outline-none"
                                 aria-label="Remove category filter"
                             >
@@ -378,7 +402,7 @@
                         <!-- Reset Filters Button (only when filters are applied) -->
                         @if($activeFilterCount > 0)
                             <button 
-                                wire:click="clearFilters"
+                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.clearFilters())"
                                 type="button" 
                                 class="w-full mt-2 py-1 px-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100 flex items-center justify-center gap-1"
                             >
@@ -396,244 +420,4 @@
         </div>
     </div>
     
-    <!-- Filter Modal - Enhanced for better organization -->
-    <div 
-        x-show="showFilterModal" 
-        x-cloak
-        class="fixed inset-0 z-50 overflow-y-auto"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200" 
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    >
-        <!-- Backdrop with click to close -->
-        <div class="fixed inset-0 bg-black bg-opacity-50" @click="showFilterModal = false"></div>
-            
-        <!-- Modal panel -->
-        <div 
-            class="relative bg-white rounded-t-xl mx-auto mt-16 sm:mt-20 px-4 py-5 shadow-xl max-w-lg sm:rounded-xl"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-4"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-        >
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-lg font-medium text-gray-900">Filter Products</h3>
-                <button 
-                    @click="showFilterModal = false" 
-                    class="rounded-full p-1 text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                    aria-label="Close modal"
-                >
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-                
-            <!-- Modal Content -->
-            <div class="space-y-5">
-                <!-- Search -->
-                <div>
-                    <label for="modal-search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                    <form class="relative" wire:submit.prevent="submitSearch">
-                        <div class="relative">
-                            <input 
-                                type="search" 
-                                id="modal-search" 
-                                wire:model="search" 
-                                placeholder="Search products..." 
-                                class="block w-full pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
-                            >
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                </svg>
-                            </div>
-                            <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500 hover:text-red-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Brand Filter -->
-                <div>
-                    <label for="modal-brand" class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-                    <select 
-                        id="modal-brand" 
-                        wire:model.live="brand" 
-                        class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
-                    >
-                        <option value="">All Brands</option>
-                        @foreach($brands as $brandOption)
-                            <option value="{{ $brandOption }}">{{ $brandOption }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Category Filter -->
-                <div>
-                    <label for="modal-class" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select 
-                        id="modal-class" 
-                        wire:model.live="class" 
-                        class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
-                    >
-                        <option value="">All Categories</option>
-                        @foreach($classes as $classOption)
-                            <option value="{{ $classOption }}">{{ $classOption }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Availability Information -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Availability Information</label>
-                    @if(auth()->check())
-                        @if(auth()->user()->canViewFloridaItems() && auth()->user()->canViewGeorgiaItems())
-                            <!-- Staff/Admin: Show all states info -->
-                            <div class="py-2 px-3 bg-green-50 rounded border border-green-200">
-                                <div class="text-sm font-medium text-green-800">Staff/Admin Access</div>
-                                <div class="text-xs text-gray-600 mt-1">You can view products for all states.</div>
-                            </div>
-                        @elseif(auth()->user()->canViewFloridaItems() && !auth()->user()->canViewGeorgiaItems())
-                            <!-- Florida Customer: Show informational text -->
-                            <div class="py-2 px-3 bg-blue-50 rounded border border-blue-200">
-                                <div class="text-sm font-medium text-blue-800">Florida Customer</div>
-                                <div class="text-xs text-gray-600 mt-1">You can only view Florida and unrestricted items.</div>
-                            </div>
-                        @elseif(auth()->user()->canViewGeorgiaItems() && !auth()->user()->canViewFloridaItems())
-                            <!-- Georgia Customer: Show informational text with same blue style as Florida -->
-                            <div class="py-2 px-3 bg-blue-50 rounded border border-blue-200">
-                                <div class="text-sm font-medium text-blue-800">Georgia Customer</div>
-                                <div class="text-xs text-gray-600 mt-1">You can only view Georgia and unrestricted items.</div>
-                            </div>
-                        @endif
-                    @else
-                        <!-- Guest users info -->
-                        <div class="py-2 px-3 bg-gray-50 rounded border border-gray-200">
-                            <div class="text-sm font-medium text-gray-800">Guest Access</div>
-                            <div class="text-xs text-gray-600 mt-1">Sign in to see state-specific pricing and availability.</div>
-                        </div>
-                    @endif
-                </div>
-                
-                <!-- Active Filters Section -->
-                @if(!empty($search) || !empty($brand) || !empty($class))
-                <div class="border-t pt-4">
-                    <h4 class="text-sm font-medium text-gray-700 mb-2">Active Filters</h4>
-                    <div class="flex flex-wrap gap-2">
-                        @if(!empty($search))
-                            <button 
-                                type="button" 
-                                wire:click="removeFilter('search')" 
-                                class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors focus:outline-none"
-                                aria-label="Remove search filter"
-                            >
-                                Search: {{ $search }}
-                                <span class="ml-1 text-blue-500">
-                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </span>
-                            </button>
-                        @endif
-                        
-                        @if(!empty($brand))
-                            <button 
-                                type="button" 
-                                wire:click="removeFilter('brand')" 
-                                class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors focus:outline-none"
-                                aria-label="Remove brand filter"
-                            >
-                                Brand: {{ $brand }}
-                                <span class="ml-1 text-green-500">
-                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </span>
-                            </button>
-                        @endif
-                        
-                        @if(!empty($class))
-                            <button 
-                                type="button" 
-                                wire:click="removeFilter('class')" 
-                                class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors focus:outline-none"
-                                aria-label="Remove category filter"
-                            >
-                                Category: {{ $class }}
-                                <span class="ml-1 text-purple-500">
-                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </span>
-                            </button>
-                        @endif
-                    </div>
-                </div>
-                @endif
-                
-                <!-- Redesigned Action Buttons -->
-                <div class="border-t pt-4 mt-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <!-- Reset Filters Button -->
-                        <button 
-                            type="button"
-                            wire:click="clearFilters"
-                            @click="showFilterModal = false" 
-                            class="sm:col-span-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 flex justify-center items-center"
-                            aria-label="Reset all filters to default values"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Reset
-                        </button>
-                        
-                        <!-- Apply Filters Button -->
-                        <button 
-                            type="button"
-                            @click="showFilterModal = false" 
-                            class="sm:col-span-2 px-4 py-2.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 flex justify-center items-center"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Done
-                        </button>
-                    </div>
-                    
-                    <!-- Indicator of Active Filters -->
-                    @php
-                        $activeFilterCount = 0;
-                        if (!empty($search)) $activeFilterCount++;
-                        if (!empty($brand)) $activeFilterCount++;
-                        if (!empty($class)) $activeFilterCount++;
-                    @endphp
-                    <div class="text-center mt-3 text-xs text-gray-500">
-                        @if($activeFilterCount > 0)
-                            <span class="inline-flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ $activeFilterCount }} filter{{ $activeFilterCount != 1 ? 's' : '' }} currently active
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                No filters currently active
-                            </span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>

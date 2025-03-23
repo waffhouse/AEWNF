@@ -17,15 +17,7 @@
             </div>
         </div>
     @else
-        <!-- Initial Loading Indicator -->
-        <div wire:loading wire:target="loadProducts, resetProducts" class="w-full">
-            <div class="flex justify-center py-12">
-                <svg class="animate-spin h-10 w-10 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            </div>
-        </div>
+        <!-- Initial Loading Indicator is now shown in the sticky filter bar -->
 
         <!-- Spacer -->
         <div class="mb-4"></div>
@@ -79,14 +71,7 @@
                     }
                 }"
         >
-            <!-- Loading Indicator -->
-            <div wire:loading wire:target="loadMore" class="py-4">
-                <svg class="animate-spin h-6 w-6 text-gray-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span class="ml-2 text-sm text-gray-600">Loading more products...</span>
-            </div>
+            <!-- Loading indicator is now shown in the sticky filter bar -->
 
             <!-- End of Results Message -->
             <div x-show="!@js($hasMorePages)" class="py-4 text-sm text-gray-600">
@@ -98,6 +83,9 @@
                     Showing all {{ $loadedCount }} products
                 @endif
             </div>
+            
+            <!-- Extra space to ensure infinite scroll trigger is above sticky filter -->
+            <div x-show="@js($hasMorePages)" class="h-24 mb-8"></div>
         </div>
     @endif
 </div>
