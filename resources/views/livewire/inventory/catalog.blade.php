@@ -265,56 +265,16 @@
             x-transition:leave-end="opacity-0 transform translate-y-4"
             class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3"
         >
-            <div class="flex flex-col sm:flex-row gap-3">
-                <!-- Search Field - Full width on mobile, proportional on desktop -->
-                <div class="w-full sm:w-1/3 lg:w-2/5">
-                    <!-- Desktop Search with live updates -->
-                    <div class="relative hidden sm:block">
-                        <input 
-                            type="search" 
-                            wire:model.live.debounce.300ms="search" 
-                            placeholder="Search products..." 
-                            class="w-full h-10 pl-8 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
-                            aria-label="Search products"
-                        >
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    
-                    <!-- Mobile Search Form with submit button -->
-                    <form class="relative sm:hidden" wire:submit.prevent="submitSearch">
-                        <input 
-                            type="search" 
-                            wire:model="search" 
-                            placeholder="Search products..." 
-                            class="w-full h-10 pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
-                            aria-label="Search products"
-                        >
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                        </div>
-                        <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500 hover:text-red-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-                
-                <!-- Filter Controls - Flex container for the rest of the controls -->
-                <div class="flex flex-col sm:flex-row sm:items-start gap-2 w-full sm:w-2/3 lg:w-3/5 justify-between">
-                    <!-- Dropdown Filters Container - full width on mobile, side by side on desktop -->
-                    <div class="flex flex-col sm:flex-row w-full gap-2">
+            <div class="flex flex-row gap-4 justify-between">
+                <!-- Filter Controls Container -->
+                <div class="flex flex-col sm:flex-row gap-4 w-full">
+                    <!-- Filter Dropdowns - side by side on desktop -->
+                    <div class="flex flex-col sm:flex-row w-full gap-4">
                         <!-- Brand Filter -->
                         <select 
                             wire:model.live="brand" 
                             aria-label="Filter by brand"
-                            class="h-10 w-full sm:w-[140px] text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
+                            class="h-10 w-full sm:w-1/2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                         >
                             <option value="">All Brands</option>
                             @foreach($brands as $brandOption)
@@ -326,7 +286,7 @@
                         <select 
                             wire:model.live="class" 
                             aria-label="Filter by category"
-                            class="h-10 w-full sm:w-[140px] text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
+                            class="h-10 w-full sm:w-1/2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                         >
                             <option value="">All Categories</option>
                             @foreach($classes as $classOption)
@@ -378,58 +338,7 @@
                 </div>
             </div>
             
-            <!-- Active Filters Pills - Visible when filters are applied -->
-            @if(!empty($search) || !empty($brand) || !empty($class))
-                <div class="mt-2 flex flex-wrap gap-2 overflow-x-auto pb-1 max-w-full">
-                    @if(!empty($search))
-                        <button 
-                            type="button" 
-                            wire:click="removeFilter('search')" 
-                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap hover:bg-blue-200 transition-colors focus:outline-none"
-                            aria-label="Remove search filter"
-                        >
-                            Search: {{ $search }}
-                            <span class="ml-1 text-blue-500">
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </span>
-                        </button>
-                    @endif
-                    
-                    @if(!empty($brand))
-                        <button 
-                            type="button" 
-                            wire:click="removeFilter('brand')" 
-                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap hover:bg-green-200 transition-colors focus:outline-none"
-                            aria-label="Remove brand filter"
-                        >
-                            Brand: {{ $brand }}
-                            <span class="ml-1 text-green-500">
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </span>
-                        </button>
-                    @endif
-                    
-                    @if(!empty($class))
-                        <button 
-                            type="button" 
-                            wire:click="removeFilter('class')" 
-                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap hover:bg-purple-200 transition-colors focus:outline-none"
-                            aria-label="Remove category filter"
-                        >
-                            Category: {{ $class }}
-                            <span class="ml-1 text-purple-500">
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </span>
-                        </button>
-                    @endif
-                </div>
-            @endif
+            <!-- Active filter badges are already shown in the collapsed header -->
         </div>
     </div>
     
