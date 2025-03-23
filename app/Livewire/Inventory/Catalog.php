@@ -315,13 +315,21 @@ class Catalog extends Component
             $cart = $user->cart;
             
             if ($cart) {
+                // Check if cart has any items before clearing
+                $itemCount = $cart->items()->count();
+                
+                if ($itemCount === 0) {
+                    $this->dispatch('notification', type: 'info', message: 'Your cart is already empty');
+                    return;
+                }
+                
                 // Delete all cart items
                 $cart->items()->delete();
                 
                 // Dispatch events to update UI components
                 $this->dispatch('cart-updated');
                 $this->dispatch('cart-cleared');
-                $this->dispatch('notification', type: 'warning', message: 'Your cart has been cleared');
+                $this->dispatch('notification', type: 'warning', message: 'Your cart has been cleared (' . $itemCount . ' ' . ($itemCount === 1 ? 'item' : 'items') . ')');
             }
         }
     }
