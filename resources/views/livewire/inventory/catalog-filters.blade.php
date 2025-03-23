@@ -132,36 +132,51 @@
     <div class="mb-4 flex flex-wrap gap-2">
         <span class="text-sm font-medium text-gray-700">Active Filters:</span>
         @if(!empty($search))
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <button 
+                type="button" 
+                wire:click="removeFilter('search')" 
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors focus:outline-none"
+                aria-label="Remove search filter"
+            >
                 Search: {{ $search }}
-                <button type="button" wire:click="removeFilter('search')" class="ml-1 text-blue-500 hover:text-blue-600">
+                <span class="ml-1 text-blue-500">
                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
-            </span>
+                </span>
+            </button>
         @endif
         
         @if(!empty($brand))
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <button 
+                type="button" 
+                wire:click="removeFilter('brand')" 
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors focus:outline-none"
+                aria-label="Remove brand filter"
+            >
                 Brand: {{ $brand }}
-                <button type="button" wire:click="removeFilter('brand')" class="ml-1 text-green-500 hover:text-green-600">
+                <span class="ml-1 text-green-500">
                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
-            </span>
+                </span>
+            </button>
         @endif
         
         @if(!empty($class))
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+            <button 
+                type="button" 
+                wire:click="removeFilter('class')" 
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors focus:outline-none"
+                aria-label="Remove category filter"
+            >
                 Category: {{ $class }}
-                <button type="button" wire:click="removeFilter('class')" class="ml-1 text-purple-500 hover:text-purple-600">
+                <span class="ml-1 text-purple-500">
                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
-            </span>
+                </span>
+            </button>
         @endif
     </div>
     @endif
