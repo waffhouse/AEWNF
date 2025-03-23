@@ -1,11 +1,84 @@
 <div>
     <!-- Alpine.js Component Definition -->
     <script>
+        // Ensure the accordion component is available immediately
+        if (window.Alpine) {
+            window.Alpine.data('ordersAccordion', () => ({
+                expandedId: null,
+                initialized: false,
+                
+                init() {
+                    console.log('Initializing orders accordion');
+                    
+                    // Mark as initialized
+                    this.initialized = true;
+                    
+                    // Force a reset to ensure everything is properly set up
+                    this.$nextTick(() => {
+                        // Ensure this component is fully initialized before watching
+                        this.$watch('expandedId', value => {
+                            console.log('Expanded ID changed to:', value);
+                        });
+                    });
+                    
+                    // Listen for order status updates
+                    if (window.Livewire) {
+                        window.Livewire.on('order-status-updated', () => {
+                            console.log('Order status updated, clearing expandedId');
+                            this.expandedId = null;
+                        });
+                        
+                        window.Livewire.on('ordersUpdated', () => {
+                            console.log('Orders updated, clearing expandedId');
+                            this.expandedId = null;
+                        });
+                    }
+                    
+                    // Listen for navigation-related reinitialization
+                    window.addEventListener('alpine-reinit', () => {
+                        console.log('Alpine reinit detected, ensuring order accordion is initialized');
+                        // Force Alpine to reevaluate this component
+                        if (!this.initialized) {
+                            this.initialized = true;
+                        }
+                        this.$nextTick(() => {
+                            console.log('Component re-evaluated after navigation');
+                        });
+                    });
+                    
+                    // Also handle direct page loads
+                    window.addEventListener('DOMContentLoaded', () => {
+                        console.log('DOMContentLoaded, ensuring order accordion is ready');
+                        this.$nextTick(() => {
+                            console.log('Component checked after DOMContentLoaded');
+                        });
+                    });
+                },
+                
+                toggle(id) {
+                    console.log('Toggle called for ID:', id, 'Current expandedId:', this.expandedId);
+                    this.expandedId = (this.expandedId === id) ? null : id;
+                },
+                
+                isExpanded(id) {
+                    return this.expandedId === id;
+                }
+            }));
+        }
+        
+        // Also register on alpine:init for consistency
         document.addEventListener('alpine:init', () => {
             Alpine.data('ordersAccordion', () => ({
                 expandedId: null,
+                initialized: false,
                 
                 init() {
+                    console.log('Initializing orders accordion (via alpine:init)');
+                    
+                    // Mark as initialized
+                    this.initialized = true;
+                    
+                    // Force a reset to ensure everything is properly set up
                     this.$nextTick(() => {
                         // Ensure this component is fully initialized before watching
                         this.$watch('expandedId', value => {
@@ -28,8 +101,11 @@
                     window.addEventListener('alpine-reinit', () => {
                         console.log('Alpine reinit detected, ensuring order accordion is initialized');
                         // Force Alpine to reevaluate this component
+                        if (!this.initialized) {
+                            this.initialized = true;
+                        }
                         this.$nextTick(() => {
-                            // Keeping the same expandedId if there is one
+                            console.log('Component re-evaluated after navigation');
                         });
                     });
                 },
@@ -87,7 +163,20 @@
         <div 
             wire:key="orders-list-{{ count($orders) }}-{{ time() }}"
             x-data="ordersAccordion()"
-            x-init="$nextTick(() => { console.log('Orders accordion fully initialized'); })"
+            x-init="
+                $nextTick(() => { 
+                    console.log('Orders accordion fully initialized');
+                    
+                    // Dispatch an event to alert any parent components
+                    window.dispatchEvent(new CustomEvent('orders-accordion-initialized'));
+                    
+                    // Force layout recalculation to ensure Alpine.js bindings are active
+                    setTimeout(() => {
+                        console.log('Delayed initialization check running');
+                        let triggerLayout = document.body.offsetHeight;
+                    }, 100);
+                });
+            "
             class="space-y-4"
         >
             @foreach($orders as $order)

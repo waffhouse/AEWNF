@@ -3,8 +3,12 @@
         showStickyFilter: true,
         showFilterModal: false,
         isExpanded: false,
-        init() {
-            // Handle responsive behavior based on screen size
+        ticking: false,
+        scrollListeners: [],
+        resizeListeners: [],
+        
+        initializeEvents() {
+            // Handle responsive behavior based on screen size - throttled with requestAnimationFrame
             const handleScreenSize = () => {
                 // Only control sticky filter visibility on desktop
                 if (window.matchMedia('(min-width: 768px)').matches) {
@@ -15,38 +19,88 @@
                     this.showStickyFilter = true;
                 }
                 
-                // Always start with collapsed state by default
-                this.isExpanded = false;
+                this.ticking = false;
+            };
+            
+            const requestTick = () => {
+                if (!this.ticking) {
+                    window.requestAnimationFrame(handleScreenSize);
+                    this.ticking = true;
+                }
             };
             
             // Initial check
             handleScreenSize();
             
-            // Add event listeners
-            window.addEventListener('scroll', handleScreenSize);
-            window.addEventListener('resize', handleScreenSize);
+            // Clean up any existing listeners 
+            this.cleanupListeners();
+            
+            // Add throttled event listeners
+            window.addEventListener('scroll', requestTick);
+            window.addEventListener('resize', requestTick);
+            
+            // Store references for cleanup
+            this.scrollListeners.push(requestTick);
+            this.resizeListeners.push(requestTick);
             
             // Event listeners for modal control (legacy support)
-            window.addEventListener('open-mobile-filters', () => {
+            const openMobileFiltersHandler = () => {
                 this.showFilterModal = true;
-            });
-            
-            // Close modal on filter change
-            Livewire.on('filter-changed', () => {
-                this.showFilterModal = false;
-            });
-            Livewire.on('closeFilterModal', () => {
-                this.showFilterModal = false;
-            });
+            };
+            window.addEventListener('open-mobile-filters', openMobileFiltersHandler);
             
             // Listen for filter area events
-            window.addEventListener('expand-filter-area', () => {
+            const expandFilterAreaHandler = () => {
                 this.isExpanded = true;
-            });
-            window.addEventListener('collapse-filter-area', () => {
+            };
+            const collapseFilterAreaHandler = () => {
                 this.isExpanded = false;
+            };
+            
+            window.addEventListener('expand-filter-area', expandFilterAreaHandler);
+            window.addEventListener('collapse-filter-area', collapseFilterAreaHandler);
+            
+            // Setup Livewire event listeners if Livewire is available
+            if (window.Livewire) {
+                // Close modal on filter change
+                Livewire.on('filter-changed', () => {
+                    this.showFilterModal = false;
+                });
+                Livewire.on('closeFilterModal', () => {
+                    this.showFilterModal = false;
+                });
+            }
+            
+            // Add cleanup function to remove all event listeners
+            this.$cleanup = () => {
+                this.cleanupListeners();
+            };
+        },
+        
+        cleanupListeners() {
+            // Remove scroll listeners
+            this.scrollListeners.forEach(listener => {
+                window.removeEventListener('scroll', listener);
+            });
+            this.scrollListeners = [];
+            
+            // Remove resize listeners
+            this.resizeListeners.forEach(listener => {
+                window.removeEventListener('resize', listener);
+            });
+            this.resizeListeners = [];
+        },
+        
+        init() {
+            this.initializeEvents();
+            
+            // Handle navigation events for proper reinitialization
+            window.addEventListener('alpine-reinit', () => {
+                console.log('Alpine reinit detected in catalog, reinitializing events');
+                this.initializeEvents();
             });
         },
+        
         toggleExpand() {
             this.isExpanded = !this.isExpanded;
         }

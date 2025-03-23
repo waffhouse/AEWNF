@@ -42,8 +42,14 @@
         <!-- Infinite Scroll Controls -->
         <div class="mt-8 text-center" 
                 x-data="{ 
+                    observer: null,
                     observe() {
-                        const observer = new IntersectionObserver((entries) => {
+                        // Clean up any existing observer
+                        if (this.observer) {
+                            this.observer.disconnect();
+                        }
+                        
+                        this.observer = new IntersectionObserver((entries) => {
                             entries.forEach(entry => {
                                 if (entry.isIntersecting) {
                                     @this.loadMore()
@@ -51,10 +57,27 @@
                             })
                         }, { rootMargin: '100px' })
                     
-                        observer.observe(this.$el)
+                        this.observer.observe(this.$el)
+                    },
+                    init() {
+                        // Initial observation
+                        this.observe();
+                        
+                        // Listen for navigation-related reinitialization
+                        window.addEventListener('alpine-reinit', () => {
+                            console.log('Alpine reinit detected, reinitializing product grid observer');
+                            this.observe();
+                        });
+                        
+                        // Clean up when component is destroyed
+                        this.$cleanup = () => {
+                            if (this.observer) {
+                                this.observer.disconnect();
+                                this.observer = null;
+                            }
+                        };
                     }
                 }"
-                x-init="observe"
         >
             <!-- Loading Indicator -->
             <div wire:loading wire:target="loadMore" class="py-4">
