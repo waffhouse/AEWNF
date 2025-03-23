@@ -132,20 +132,15 @@ class CartPage extends Component
         if ($cart) {
             $cart->items()->delete();
             
-            // Refresh the cart from database
-            $this->refreshCart();
-            
-            // Dispatch events
-            $this->dispatch('cart-updated');
-            
-            // Show notification
-            $this->dispatch('notification', [
+            // Rather than trying to update component state through events,
+            // use the redirect approach to fully refresh the page
+            session()->flash('notification', [
                 'type' => 'warning',
                 'message' => 'Cart cleared'
             ]);
             
-            // Reload component
-            $this->dispatch('refresh');
+            // This will do a full page refresh, avoiding the component errors
+            return redirect()->route('customer.cart');
         }
     }
     

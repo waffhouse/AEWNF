@@ -76,6 +76,11 @@
                             add(data.message, data.type || 'success');
                         });
                     });
+                    
+                    // Check for session flashed notification
+                    @if (session()->has('notification'))
+                        add('{{ session('notification')['message'] }}', '{{ session('notification')['type'] }}');
+                    @endif
                 "
                 class="fixed top-20 right-4 z-50 flex flex-col space-y-2 max-h-[80vh] overflow-hidden pointer-events-none"
             >

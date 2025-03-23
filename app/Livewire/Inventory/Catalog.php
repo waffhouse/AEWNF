@@ -313,7 +313,7 @@ class Catalog extends Component
     {
         if (auth()->check()) {
             $user = auth()->user();
-            $cart = $user->cart;
+            $cart = $user->getOrCreateCart();
             
             if ($cart) {
                 // Check if cart has any items before clearing
@@ -327,10 +327,15 @@ class Catalog extends Component
                 // Delete all cart items
                 $cart->items()->delete();
                 
-                // Dispatch events to update UI components
-                $this->dispatch('cart-updated');
-                $this->dispatch('cart-cleared');
-                $this->dispatch('notification', type: 'warning', message: 'Your cart has been cleared (' . $itemCount . ' ' . ($itemCount === 1 ? 'item' : 'items') . ')');
+                // Use the redirect approach with flash message instead of Livewire events
+                // This avoids the component errors by doing a full page refresh
+                session()->flash('notification', [
+                    'type' => 'warning',
+                    'message' => 'Your cart has been cleared (' . $itemCount . ' ' . ($itemCount === 1 ? 'item' : 'items') . ')'
+                ]);
+                
+                // This will do a full page refresh, avoiding the component errors
+                return redirect(request()->header('Referer'));
             }
         }
     }
