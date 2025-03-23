@@ -336,6 +336,34 @@ class Catalog extends Component
     }
 
     /**
+     * Check if the user's cart has items
+     */
+    public function hasCartItems()
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+            $cart = $user->cart;
+            
+            if ($cart) {
+                return $cart->items()->count() > 0;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Listen for cart updates to refresh the Clear Cart button visibility
+     */
+    #[On('cart-updated')]
+    #[On('cart-cleared')]
+    public function refreshCartState()
+    {
+        // No action needed, the hasCartItems() will be called during the next render cycle
+        // This listener just ensures the component gets refreshed
+    }
+    
+    /**
      * Render the component
      */
     #[Title('Product Catalog')]
@@ -344,9 +372,13 @@ class Catalog extends Component
         // Determine layout based on authentication status
         $layout = auth()->check() ? 'layouts.app' : 'layouts.guest-catalog';
         
+        // Check if cart has items
+        $hasCartItems = $this->hasCartItems();
+        
         return view('livewire.inventory.catalog', [
             'brands' => $this->brands,
             'classes' => $this->classes,
+            'hasCartItems' => $hasCartItems,
         ])->layout($layout);
     }
 }
