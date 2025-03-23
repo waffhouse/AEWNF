@@ -152,6 +152,8 @@ class AddToCart extends Component
         // Increment quantity, respecting max limit
         if ($this->quantity < $this->maxQuantity) {
             $this->quantity++;
+            // Auto-update cart when incrementing
+            $this->addToCart();
         }
     }
     
@@ -159,6 +161,8 @@ class AddToCart extends Component
     {
         if ($this->quantity > 0) {
             $this->quantity--;
+            // Auto-update cart when decrementing (including removal when quantity becomes 0)
+            $this->addToCart();
         }
     }
     

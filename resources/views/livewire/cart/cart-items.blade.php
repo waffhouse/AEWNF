@@ -75,9 +75,10 @@
                                     <div class="flex rounded-md overflow-hidden border border-gray-300">
                                         <button 
                                             type="button"
-                                            wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                            wire:click.stop="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
                                             x-on:click="qty > 0 ? qty-- : null"
                                             class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                            aria-label="Decrease quantity"
                                         >
                                             <span class="font-bold text-xs">−</span>
                                         </button>
@@ -92,9 +93,10 @@
                                         >
                                         <button
                                             type="button"
-                                            wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                            wire:click.stop="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
                                             x-on:click="qty < 99 ? qty++ : null"
                                             class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                            aria-label="Increase quantity"
                                         >
                                             <span class="font-bold text-xs">+</span>
                                         </button>
@@ -165,9 +167,10 @@
                                 <div class="flex rounded-md overflow-hidden border border-gray-300">
                                     <button 
                                         type="button"
-                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                        wire:click.stop="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
                                         x-on:click="qty > 0 ? qty-- : null"
                                         class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                        aria-label="Decrease quantity"
                                     >
                                         <span class="font-bold text-xs">−</span>
                                     </button>
@@ -182,9 +185,10 @@
                                     >
                                     <button
                                         type="button"
-                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                        wire:click.stop="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
                                         x-on:click="qty < 99 ? qty++ : null"
                                         class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                        aria-label="Increase quantity"
                                     >
                                         <span class="font-bold text-xs">+</span>
                                     </button>

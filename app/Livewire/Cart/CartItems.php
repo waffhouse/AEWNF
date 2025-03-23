@@ -14,6 +14,9 @@ class CartItems extends Component
         'refreshCart' => 'refreshCartItems'
     ];
     
+    // Used for direct updates when using +/- buttons
+    public $suppressNotifications = false;
+    
     public function mount($cartItems = [])
     {
         $this->cartItems = $cartItems;
