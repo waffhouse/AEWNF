@@ -1,5 +1,4 @@
 import './bootstrap';
-import './cart-reactive';
 
 // Fix for Alpine.js components during navigation
 document.addEventListener('livewire:navigating', () => {

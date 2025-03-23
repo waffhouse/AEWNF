@@ -5,7 +5,6 @@ namespace App\Livewire\Cart;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
-use App\Services\CartService;
 use App\Services\OrderService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
@@ -31,7 +30,8 @@ class CartPage extends Component
         return [
             'initiateCheckout' => 'checkout',
             'cartItemUpdated' => 'refreshCart',
-            'cartItemRemoved' => 'refreshCart'
+            'cartItemRemoved' => 'refreshCart',
+            'refresh' => 'refresh'
         ];
     }
     
@@ -47,38 +47,23 @@ class CartPage extends Component
     
     public function refreshCart()
     {
-        $cartService = app(CartService::class);
-        $cartItems = $cartService->getCartItems();
-        
-        // Transform the cart items into a collection-like format for the view
-        $transformedItems = [];
-        foreach ($cartItems as $item) {
-            $transformedItems[] = (object)[
-                'id' => $item['id'] ?? null,
-                'inventory_id' => $item['inventory_id'],
-                'inventory' => $item['inventory'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ];
+        // Get cart items directly from database
+        $user = auth()->user();
+        if (!$user) {
+            $this->cartItems = collect([]);
+            return;
         }
         
-        $this->cartItems = collect($transformedItems);
+        $cart = $user->getOrCreateCart();
+        $this->cartItems = $cart->items()->with('inventory')->get();
     }
     
     public function updateQuantity($itemId, $quantity)
     {
-        // Get inventory ID from either a database ID or direct inventory ID
-        $inventoryId = null;
+        // Find the cart item directly
+        $cartItem = CartItem::find($itemId);
         
-        // Find the item in local cart items
-        foreach ($this->cartItems as $item) {
-            if ($item->id == $itemId || (is_null($item->id) && $item->inventory_id == $itemId)) {
-                $inventoryId = $item->inventory_id;
-                break;
-            }
-        }
-        
-        if (!$inventoryId) {
+        if (!$cartItem) {
             $this->dispatch('notification', [
                 'type' => 'error',
                 'message' => 'Item not found'
@@ -87,43 +72,33 @@ class CartPage extends Component
         }
         
         // Validate quantity
+        $quantity = (int)$quantity;
         if ($quantity < 1) {
             $quantity = 1;
         }
         
-        // Use cart service to update cart
-        $cartService = app(CartService::class);
-        $result = $cartService->addToCart($inventoryId, $quantity, true);
-        
-        if ($result['success']) {
-            // Refresh local cart items to update the UI
-            $this->refreshCart();
-            
-            // Dispatch cart-updated event to update counter
-            $this->dispatch('cart-updated');
-        } else {
-            // Handle error case
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => $result['message'] ?? 'Failed to update cart'
-            ]);
+        if ($quantity > 99) {
+            $quantity = 99;
         }
+        
+        // Update the cart item
+        $cartItem->update([
+            'quantity' => $quantity
+        ]);
+        
+        // Refresh cart items to update the UI
+        $this->refreshCart();
+        
+        // Dispatch cart-updated event to update counter
+        $this->dispatch('cart-updated');
     }
     
     public function removeItem($itemId)
     {
-        // Get inventory ID from either a database ID or direct inventory ID
-        $inventoryId = null;
+        // Find the cart item directly
+        $cartItem = CartItem::find($itemId);
         
-        // Find the item in local cart items
-        foreach ($this->cartItems as $item) {
-            if ($item->id == $itemId || (is_null($item->id) && $item->inventory_id == $itemId)) {
-                $inventoryId = $item->inventory_id;
-                break;
-            }
-        }
-        
-        if (!$inventoryId) {
+        if (!$cartItem) {
             $this->dispatch('notification', [
                 'type' => 'error',
                 'message' => 'Item not found'
@@ -131,57 +106,52 @@ class CartPage extends Component
             return;
         }
         
-        // Use cart service to remove from cart
-        $cartService = app(CartService::class);
-        $result = $cartService->removeFromCart($inventoryId);
+        $inventoryId = $cartItem->inventory_id;
         
-        if ($result['success']) {
-            // Broadcast that item was removed so AddToCart component can update
-            $this->dispatch('cartItemRemoved', inventoryId: $inventoryId)->to('cart.add-to-cart');
-            
-            // Refresh cart and update cart count
-            $this->refreshCart();
-            $this->dispatch('cart-updated');
-            
-            $this->dispatch('notification', [
-                'type' => 'warning',
-                'message' => 'Item removed from cart'
-            ]);
-        } else {
-            // Handle error case
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => $result['message'] ?? 'Failed to remove item'
-            ]);
-        }
+        // Delete the cart item
+        $cartItem->delete();
+        
+        // Broadcast that item was removed so AddToCart component can update
+        $this->dispatch('cartItemRemoved', inventoryId: $inventoryId)->to('cart.add-to-cart');
+        
+        // Refresh cart and update cart count
+        $this->refreshCart();
+        $this->dispatch('cart-updated');
+        
+        $this->dispatch('notification', [
+            'type' => 'warning',
+            'message' => 'Item removed from cart'
+        ]);
     }
     
     public function clearCart()
     {
-        // Force sync to database first
-        $cartService = app(CartService::class);
-        $cartService->forceDatabaseSync();
-        
         // Get cart from database to clear it
         $cart = Auth::user()->getOrCreateCart();
         
         if ($cart) {
             $cart->items()->delete();
             
-            // Clear local cache
-            $cartService = app(CartService::class);
-            foreach ($this->cartItems as $item) {
-                $cartService->removeFromCart($item->inventory_id);
-            }
-            
+            // Refresh the cart from database
             $this->refreshCart();
+            
+            // Dispatch events
             $this->dispatch('cart-updated');
             
+            // Show notification
             $this->dispatch('notification', [
                 'type' => 'warning',
                 'message' => 'Cart cleared'
             ]);
+            
+            // Reload component
+            $this->dispatch('refresh');
         }
+    }
+    
+    public function refresh()
+    {
+        $this->refreshCart();
     }
     
     public function viewOrderDetails($orderId)
@@ -256,11 +226,18 @@ class CartPage extends Component
     #[Title('Shopping Cart')]
     public function render()
     {
-        $cartService = app(CartService::class);
+        // Calculate totals directly
+        $total = 0;
+        $itemCount = 0;
+        
+        foreach ($this->cartItems as $item) {
+            $total += $item->price * $item->quantity;
+            $itemCount += $item->quantity;
+        }
         
         return view('livewire.cart.cart-page', [
-            'total' => $cartService->getCartTotal(),
-            'itemCount' => $cartService->getCartCount(),
+            'total' => $total,
+            'itemCount' => $itemCount,
         ])->layout('layouts.app');
     }
 }

@@ -25,9 +25,23 @@ class CartCounter extends Component
     #[On('cart-updated')]
     public function updateCartData()
     {
-        $cartService = app(CartService::class);
-        $this->count = $cartService->getCartCount();
-        $this->total = $cartService->getCartTotal();
+        if (!Auth::check()) {
+            $this->count = 0;
+            $this->total = 0;
+            return;
+        }
+        
+        $cart = Auth::user()->getOrCreateCart();
+        
+        // Calculate cart counts directly
+        $this->count = $cart->items()->sum('quantity');
+        
+        // Calculate total
+        $total = 0;
+        foreach ($cart->items as $item) {
+            $total += $item->price * $item->quantity;
+        }
+        $this->total = $total;
     }
     
     public function render()

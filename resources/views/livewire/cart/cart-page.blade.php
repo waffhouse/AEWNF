@@ -1,4 +1,6 @@
-<div class="py-12">
+<div class="py-12" wire:init="refreshCart"
+     x-data="{}"
+     x-on:cart-updated.window="$nextTick(() => Livewire.dispatch('refresh'))">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
             <div class="p-6 text-gray-900">
@@ -8,7 +10,7 @@
                         <p class="text-sm text-gray-600 mt-1">Review the items in your cart before checkout.</p>
                     </div>
 
-                    @if(count($cartItems) > 0)
+                    @if($itemCount > 0)
                     <div class="flex space-x-2 mt-4 sm:mt-0">
                         <button 
                             wire:click="clearCart"
@@ -25,14 +27,12 @@
                     @endif
                 </div>
 
-                @if(count($cartItems) === 0)
-                    <livewire:cart.cart-items :cartItems="$cartItems" />
-                @else
-                    <!-- Regular layout - full width for both sections -->
-                    <div class="w-full">
-                        <livewire:cart.cart-items :cartItems="$cartItems" />
-                    </div>
-                    
+                <!-- Regular layout - full width for cart items -->
+                <div class="w-full">
+                    <livewire:cart.cart-items />
+                </div>
+                
+                @if($itemCount > 0)
                     <!-- Hidden order summary - only needed for form submission -->
                     <div class="hidden">
                         <livewire:cart.order-summary 
@@ -50,7 +50,7 @@
     <livewire:cart.order-confirmation />
     
     <!-- Fixed Action Button (visible on all screen sizes) -->
-    @if(count($cartItems) > 0)
+    @if($itemCount > 0)
         <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 shadow-lg z-10">
             <div class="container mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between">
