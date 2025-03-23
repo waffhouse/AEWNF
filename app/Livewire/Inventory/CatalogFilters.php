@@ -72,6 +72,15 @@ class CatalogFilters extends Component
         // Load filter options from view model
         $this->brands = $this->viewModel->getBrands();
         $this->classes = $this->viewModel->getClasses();
+        
+        // Set initial class filter to Beverages if no filter is set
+        // This ensures it only happens on the first page load
+        if (empty($this->class) && empty($this->search) && empty($this->brand)) {
+            $this->class = 'Beverages';
+            $this->filtersApplied = true;
+            // Notify other components about the filter change
+            $this->resetItems();
+        }
     }
     
     /**
