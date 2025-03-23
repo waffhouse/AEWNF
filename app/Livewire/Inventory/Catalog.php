@@ -306,6 +306,27 @@ class Catalog extends Component
     }
     
     /**
+     * Clear the user's shopping cart
+     */
+    public function clearCart()
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+            $cart = $user->cart;
+            
+            if ($cart) {
+                // Delete all cart items
+                $cart->items()->delete();
+                
+                // Dispatch events to update UI components
+                $this->dispatch('cart-updated');
+                $this->dispatch('cart-cleared');
+                $this->dispatch('notification', type: 'warning', message: 'Your cart has been cleared');
+            }
+        }
+    }
+
+    /**
      * Render the component
      */
     #[Title('Product Catalog')]

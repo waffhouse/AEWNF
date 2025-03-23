@@ -207,6 +207,9 @@ class AddToCart extends Component
         if ($this->quantity > $this->maxQuantity) {
             $this->quantity = $this->maxQuantity;
         }
+        
+        // We're now using Alpine.js's x-model for the input value and explicitly updating via the update button
+        // The quantity value will be set by Alpine.js before calling addToCart
     }
     
     #[On('cartItemRemoved')]
@@ -214,7 +217,15 @@ class AddToCart extends Component
     {
         if ($this->inventoryId === $inventoryId) {
             $this->isInCart = false;
+            $this->quantity = 0;
         }
+    }
+    
+    // Method to handle updates from Alpine.js
+    public function updateQuantity($newQuantity)
+    {
+        $this->quantity = (int)$newQuantity;
+        $this->addToCart();
     }
     
     #[On('products-loaded')]

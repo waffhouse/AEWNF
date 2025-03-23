@@ -15,39 +15,57 @@
             <div class="mt-2">
                 @if($isInCart)
                     <div class="flex flex-col space-y-2">
-                        <div class="flex rounded-md overflow-hidden border border-gray-300">
-                            <button 
-                                type="button"
-                                wire:click.stop="decrementQuantity" 
-                                wire:loading.attr="disabled" 
-                                aria-label="Decrease quantity"
-                                class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
-                            >
-                                <span class="font-bold text-sm">−</span>
-                                <div wire:loading.flex wire:target="decrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                            </button>
-                            <input 
-                                type="number" 
-                                wire:model.blur="quantity" 
-                                wire:change="addToCart" 
-                                min="0"
-                                max="{{ $maxQuantity }}"
-                                class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
-                                name="quantity" 
-                                id="quantity-{{ $inventoryId }}"
-                                @focus="$event.target.select()"
-                            >
+                        <div x-data="{ qtyInput: {{ $quantity }}, isEditing: false, initialValue: {{ $quantity }} }" class="flex items-center space-x-2">
+                            <div class="flex rounded-md overflow-hidden border border-gray-300">
+                                <button 
+                                    type="button"
+                                    wire:click.stop="decrementQuantity" 
+                                    wire:loading.attr="disabled" 
+                                    aria-label="Decrease quantity"
+                                    class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
+                                >
+                                    <span class="font-bold text-sm">−</span>
+                                    <div wire:loading.flex wire:target="decrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </button>
+                                <input 
+                                    type="number" 
+                                    x-model="qtyInput"
+                                    min="0"
+                                    max="{{ $maxQuantity }}"
+                                    class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
+                                    name="quantity" 
+                                    id="quantity-{{ $inventoryId }}"
+                                    @focus="$event.target.select(); isEditing = true; initialValue = $el.value"
+                                    @blur="if($el.value == initialValue) { isEditing = false }"
+                                    wire:model.defer="quantity"
+                                >
+                                <button
+                                    type="button"
+                                    wire:click.stop="incrementQuantity" 
+                                    wire:loading.attr="disabled" 
+                                    aria-label="Increase quantity"
+                                    class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
+                                >
+                                    <span class="font-bold text-sm">+</span>
+                                    <div wire:loading.flex wire:target="incrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </button>
+                            </div>
+                            
+                            <!-- Update Button - Always visible, but only enabled when editing -->
                             <button
                                 type="button"
-                                wire:click.stop="incrementQuantity" 
-                                wire:loading.attr="disabled" 
-                                aria-label="Increase quantity"
-                                class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
+                                @click="isEditing = false; $wire.set('quantity', qtyInput); $wire.addToCart()"
+                                class="h-8 px-3 py-1 rounded-md flex items-center justify-center relative shadow-sm transition-colors"
+                                :class="isEditing ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+                                :disabled="!isEditing"
+                                aria-label="Update quantity"
                             >
-                                <span class="font-bold text-sm">+</span>
-                                <div wire:loading.flex wire:target="incrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
+                                <span class="text-xs font-medium">Update</span>
+                                <div wire:loading.flex wire:target="addToCart" class="absolute inset-0 bg-opacity-50 flex items-center justify-center" :class="isEditing ? 'bg-red-700' : 'bg-gray-200'">
                                     <span class="sr-only">Loading...</span>
                                 </div>
                             </button>
@@ -55,39 +73,57 @@
                     </div>
                 @else
                     <div class="flex flex-col space-y-2">
-                        <div class="flex rounded-md overflow-hidden border border-gray-300">
-                            <button 
-                                type="button"
-                                wire:click.stop="decrementQuantity" 
-                                wire:loading.attr="disabled" 
-                                aria-label="Decrease quantity"
-                                class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
-                            >
-                                <span class="font-bold text-sm">−</span>
-                                <div wire:loading.flex wire:target="decrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                            </button>
-                            <input 
-                                type="number" 
-                                wire:model.blur="quantity" 
-                                wire:change="addToCart" 
-                                min="0"
-                                max="{{ $maxQuantity }}"
-                                class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
-                                name="quantity" 
-                                id="quantity-{{ $inventoryId }}"
-                                @focus="$event.target.select()"
-                            >
+                        <div x-data="{ qtyInput: {{ $quantity }}, isEditing: false, initialValue: {{ $quantity }} }" class="flex items-center space-x-2">
+                            <div class="flex rounded-md overflow-hidden border border-gray-300">
+                                <button 
+                                    type="button"
+                                    wire:click.stop="decrementQuantity" 
+                                    wire:loading.attr="disabled" 
+                                    aria-label="Decrease quantity"
+                                    class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
+                                >
+                                    <span class="font-bold text-sm">−</span>
+                                    <div wire:loading.flex wire:target="decrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </button>
+                                <input 
+                                    type="number" 
+                                    x-model="qtyInput"
+                                    min="0"
+                                    max="{{ $maxQuantity }}"
+                                    class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
+                                    name="quantity" 
+                                    id="quantity-{{ $inventoryId }}"
+                                    @focus="$event.target.select(); isEditing = true; initialValue = $el.value"
+                                    @blur="if($el.value == initialValue) { isEditing = false }"
+                                    wire:model.defer="quantity"
+                                >
+                                <button
+                                    type="button"
+                                    wire:click.stop="incrementQuantity" 
+                                    wire:loading.attr="disabled" 
+                                    aria-label="Increase quantity"
+                                    class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
+                                >
+                                    <span class="font-bold text-sm">+</span>
+                                    <div wire:loading.flex wire:target="incrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </button>
+                            </div>
+                            
+                            <!-- Update Button - Always visible, but only enabled when editing -->
                             <button
                                 type="button"
-                                wire:click.stop="incrementQuantity" 
-                                wire:loading.attr="disabled" 
-                                aria-label="Increase quantity"
-                                class="w-8 px-2 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center relative"
+                                @click="isEditing = false; $wire.set('quantity', qtyInput); $wire.addToCart()"
+                                class="h-8 px-3 py-1 rounded-md flex items-center justify-center relative shadow-sm transition-colors"
+                                :class="isEditing ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+                                :disabled="!isEditing"
+                                aria-label="Update quantity"
                             >
-                                <span class="font-bold text-sm">+</span>
-                                <div wire:loading.flex wire:target="incrementQuantity" class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center">
+                                <span class="text-xs font-medium">Update</span>
+                                <div wire:loading.flex wire:target="addToCart" class="absolute inset-0 bg-opacity-50 flex items-center justify-center" :class="isEditing ? 'bg-red-700' : 'bg-gray-200'">
                                     <span class="sr-only">Loading...</span>
                                 </div>
                             </button>
