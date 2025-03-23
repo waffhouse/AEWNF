@@ -8,12 +8,7 @@
         class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
     >
         <div class="p-4 flex flex-col h-full">
-            <!-- Header: Description -->
-            <div class="mb-2">
-                <h3 class="text-lg font-bold text-gray-900 leading-tight overflow-hidden line-clamp-2">{{ $product['description'] }}</h3>
-            </div>
-            
-            <!-- Extract product information variables -->
+            <!-- Extract product information variables first -->
             @php
                 $state = $product['state'] ?? '';
                 $quantity = $product['quantity'] ?? 0;
@@ -25,6 +20,19 @@
                 $isAvailableInGeorgia = $isUnrestricted || $state === 'Georgia';
                 $productId = $product['id'];
             @endphp
+            
+            <!-- Header: Description and stock status -->
+            <div class="mb-2">
+                <h3 class="text-lg font-bold text-gray-900 leading-tight overflow-hidden line-clamp-2">{{ $product['description'] }}</h3>
+                <!-- Stock status badge -->
+                <div class="mt-1">
+                    @if($quantity > 0)
+                        <span class="inline-block px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">In Stock</span>
+                    @else
+                        <span class="inline-block px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
+                    @endif
+                </div>
+            </div>
             
             <!-- Calculate if we have a price to show -->
             @php
@@ -46,18 +54,11 @@
             <!-- Product info and price in one row -->
             <div class="border-t border-gray-100 py-2">
                 <div class="flex justify-between items-center">
-                    <!-- SKU, brand and stock status -->
+                    <!-- SKU and brand info -->
                     <div class="flex items-center text-xs font-medium text-gray-600">
                         {{ $product['sku'] }}
                         <span class="mx-1">•</span> 
                         {{ $product['brand'] }}
-                        <span class="ml-1">
-                            @if($quantity > 0)
-                                <span class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">In Stock</span>
-                            @else
-                                <span class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
-                            @endif
-                        </span>
                     </div>
                     
                     <div class="flex items-center">
