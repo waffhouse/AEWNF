@@ -308,6 +308,7 @@ class Catalog extends Component
     /**
      * Clear the user's shopping cart
      */
+    #[On('clear-cart')]
     public function clearCart()
     {
         if (auth()->check()) {
