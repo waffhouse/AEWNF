@@ -264,6 +264,10 @@ class Catalog extends Component
         // Update loaded count
         $this->loadedCount += count($result['products']);
         $this->isLoading = false;
+        
+        // Dispatch event to notify product grid that products are loaded
+        // This will trigger AddToCart components to refresh their state
+        $this->dispatch('products-loaded');
     }
     
     /**

@@ -91,6 +91,7 @@
                                             class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200 text-sm"
                                             name="quantity" 
                                             id="cart-quantity-{{ $item->id }}"
+                                            @focus="$event.target.select()"
                                         >
                                         <button
                                             type="button"
@@ -184,6 +185,7 @@
                                         class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200 text-sm"
                                         name="quantity" 
                                         id="mobile-cart-quantity-{{ $item->id }}"
+                                        @focus="$event.target.select()"
                                     >
                                     <button
                                         type="button"
