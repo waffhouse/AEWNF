@@ -283,7 +283,7 @@
                         @if(!empty($search))
                             <button 
                                 type="button" 
-                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.removeFilter('search'))" 
+                                @click="window.scrollTo({top: 0, behavior: 'smooth'}); $nextTick(() => $wire.removeFilter('search'))" 
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap hover:bg-blue-200 transition-colors focus:outline-none"
                                 aria-label="Remove search filter"
                             >
@@ -299,7 +299,7 @@
                         @if(!empty($brand))
                             <button 
                                 type="button" 
-                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.removeFilter('brand'))" 
+                                @click="window.scrollTo({top: 0, behavior: 'smooth'}); $nextTick(() => $wire.removeFilter('brand'))" 
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap hover:bg-green-200 transition-colors focus:outline-none"
                                 aria-label="Remove brand filter"
                             >
@@ -315,7 +315,7 @@
                         @if(!empty($class))
                             <button 
                                 type="button" 
-                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.removeFilter('class'))" 
+                                @click="window.scrollTo({top: 0, behavior: 'smooth'}); $nextTick(() => $wire.removeFilter('class'))" 
                                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap hover:bg-purple-200 transition-colors focus:outline-none"
                                 aria-label="Remove category filter"
                             >
@@ -402,7 +402,7 @@
                         <!-- Reset Filters Button (only when filters are applied) -->
                         @if($activeFilterCount > 0)
                             <button 
-                                @click="window.scrollTo({top: 0, behavior: 'instant'}); $nextTick(() => $wire.clearFilters())"
+                                @click="window.scrollTo({top: 0, behavior: 'smooth'}); $nextTick(() => $wire.clearFilters())"
                                 type="button" 
                                 class="w-full mt-2 py-1 px-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100 flex items-center justify-center gap-1"
                             >
