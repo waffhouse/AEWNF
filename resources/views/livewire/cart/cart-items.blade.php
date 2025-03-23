@@ -76,7 +76,7 @@
                                         <button 
                                             type="button"
                                             wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                            x-on:click="qty > 1 ? qty-- : null"
+                                            x-on:click="qty > 0 ? qty-- : null"
                                             class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
                                         >
                                             <span class="font-bold text-xs">−</span>
@@ -85,7 +85,7 @@
                                             type="number" 
                                             x-model="qty"
                                             wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
-                                            min="1"
+                                            min="0"
                                             max="99"
                                             class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200 text-sm"
                                             name="quantity" 
@@ -166,7 +166,7 @@
                                     <button 
                                         type="button"
                                         wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                        x-on:click="qty > 1 ? qty-- : null"
+                                        x-on:click="qty > 0 ? qty-- : null"
                                         class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
                                     >
                                         <span class="font-bold text-xs">−</span>
@@ -175,7 +175,7 @@
                                         type="number" 
                                         x-model="qty"
                                         wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
-                                        min="1"
+                                        min="0"
                                         max="99"
                                         class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200 text-sm"
                                         name="quantity" 

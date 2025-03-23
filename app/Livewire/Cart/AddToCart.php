@@ -12,7 +12,7 @@ use Livewire\Attributes\On;
 class AddToCart extends Component
 {
     public int $inventoryId;
-    public int $quantity = 1;
+    public int $quantity = 0;
     public bool $isInCart = false;
     public bool $showQuantity = true;
     public string $quantityInputType = 'stepper'; // 'stepper' or 'input'
@@ -55,15 +55,6 @@ class AddToCart extends Component
     
     public function addToCart()
     {
-        // Check for quantity limit first
-        if ($this->quantity > 99) {
-            $this->quantity = 99;
-            
-            // This is the only notification we want to keep
-            $this->dispatch('notification', type: 'warning', message: 'For orders of 100+ items, please contact our office directly.');
-            return;
-        }
-        
         // Check if user has permission to add to cart
         if (!Auth::check() || !Auth::user()->can('add to cart')) {
             // Redirect to login if not authenticated
@@ -82,6 +73,38 @@ class AddToCart extends Component
         $user = Auth::user();
         $cart = $user->getOrCreateCart();
         
+        // Check if item already exists in cart
+        $cartItem = $cart->items()->where('inventory_id', $this->inventoryId)->first();
+        
+        // If quantity is 0, remove the item from cart if it exists
+        if ($this->quantity <= 0) {
+            if ($cartItem) {
+                $cartItem->delete();
+                $this->isInCart = false;
+                
+                // Emit events to update cart UI components
+                $this->dispatch('cart-updated');
+                $this->dispatch('cartItemRemoved', inventoryId: $this->inventoryId);
+                $this->dispatch('product-cart-status-changed', [
+                    'id' => $this->inventoryId, 
+                    'inCart' => false,
+                    'quantity' => 0
+                ]);
+                
+                $this->dispatch('notification', type: 'success', message: 'Item removed from cart');
+            }
+            return;
+        }
+        
+        // Check for quantity limit first
+        if ($this->quantity > 99) {
+            $this->quantity = 99;
+            
+            // This is the only notification we want to keep
+            $this->dispatch('notification', type: 'warning', message: 'For orders of 100+ items, please contact our office directly.');
+            return;
+        }
+        
         // Determine price based on user's state permissions
         $priceField = $user->price_field;
         $price = $inventoryItem->$priceField;
@@ -91,9 +114,6 @@ class AddToCart extends Component
             // No notification for unavailable items
             return;
         }
-        
-        // Check if item already exists in cart
-        $cartItem = $cart->items()->where('inventory_id', $this->inventoryId)->first();
         
         if ($cartItem) {
             // Update quantity if item exists (replacing the quantity, not adding to it)
@@ -137,7 +157,7 @@ class AddToCart extends Component
     
     public function decrementQuantity()
     {
-        if ($this->quantity > 1) {
+        if ($this->quantity > 0) {
             $this->quantity--;
         }
     }
@@ -146,16 +166,16 @@ class AddToCart extends Component
     {
         // Validate quantity input is a number
         if (!is_numeric($this->quantity)) {
-            $this->quantity = 1;
+            $this->quantity = 0;
             return;
         }
         
         // Convert to integer
         $this->quantity = (int)$this->quantity;
         
-        // Validate quantity input
-        if ($this->quantity < 1) {
-            $this->quantity = 1;
+        // Validate quantity input (allow 0)
+        if ($this->quantity < 0) {
+            $this->quantity = 0;
         }
         
         // Check if quantity exceeds the maximum (99)

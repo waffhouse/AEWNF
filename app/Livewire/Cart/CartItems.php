@@ -47,9 +47,28 @@ class CartItems extends Component
         // Convert to integer
         $quantity = (int)$quantity;
         
-        // Validate quantity is at least 1
-        if ($quantity < 1) {
-            $quantity = 1;
+        // If quantity is 0 or less, remove the item
+        if ($quantity <= 0) {
+            // Store inventory_id before deleting to broadcast event
+            $inventoryId = $cartItem->inventory_id;
+            
+            $cartItem->delete();
+            
+            // Refresh local cart items to update the UI
+            $this->refreshCartItems();
+            
+            // Broadcast that item was removed so AddToCart component can update
+            $this->dispatch('cartItemRemoved', inventoryId: $inventoryId)->to('cart.add-to-cart');
+            
+            // Notify parent component to refresh cart
+            $this->dispatch('cartItemRemoved');
+            
+            // Update cart count
+            $this->dispatch('cart-updated');
+            
+            $this->dispatch('notification', type: 'success', message: 'Item removed from cart');
+            
+            return;
         }
         
         // Check if quantity exceeds the maximum (99)

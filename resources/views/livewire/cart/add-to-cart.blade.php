@@ -28,7 +28,7 @@
                                     <input 
                                         type="number" 
                                         wire:model.blur="quantity" 
-                                        min="1"
+                                        min="0"
                                         max="{{ $maxQuantity }}"
                                         class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
                                         name="quantity" 
@@ -85,7 +85,7 @@
                                     <input 
                                         type="number" 
                                         wire:model.blur="quantity" 
-                                        min="1"
+                                        min="0"
                                         max="{{ $maxQuantity }}"
                                         class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
                                         name="quantity" 
