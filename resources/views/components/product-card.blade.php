@@ -23,6 +23,7 @@
                 $isUnrestricted = empty($state);
                 $isAvailableInFlorida = $isUnrestricted || $state === 'Florida';
                 $isAvailableInGeorgia = $isUnrestricted || $state === 'Georgia';
+                $productId = $product['id'];
             @endphp
             
             <!-- Calculate if we have a price to show -->
@@ -59,12 +60,51 @@
                         </span>
                     </div>
                     
-                    <!-- Primary price for authenticated users -->
-                    @if(auth()->check() && $primaryPrice)
-                        <div class="font-bold text-sm text-red-600">
-                            {{ $priceLabel }}: ${{ number_format($primaryPrice, 2) }}
-                        </div>
-                    @endif
+                    <div class="flex items-center">
+                        <!-- Use a simpler cart indicator that won't interfere with other elements -->
+                        @if(auth()->check())
+                            @php
+                                $isInCart = false;
+                                $userCart = auth()->user()->cart;
+                                if ($userCart && $productId) {
+                                    $cartItem = $userCart->items()->where('inventory_id', $productId)->first();
+                                    $isInCart = $cartItem !== null;
+                                }
+                            @endphp
+                            
+                            <div 
+                                id="cart-indicator-{{ $productId }}"
+                                data-inventory-id="{{ $productId }}" 
+                                class="hidden"
+                            ></div>
+                            
+                            <div 
+                                x-data="{
+                                    isInCart: {{ $isInCart ? 'true' : 'false' }},
+                                    inventoryId: {{ $productId }},
+                                    init() {
+                                        // Listen for cart updates via browser events
+                                        document.addEventListener('product-cart-updated', (event) => {
+                                            if (event.detail && event.detail.inventoryId == this.inventoryId) {
+                                                this.isInCart = event.detail.isInCart;
+                                            }
+                                        });
+                                    }
+                                }"
+                                x-show="isInCart"
+                                class="mr-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800"
+                            >
+                                In Cart
+                            </div>
+                        @endif
+                        
+                        <!-- Primary price for authenticated users -->
+                        @if(auth()->check() && $primaryPrice)
+                            <div class="font-bold text-sm text-red-600">
+                                {{ $priceLabel }}: ${{ number_format($primaryPrice, 2) }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
                 
                 <!-- Quantity selector and add to cart -->

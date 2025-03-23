@@ -85,11 +85,17 @@ class AddToCart extends Component
                 // Emit events to update cart UI components
                 $this->dispatch('cart-updated');
                 $this->dispatch('cartItemRemoved', inventoryId: $this->inventoryId);
-                $this->dispatch('product-cart-status-changed', [
-                    'id' => $this->inventoryId, 
-                    'inCart' => false,
-                    'quantity' => 0
-                ]);
+                $this->dispatch('cart-status-changed'); // For badge updates
+                
+                // We'll use JavaScript to trigger a custom event for the cart indicators
+                $this->js("
+                    document.dispatchEvent(new CustomEvent('product-cart-updated', {
+                        detail: {
+                            inventoryId: {$this->inventoryId},
+                            isInCart: false
+                        }
+                    }));
+                ");
                 
                 $this->dispatch('notification', type: 'success', message: 'Item removed from cart');
             }
@@ -138,13 +144,20 @@ class AddToCart extends Component
         
         // Emit events to update cart UI components
         $this->dispatch('cart-updated');
-        $this->dispatch('product-cart-status-changed', [
-            'id' => $this->inventoryId, 
-            'inCart' => true,
-            'quantity' => $this->quantity
-        ]);
+        $this->dispatch('cart-status-changed'); // For badge updates
         
-        // No success notification
+        // We'll use JavaScript to trigger a custom event for the cart indicators
+        $this->js("
+            document.dispatchEvent(new CustomEvent('product-cart-updated', {
+                detail: {
+                    inventoryId: {$this->inventoryId},
+                    isInCart: true
+                }
+            }));
+        ");
+        
+        // Add success notification
+        $this->dispatch('notification', type: 'success', message: $successMessage);
     }
     
     public function incrementQuantity()
@@ -217,6 +230,10 @@ class AddToCart extends Component
                 if ($cartItem) {
                     $this->isInCart = true;
                     $this->quantity = $cartItem->quantity;
+                    
+                    // We used to emit cart status events here, but we've removed the cart indicator functionality
+                } else {
+                    // The item is not in the cart
                 }
             }
         }

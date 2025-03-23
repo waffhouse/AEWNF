@@ -55,9 +55,9 @@
             
             <!-- Availability Info - Replaces state filter dropdown -->
             <div>
-                <label for="availability-info" class="block text-sm font-medium text-gray-700 mb-1">
+                <span class="block text-sm font-medium text-gray-700 mb-1">
                     Availability Information
-                </label>
+                </span>
                 
                 @if(auth()->check())
                     @if(auth()->user()->canViewFloridaItems() && auth()->user()->canViewGeorgiaItems())

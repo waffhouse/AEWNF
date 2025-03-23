@@ -1,4 +1,4 @@
-<div>
+<div data-inventory-id="{{ $inventoryId }}">
     <style>
         /* Hide browser's native number input spinner buttons */
         input[type=number]::-webkit-inner-spin-button, 
@@ -36,6 +36,7 @@
                                 max="{{ $maxQuantity }}"
                                 class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
                                 name="quantity" 
+                                id="quantity-{{ $inventoryId }}"
                             >
                             <button
                                 type="button"
@@ -74,6 +75,7 @@
                                 max="{{ $maxQuantity }}"
                                 class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200"
                                 name="quantity" 
+                                id="quantity-{{ $inventoryId }}"
                             >
                             <button
                                 type="button"
