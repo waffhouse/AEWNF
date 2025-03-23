@@ -73,13 +73,17 @@ class CatalogFilters extends Component
         $this->brands = $this->viewModel->getBrands();
         $this->classes = $this->viewModel->getClasses();
         
-        // Set initial class filter to Beverages if no filter is set
+        // Set initial class filter to the default category if no filter is set
         // This ensures it only happens on the first page load
+        // The default category can be changed in CatalogViewModel::DEFAULT_CATEGORY
         if (empty($this->class) && empty($this->search) && empty($this->brand)) {
-            $this->class = 'Beverages';
-            $this->filtersApplied = true;
-            // Notify other components about the filter change
-            $this->resetItems();
+            $this->class = CatalogViewModel::DEFAULT_CATEGORY;
+            $this->filtersApplied = !empty($this->class);
+            
+            // Only notify other components if we actually set a filter
+            if (!empty($this->class)) {
+                $this->resetItems();
+            }
         }
     }
     

@@ -9,6 +9,14 @@ use Illuminate\Support\Collection;
 class CatalogViewModel
 {
     /**
+     * Default category to display on initial catalog load.
+     * Change this value to set a different default category.
+     * Set to empty string to show all products by default.
+     * 
+     * @var string
+     */
+    public const DEFAULT_CATEGORY = 'Beverages';
+    /**
      * Get distinct brand options for filters
      * 
      * @return array

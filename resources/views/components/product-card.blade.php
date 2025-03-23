@@ -5,8 +5,7 @@
 
 <div class="h-full">
     <div 
-        class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-md transition-shadow duration-300 h-full flex flex-col cursor-pointer"
-        @click="$dispatch('open-modal', 'product-detail-{{ $product['id'] }}')"
+        class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
     >
         <div class="p-4 flex flex-col h-full">
             <!-- Header: Description -->
@@ -99,7 +98,11 @@
                 
                 <!-- View details link -->
                 <div class="text-center mt-2">
-                    <span class="text-xs text-gray-500 underline cursor-pointer">View Details</span>
+                    <button 
+                        type="button"
+                        class="text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+                        @click="$dispatch('open-modal', 'product-detail-{{ $product['id'] }}')"
+                    >View Details</button>
                 </div>
             </div>
         </div>
