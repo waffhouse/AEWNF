@@ -97,7 +97,7 @@ class AddToCart extends Component
                     }));
                 ");
                 
-                $this->dispatch('notification', type: 'success', message: 'Item removed from cart');
+                $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
             }
             return;
         }
@@ -129,6 +129,7 @@ class AddToCart extends Component
             ]);
             
             $successMessage = 'Cart updated';
+            $successType = 'warning'; // Use warning type for updates
         } else {
             // Create new cart item
             $cart->items()->create([
@@ -138,6 +139,7 @@ class AddToCart extends Component
             ]);
             
             $successMessage = 'Item added to cart';
+            $successType = 'success'; // Keep success type for adds
         }
         
         $this->isInCart = true;
@@ -156,8 +158,8 @@ class AddToCart extends Component
             }));
         ");
         
-        // Add success notification
-        $this->dispatch('notification', type: 'success', message: $successMessage);
+        // Add notification with appropriate type
+        $this->dispatch('notification', type: $successType, message: $successMessage);
     }
     
     public function incrementQuantity()

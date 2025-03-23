@@ -71,7 +71,7 @@ class CartPage extends Component
         $cartItem->update(['quantity' => $quantity]);
         
         $this->dispatch('notification', [
-            'type' => 'success',
+            'type' => 'warning',
             'message' => 'Cart updated'
         ]);
         
@@ -107,7 +107,7 @@ class CartPage extends Component
         $this->dispatch('cart-updated');
         
         $this->dispatch('notification', [
-            'type' => 'success',
+            'type' => 'warning',
             'message' => 'Item removed from cart'
         ]);
     }
@@ -123,7 +123,7 @@ class CartPage extends Component
             $this->dispatch('cart-updated');
             
             $this->dispatch('notification', [
-                'type' => 'success',
+                'type' => 'warning',
                 'message' => 'Cart cleared'
             ]);
         }

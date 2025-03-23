@@ -34,41 +34,79 @@
             <!-- Space to account for fixed header -->
             <div class="pt-16"></div>
 
-            <!-- Flash Messages - Global notification component -->
+            <!-- Flash Messages - Smooth stacked notification component with newest on top -->
             <div 
-                x-data="{ show: false, message: '', type: '' }"
-                x-show="show"
+                x-data="{ 
+                    notifications: [],
+                    add(message, type = 'success') {
+                        // Create a unique ID for this notification
+                        const id = Date.now() + Math.floor(Math.random() * 1000);
+                        
+                        // Add the new notification to the beginning of the array (newest on top)
+                        this.notifications.unshift({
+                            id: id,
+                            message: message,
+                            type: type,
+                            show: true
+                        });
+                        
+                        // Set a timeout to remove this notification
+                        setTimeout(() => {
+                            this.dismiss(id);
+                        }, 4000);
+                    },
+                    dismiss(id) {
+                        // Find notification and mark it for animation-out
+                        const index = this.notifications.findIndex(n => n.id === id);
+                        if (index !== -1) {
+                            this.notifications[index].show = false;
+                            // Actually remove after animation completes
+                            setTimeout(() => {
+                                this.remove(id);
+                            }, 300);
+                        }
+                    },
+                    remove(id) {
+                        this.notifications = this.notifications.filter(notification => notification.id !== id);
+                    }
+                }"
                 x-init="
                     window.addEventListener('livewire:initialized', () => {
                         Livewire.on('notification', (data) => {
-                            show = true;
-                            message = data.message;
-                            type = data.type || 'success';
-                            setTimeout(() => show = false, 3000);
+                            add(data.message, data.type || 'success');
                         });
                     });
                 "
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform -translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-300"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform -translate-y-2"
-                class="fixed top-20 right-4 z-50 w-72 p-4 rounded shadow-lg"
-                :class="type === 'success' ? 'bg-green-100 text-green-800' : (type === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')"
-                style="display: none;"
+                class="fixed top-20 right-4 z-50 flex flex-col space-y-2 max-h-[80vh] overflow-hidden pointer-events-none"
             >
-                <div class="flex items-center justify-between">
-                    <span x-text="message"></span>
-                    <button 
-                        @click="show = false" 
-                        class="text-gray-500 hover:text-gray-700"
+                <template x-for="notification in notifications" :key="notification.id">
+                    <div 
+                        x-show="notification.show"
+                        x-transition:enter="transform transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 translate-y-[-100%] translate-x-4"
+                        x-transition:enter-end="opacity-100 translate-y-0 translate-x-0"
+                        x-transition:leave="transform transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-0 scale-95"
+                        class="w-72 p-4 rounded shadow-lg pointer-events-auto relative transition-all duration-300 ease-in-out"
+                        :class="notification.type === 'success' ? 'bg-green-100 text-green-800 border-l-4 border-green-500' : 
+                                (notification.type === 'warning' ? 'bg-yellow-100 text-yellow-800 border-l-4 border-yellow-500' : 
+                                'bg-red-100 text-red-800 border-l-4 border-red-500')"
                     >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+                        <div class="flex items-start justify-between">
+                            <span x-text="notification.message" class="flex-1 pr-2"></span>
+                            <button 
+                                @click="dismiss(notification.id)" 
+                                class="text-gray-500 hover:text-gray-700 ml-1 flex-shrink-0 focus:outline-none"
+                                aria-label="Close notification"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <!-- Page Heading -->

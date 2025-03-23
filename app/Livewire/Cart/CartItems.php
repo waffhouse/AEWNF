@@ -69,7 +69,7 @@ class CartItems extends Component
             // Update cart count
             $this->dispatch('cart-updated');
             
-            $this->dispatch('notification', type: 'success', message: 'Item removed from cart');
+            $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
             
             return;
         }
@@ -91,8 +91,8 @@ class CartItems extends Component
         
         // Send appropriate notification
         if ($quantity < 99) {
-            // Success notification for regular updates
-            $this->dispatch('notification', type: 'success', message: 'Cart updated');
+            // Warning notification for cart updates
+            $this->dispatch('notification', type: 'warning', message: 'Cart updated');
         }
         
         // Notify parent component to refresh cart
@@ -129,7 +129,7 @@ class CartItems extends Component
         // Update cart count
         $this->dispatch('cart-updated');
         
-        $this->dispatch('notification', type: 'success', message: 'Item removed from cart');
+        $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
     }
     
     public function render()
