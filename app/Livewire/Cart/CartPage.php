@@ -70,10 +70,7 @@ class CartPage extends Component
         
         $cartItem->update(['quantity' => $quantity]);
         
-        $this->dispatch('notification', [
-            'type' => 'warning',
-            'message' => 'Cart updated'
-        ]);
+        // No notification needed for updates - visual feedback is sufficient
         
         $this->refreshCart();
         

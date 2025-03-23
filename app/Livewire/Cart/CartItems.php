@@ -89,11 +89,7 @@ class CartItems extends Component
         // Refresh local cart items to update the UI
         $this->refreshCartItems();
         
-        // Send appropriate notification
-        if ($quantity < 99) {
-            // Warning notification for cart updates
-            $this->dispatch('notification', type: 'warning', message: 'Cart updated');
-        }
+        // No notification needed for normal quantity updates
         
         // Notify parent component to refresh cart
         $this->dispatch('cartItemUpdated');
