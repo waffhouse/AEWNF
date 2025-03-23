@@ -139,6 +139,11 @@ class Catalog extends Component
     {
         $this->filtersApplied = true;
         $this->resetItems();
+        
+        // Dispatch a browser event to expand the filter area when search is entered
+        if (!empty($this->search)) {
+            $this->dispatch('expand-filter-area');
+        }
     }
     
     /**

@@ -2,6 +2,7 @@
     x-data="{ 
         showStickyFilter: true,
         showFilterModal: false,
+        isExpanded: false,
         init() {
             // Handle responsive behavior based on screen size
             const handleScreenSize = () => {
@@ -13,6 +14,9 @@
                     // On mobile: Always show sticky filter
                     this.showStickyFilter = true;
                 }
+                
+                // Set collapsed state by default, unless there are active filters
+                this.isExpanded = @json(!empty($search) || !empty($brand) || !empty($class));
             };
             
             // Initial check
@@ -34,12 +38,20 @@
             Livewire.on('closeFilterModal', () => {
                 this.showFilterModal = false;
             });
+            
+            // Listen for expand filter event
+            window.addEventListener('expand-filter-area', () => {
+                this.isExpanded = true;
+            });
+        },
+        toggleExpand() {
+            this.isExpanded = !this.isExpanded;
         }
     }" 
     class="py-6"
 >
-    <!-- Scroll to top button -->
-    <x-scroll-to-top />
+    <!-- Removing the default scroll to top button as we'll add a custom one in the sticky filter -->
+    <!-- <x-scroll-to-top /> -->
     
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -73,7 +85,7 @@
         </div>
     </div>
     
-    <!-- Sticky Filter Bar - Redesigned for better responsiveness -->
+    <!-- Sticky Filter Bar - Collapsible version -->
     <div 
         x-show="showStickyFilter" 
         x-cloak
@@ -85,7 +97,156 @@
         x-transition:leave-start="opacity-100 transform translate-y-0"
         x-transition:leave-end="opacity-0 transform translate-y-full"
     >
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <!-- Filter toggle bar - Always visible -->
+        <div class="w-full bg-gray-50 border-b border-gray-200 px-4 py-2">
+            <!-- Top row with label and toggle button -->
+            <div class="flex justify-between items-center">
+                <div class="flex items-center flex-grow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <span class="text-sm font-medium">Product Filters</span>
+                    
+                    @php
+                        $activeFilterCount = 0;
+                        if (!empty($search)) $activeFilterCount++;
+                        if (!empty($brand)) $activeFilterCount++;
+                        if (!empty($class)) $activeFilterCount++;
+                    @endphp
+                    
+                    @if($activeFilterCount > 0)
+                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                            {{ $activeFilterCount }}
+                        </span>
+                    @endif
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <!-- Scroll to top button integrated into filter bar with same styling as filter toggle -->
+                    <button
+                        x-data="{
+                            show: false,
+                            init() {
+                                window.addEventListener('scroll', () => {
+                                    this.show = window.scrollY > 500;
+                                });
+                            }
+                        }"
+                        x-show="show"
+                        @click="window.scrollTo({top: 0, behavior: 'smooth'})"
+                        class="flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors focus:outline-none"
+                        aria-label="Return to top"
+                    >
+                        <span class="mr-1">Top</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Expand/collapse button with text label for clarity -->
+                    <button 
+                        @click="toggleExpand()" 
+                        class="flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors focus:outline-none"
+                        aria-label="Toggle filter panel"
+                    >
+                        <span x-text="isExpanded ? 'Hide Filters' : 'Show Filters'" class="mr-1"></span>
+                        <svg 
+                            x-show="!isExpanded" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            class="h-3 w-3 text-gray-500" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg 
+                            x-show="isExpanded" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            class="h-3 w-3 text-gray-500" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick search input (only visible when collapsed) -->
+            <div x-show="!isExpanded" class="mt-2">
+                <form class="relative" wire:submit.prevent="submitSearch">
+                    <input 
+                        type="search" 
+                        wire:model="search" 
+                        placeholder="Quick search..." 
+                        class="w-full h-9 pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
+                        aria-label="Quick search products"
+                    >
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500 hover:text-red-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </form>
+                
+                <!-- Pill filters in collapsed state if active -->
+                @if(!empty($search) || !empty($brand) || !empty($class))
+                    <div class="mt-2 flex flex-wrap gap-2 overflow-x-auto pb-1 max-w-full">
+                        @if(!empty($search))
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                                Search: {{ $search }}
+                                <button type="button" wire:click="removeFilter('search')" class="ml-1 text-blue-500 hover:text-blue-600">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </span>
+                        @endif
+                        
+                        @if(!empty($brand))
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap">
+                                Brand: {{ $brand }}
+                                <button type="button" wire:click="removeFilter('brand')" class="ml-1 text-green-500 hover:text-green-600">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </span>
+                        @endif
+                        
+                        @if(!empty($class))
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 whitespace-nowrap">
+                                Category: {{ $class }}
+                                <button type="button" wire:click="removeFilter('class')" class="ml-1 text-purple-500 hover:text-purple-600">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </span>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
+        
+        <!-- Expandable filter content -->
+        <div 
+            x-show="isExpanded"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 transform translate-y-4"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform translate-y-4"
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3"
+        >
             <div class="flex flex-col sm:flex-row gap-3">
                 <!-- Search Field - Full width on mobile, proportional on desktop -->
                 <div class="w-full sm:w-1/3 lg:w-2/5">
@@ -95,7 +256,7 @@
                             type="search" 
                             wire:model.live.debounce.300ms="search" 
                             placeholder="Search products..." 
-                            class="w-full h-10 pl-8 py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                            class="w-full h-10 pl-8 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                             aria-label="Search products"
                         >
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -111,7 +272,7 @@
                             type="search" 
                             wire:model="search" 
                             placeholder="Search products..." 
-                            class="w-full h-10 pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                            class="w-full h-10 pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                             aria-label="Search products"
                         >
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -135,7 +296,7 @@
                         <select 
                             wire:model.live="brand" 
                             aria-label="Filter by brand"
-                            class="h-10 w-full sm:w-[140px] text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                            class="h-10 w-full sm:w-[140px] text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                         >
                             <option value="">All Brands</option>
                             @foreach($brands as $brandOption)
@@ -147,7 +308,7 @@
                         <select 
                             wire:model.live="class" 
                             aria-label="Filter by category"
-                            class="h-10 w-full sm:w-[140px] text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                            class="h-10 w-full sm:w-[140px] text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                         >
                             <option value="">All Categories</option>
                             @foreach($classes as $classOption)
@@ -183,13 +344,6 @@
                         @endif
                         
                         <!-- Reset Filters Button (only when filters are applied) -->
-                        @php
-                            $activeFilterCount = 0;
-                            if (!empty($search)) $activeFilterCount++;
-                            if (!empty($brand)) $activeFilterCount++;
-                            if (!empty($class)) $activeFilterCount++;
-                        @endphp
-                        
                         @if($activeFilterCount > 0)
                             <button 
                                 wire:click="clearFilters"
@@ -294,7 +448,7 @@
                                 id="modal-search" 
                                 wire:model="search" 
                                 placeholder="Search products..." 
-                                class="block w-full pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                                class="block w-full pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                             >
                             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20" stroke="currentColor">
@@ -316,7 +470,7 @@
                     <select 
                         id="modal-brand" 
                         wire:model.live="brand" 
-                        class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                        class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                     >
                         <option value="">All Brands</option>
                         @foreach($brands as $brandOption)
@@ -331,7 +485,7 @@
                     <select 
                         id="modal-class" 
                         wire:model.live="class" 
-                        class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                        class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                     >
                         <option value="">All Categories</option>
                         @foreach($classes as $classOption)

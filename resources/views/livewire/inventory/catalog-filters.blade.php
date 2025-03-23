@@ -13,7 +13,7 @@
                         id="search" 
                         wire:model.live.debounce.300ms="search"
                         placeholder="Search products..." 
-                        class="block w-full pl-8 py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                        class="block w-full pl-8 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                     >
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -29,7 +29,7 @@
                 <select 
                     id="brand-filter" 
                     wire:model.live="brand"
-                    class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                    class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                 >
                     <option value="">All Brands</option>
                     @foreach($brands as $brandOption)
@@ -44,7 +44,7 @@
                 <select 
                     id="class-filter" 
                     wire:model.live="class"
-                    class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                    class="block w-full py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
                 >
                     <option value="">All Categories</option>
                     @foreach($classes as $classOption)
@@ -115,7 +115,7 @@
                     <button 
                         type="button"
                         wire:click="clearFilters"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-offset-1 focus:ring-red-500 flex items-center"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-0 flex items-center"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
