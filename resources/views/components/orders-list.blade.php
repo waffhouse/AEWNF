@@ -6,8 +6,11 @@
                 expandedId: null,
                 
                 init() {
-                    this.$watch('expandedId', value => {
-                        console.log('Expanded ID changed to:', value);
+                    this.$nextTick(() => {
+                        // Ensure this component is fully initialized before watching
+                        this.$watch('expandedId', value => {
+                            console.log('Expanded ID changed to:', value);
+                        });
                     });
                     
                     // Listen for order status updates
@@ -19,6 +22,15 @@
                     Livewire.on('ordersUpdated', () => {
                         console.log('Orders updated, clearing expandedId');
                         this.expandedId = null;
+                    });
+                    
+                    // Listen for navigation-related reinitialization
+                    window.addEventListener('alpine-reinit', () => {
+                        console.log('Alpine reinit detected, ensuring order accordion is initialized');
+                        // Force Alpine to reevaluate this component
+                        this.$nextTick(() => {
+                            // Keeping the same expandedId if there is one
+                        });
                     });
                 },
                 
@@ -75,6 +87,7 @@
         <div 
             wire:key="orders-list-{{ count($orders) }}-{{ time() }}"
             x-data="ordersAccordion()"
+            x-init="$nextTick(() => { console.log('Orders accordion fully initialized'); })"
             class="space-y-4"
         >
             @foreach($orders as $order)

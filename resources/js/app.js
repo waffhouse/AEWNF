@@ -8,3 +8,14 @@ document.addEventListener('livewire:navigating', () => {
         navElement.__x.getUnobservedData().open = false;
     }
 });
+
+// Ensure Alpine.js components are properly initialized after navigation
+document.addEventListener('livewire:navigated', () => {
+    // Force reinitialize any Alpine components that might not be properly initialized
+    setTimeout(() => {
+        if (window.Alpine) {
+            // Send a custom event that our components can listen to
+            window.dispatchEvent(new CustomEvent('alpine-reinit'));
+        }
+    }, 50);
+});
