@@ -140,10 +140,8 @@ class Catalog extends Component
         $this->filtersApplied = true;
         $this->resetItems();
         
-        // Dispatch a browser event to expand the filter area when search is entered
-        if (!empty($this->search)) {
-            $this->dispatch('expand-filter-area');
-        }
+        // Dispatch a browser event to collapse the filter area after search is entered
+        $this->dispatch('collapse-filter-area');
     }
     
     /**
@@ -153,6 +151,9 @@ class Catalog extends Component
     {
         $this->filtersApplied = true;
         $this->resetItems();
+        
+        // Collapse filter area after selection
+        $this->dispatch('collapse-filter-area');
     }
     
     /**
@@ -162,6 +163,9 @@ class Catalog extends Component
     {
         $this->filtersApplied = true;
         $this->resetItems();
+        
+        // Collapse filter area after selection
+        $this->dispatch('collapse-filter-area');
     }
     
     /**

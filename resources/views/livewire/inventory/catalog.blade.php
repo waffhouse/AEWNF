@@ -15,8 +15,8 @@
                     this.showStickyFilter = true;
                 }
                 
-                // Set collapsed state by default, unless there are active filters
-                this.isExpanded = @json(!empty($search) || !empty($brand) || !empty($class));
+                // Always start with collapsed state by default
+                this.isExpanded = false;
             };
             
             // Initial check
@@ -39,9 +39,12 @@
                 this.showFilterModal = false;
             });
             
-            // Listen for expand filter event
+            // Listen for filter area events
             window.addEventListener('expand-filter-area', () => {
                 this.isExpanded = true;
+            });
+            window.addEventListener('collapse-filter-area', () => {
+                this.isExpanded = false;
             });
         },
         toggleExpand() {
@@ -174,8 +177,8 @@
                 </div>
             </div>
             
-            <!-- Quick search input (only visible when collapsed) -->
-            <div x-show="!isExpanded" class="mt-2">
+            <!-- Quick search input (always visible in sticky filter) -->
+            <div class="mt-2">
                 <form class="relative" wire:submit.prevent="submitSearch">
                     <input 
                         type="search" 
