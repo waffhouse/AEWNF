@@ -17,13 +17,28 @@ class AddToCart extends Component
     public bool $showQuantity = true;
     public string $quantityInputType = 'stepper'; // 'stepper' or 'input'
     public int $maxQuantity = 100; // Default max quantity
+    public string $variant = 'default'; // 'default' or 'compact'
     
-    public function mount(int $inventoryId, bool $showQuantity = true, string $quantityInputType = 'stepper', int $maxQuantity = 100)
+    #[On('add-to-cart-quick')]
+    public function quickAdd($id, $quantity = 1)
+    {
+        // If this component is for a different product, ignore the event
+        if ($this->inventoryId !== $id) {
+            return;
+        }
+        
+        // Set quantity and add to cart
+        $this->quantity = $quantity;
+        $this->addToCart();
+    }
+    
+    public function mount(int $inventoryId, bool $showQuantity = true, string $quantityInputType = 'stepper', int $maxQuantity = 99, string $variant = 'default')
     {
         $this->inventoryId = $inventoryId;
         $this->showQuantity = $showQuantity;
         $this->quantityInputType = $quantityInputType;
-        $this->maxQuantity = $maxQuantity;
+        $this->maxQuantity = min($maxQuantity, 99); // Ensure max is never greater than 99
+        $this->variant = $variant;
         
         // Check if this item is already in the user's cart
         if (Auth::check()) {
@@ -40,6 +55,15 @@ class AddToCart extends Component
     
     public function addToCart()
     {
+        // Check for quantity limit first
+        if ($this->quantity > 99) {
+            $this->quantity = 99;
+            
+            // This is the only notification we want to keep
+            $this->dispatch('notification', type: 'warning', message: 'For orders of 100+ items, please contact our office directly.');
+            return;
+        }
+        
         // Check if user has permission to add to cart
         if (!Auth::check() || !Auth::user()->can('add to cart')) {
             // Redirect to login if not authenticated
@@ -47,11 +71,7 @@ class AddToCart extends Component
                 return redirect()->route('login');
             }
             
-            // Return error message if authenticated but no permission
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'You do not have permission to add items to cart'
-            ]);
+            // No notification, just don't proceed
             return;
         }
         
@@ -68,10 +88,7 @@ class AddToCart extends Component
         
         // Check if price is available
         if (!$price) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'This item is not available for purchase in your region'
-            ]);
+            // No notification for unavailable items
             return;
         }
         
@@ -99,14 +116,15 @@ class AddToCart extends Component
         
         $this->isInCart = true;
         
-        // Emit event to update cart count in navbar
+        // Emit events to update cart UI components
         $this->dispatch('cart-updated');
-        
-        // Show success notification
-        $this->dispatch('notification', [
-            'type' => 'success',
-            'message' => $successMessage
+        $this->dispatch('product-cart-status-changed', [
+            'id' => $this->inventoryId, 
+            'inCart' => true,
+            'quantity' => $this->quantity
         ]);
+        
+        // No success notification
     }
     
     public function incrementQuantity()
@@ -126,12 +144,31 @@ class AddToCart extends Component
     
     public function updatedQuantity()
     {
+        // Validate quantity input is a number
+        if (!is_numeric($this->quantity)) {
+            $this->quantity = 1;
+            return;
+        }
+        
+        // Convert to integer
+        $this->quantity = (int)$this->quantity;
+        
         // Validate quantity input
         if ($this->quantity < 1) {
             $this->quantity = 1;
         }
         
-        // Cap at max quantity
+        // Check if quantity exceeds the maximum (99)
+        if ($this->quantity > 99) {
+            // Reset to 99
+            $this->quantity = 99;
+            
+            // This is the only notification we want to keep
+            $this->dispatch('notification', type: 'warning', message: 'For orders of 100+ items, please contact our office directly.');
+            return;
+        }
+        
+        // Cap at configured max quantity (which is already limited to 99 in mount)
         if ($this->quantity > $this->maxQuantity) {
             $this->quantity = $this->maxQuantity;
         }

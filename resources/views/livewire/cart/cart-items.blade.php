@@ -1,4 +1,15 @@
 <div>
+    <style>
+        /* Hide browser's native number input spinner buttons */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
     @if(count($cartItems) === 0)
         <div class="bg-gray-50 py-10 px-6 rounded-lg text-center">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,23 +71,34 @@
                                 <div class="text-sm text-gray-900">${{ number_format($item->price, 2) }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <button 
-                                        type="button"
-                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                        class="border border-gray-300 rounded-l px-3 py-1 bg-gray-50 hover:bg-gray-100 focus:outline-none"
-                                    >-</button>
-                                    <input 
-                                        type="number" 
-                                        readonly
-                                        value="{{ $item->quantity }}" 
-                                        class="border-t border-b border-gray-300 text-center w-12 px-2 py-1 focus:outline-none focus:ring-0"
-                                    >
-                                    <button 
-                                        type="button"
-                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
-                                        class="border border-gray-300 rounded-r px-3 py-1 bg-gray-50 hover:bg-gray-100 focus:outline-none"
-                                    >+</button>
+                                <div class="flex items-center" x-data="{ qty: {{ $item->quantity }} }">
+                                    <div class="flex rounded-md overflow-hidden border border-gray-300">
+                                        <button 
+                                            type="button"
+                                            wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                            x-on:click="qty > 1 ? qty-- : null"
+                                            class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                        >
+                                            <span class="font-bold text-xs">−</span>
+                                        </button>
+                                        <input 
+                                            type="number" 
+                                            x-model="qty"
+                                            wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
+                                            min="1"
+                                            max="99"
+                                            class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200 text-sm"
+                                            name="quantity" 
+                                        >
+                                        <button
+                                            type="button"
+                                            wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                            x-on:click="qty < 99 ? qty++ : null"
+                                            class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                        >
+                                            <span class="font-bold text-xs">+</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
@@ -139,23 +161,34 @@
                         
                         <div class="flex items-center justify-between">
                             <!-- Quantity Controls -->
-                            <div class="flex items-center">
-                                <button 
-                                    type="button"
-                                    wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                    class="border border-gray-300 rounded-l px-3 py-1 bg-gray-50 hover:bg-gray-100 focus:outline-none"
-                                >-</button>
-                                <input 
-                                    type="number" 
-                                    readonly
-                                    value="{{ $item->quantity }}" 
-                                    class="border-t border-b border-gray-300 text-center w-12 px-2 py-1 focus:outline-none focus:ring-0"
-                                >
-                                <button 
-                                    type="button"
-                                    wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
-                                    class="border border-gray-300 rounded-r px-3 py-1 bg-gray-50 hover:bg-gray-100 focus:outline-none"
-                                >+</button>
+                            <div class="flex items-center" x-data="{ qty: {{ $item->quantity }} }">
+                                <div class="flex rounded-md overflow-hidden border border-gray-300">
+                                    <button 
+                                        type="button"
+                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                        x-on:click="qty > 1 ? qty-- : null"
+                                        class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                    >
+                                        <span class="font-bold text-xs">−</span>
+                                    </button>
+                                    <input 
+                                        type="number" 
+                                        x-model="qty"
+                                        wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
+                                        min="1"
+                                        max="99"
+                                        class="w-14 text-center bg-white py-1 outline-none border-x border-gray-200 text-sm"
+                                        name="quantity" 
+                                    >
+                                    <button
+                                        type="button"
+                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                        x-on:click="qty < 99 ? qty++ : null"
+                                        class="w-6 px-1 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                    >
+                                        <span class="font-bold text-xs">+</span>
+                                    </button>
+                                </div>
                             </div>
                             
                             <!-- Subtotal -->

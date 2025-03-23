@@ -1,37 +1,20 @@
 @props(['product'])
 
-<div 
-    class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-md transition-shadow duration-300"
->
-    <div class="p-5">
-        <!-- Header: Description -->
-        <div class="mb-2">
-            <h3 class="text-lg font-bold text-gray-900 leading-tight min-h-[3rem] overflow-hidden line-clamp-2">{{ $product['description'] }}</h3>
-        </div>
-        
-        <div class="border-t border-gray-100 pt-1">
-            <!-- Brand -->
-            <div class="flex items-center mb-1">
-                <span class="text-xs font-semibold text-gray-500 w-20">Brand:</span>
-                <span class="text-sm font-medium text-gray-800">{{ $product['brand'] }}</span>
+<!-- Include the product detail modal -->
+<x-product-detail-modal :product="$product" />
+
+<div class="h-full">
+    <div 
+        class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-md transition-shadow duration-300 h-full flex flex-col cursor-pointer"
+        @click="$dispatch('open-modal', 'product-detail-{{ $product['id'] }}')"
+    >
+        <div class="p-4 flex flex-col h-full">
+            <!-- Header: Description -->
+            <div class="mb-2">
+                <h3 class="text-lg font-bold text-gray-900 leading-tight overflow-hidden line-clamp-2">{{ $product['description'] }}</h3>
             </div>
             
-            <!-- Category -->
-            <div class="flex items-center mb-1">
-                <span class="text-xs font-semibold text-gray-500 w-20">Category:</span>
-                <span class="text-xs text-gray-700">{{ $product['class'] }}</span>
-            </div>
-
-            <!-- SKU -->
-            <div class="flex items-center mb-3">
-                <span class="text-xs font-semibold text-gray-500 w-20">Item #:</span>
-                <span class="text-xs font-medium text-gray-600">{{ $product['sku'] }}</span>
-            </div>
-        </div>
-
-        <!-- Inventory Status and Availability -->
-        <div class="flex flex-wrap justify-end items-center gap-2 mb-3">
-            <!-- State Availability -->
+            <!-- Extract product information variables -->
             @php
                 $state = $product['state'] ?? '';
                 $quantity = $product['quantity'] ?? 0;
@@ -42,106 +25,83 @@
                 $isAvailableInFlorida = $isUnrestricted || $state === 'Florida';
                 $isAvailableInGeorgia = $isUnrestricted || $state === 'Georgia';
             @endphp
-
-            @if($isUnrestricted)
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                    All States
-                </span>
-            @else
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
-                    {{ $state }} Only
-                </span>
-            @endif
             
-            <!-- Stock Status -->
-            @if($quantity > 0)
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                    In Stock
-                </span>
-            @else
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                    Out of Stock
-                </span>
-            @endif
-        </div>
-        
-        <!-- Pricing Grid - Conditionally displayed based on auth status/permissions -->
-        <div class="bg-gray-50 p-3 rounded-md mt-4 border border-gray-200">
-            <h4 class="text-xs font-semibold uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">Pricing</h4>
+            <!-- Calculate if we have a price to show -->
+            @php
+                $primaryPrice = null;
+                $priceLabel = '';
+                
+                if(auth()->check()) {
+                    // Determine which price to show based on availability and permissions
+                    if(auth()->user()->canViewFloridaItems() && $isAvailableInFlorida && isset($flPrice) && $flPrice > 0) {
+                        $primaryPrice = $flPrice;
+                        $priceLabel = 'FL';
+                    } elseif(auth()->user()->canViewGeorgiaItems() && $isAvailableInGeorgia && isset($gaPrice) && $gaPrice > 0) {
+                        $primaryPrice = $gaPrice;
+                        $priceLabel = 'GA';
+                    }
+                }
+            @endphp
             
-            @if(auth()->check() && (auth()->user()->canViewFloridaItems() || auth()->user()->canViewGeorgiaItems() || auth()->user()->canViewUnrestrictedItems()))
-            <!-- Pricing shown only to authenticated users with 'view pricing' permission -->
-            <div class="grid grid-cols-3 gap-2">
-                <!-- FL Price -->
-                <div class="text-center">
-                    <div class="text-xs font-medium text-gray-600 mb-1">Florida</div>
-                    @if(auth()->check() && auth()->user()->canViewFloridaItems())
-                        @if($isAvailableInFlorida)
-                            @php 
-                                // Check if price exists or is zero/null/empty string
-                                $hasFlPrice = isset($flPrice) && $flPrice !== null && $flPrice !== '' && $flPrice > 0;
-                            @endphp
-                            
-                            @if($hasFlPrice)
-                                <div class="font-bold text-sm">${{ number_format($flPrice, 2) }}</div>
+            <!-- Product info and price in one row -->
+            <div class="border-t border-gray-100 py-2">
+                <div class="flex justify-between items-center">
+                    <!-- SKU, brand and stock status -->
+                    <div class="flex items-center text-xs font-medium text-gray-600">
+                        {{ $product['sku'] }}
+                        <span class="mx-1">•</span> 
+                        {{ $product['brand'] }}
+                        <span class="ml-1">
+                            @if($quantity > 0)
+                                <span class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">In Stock</span>
                             @else
-                                <div class="text-gray-400 text-xs">N/A</div>
+                                <span class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
                             @endif
-                        @else
-                            <div class="text-red-500 text-xs uppercase font-semibold">Not Available</div>
-                        @endif
-                    @else
-                        <div class="text-red-500 text-xs uppercase font-semibold">Restricted</div>
+                        </span>
+                    </div>
+                    
+                    <!-- Primary price for authenticated users -->
+                    @if(auth()->check() && $primaryPrice)
+                        <div class="font-bold text-sm text-red-600">
+                            {{ $priceLabel }}: ${{ number_format($primaryPrice, 2) }}
+                        </div>
                     @endif
                 </div>
                 
-                <!-- GA Price -->
-                <div class="text-center">
-                    <div class="text-xs font-medium text-gray-600 mb-1">Georgia</div>
-                    @if(auth()->check() && auth()->user()->canViewGeorgiaItems())
-                        @if($isAvailableInGeorgia)
-                            @php 
-                                // Check if price exists or is zero/null/empty string
-                                $hasGaPrice = isset($gaPrice) && $gaPrice !== null && $gaPrice !== '' && $gaPrice > 0;
-                            @endphp
-                            
-                            @if($hasGaPrice)
-                                <div class="font-bold text-sm">${{ number_format($gaPrice, 2) }}</div>
-                            @else
-                                <div class="text-gray-400 text-xs">N/A</div>
-                            @endif
-                        @else
-                            <div class="text-red-500 text-xs uppercase font-semibold">Not Available</div>
-                        @endif
+                <!-- Quantity selector and add to cart -->
+                <div class="flex justify-center items-center mt-2">
+                    <!-- Quantity selector and add to cart for authenticated users with pricing permission -->
+                    @if(auth()->check() && $primaryPrice)
+                        <div class="flex items-center space-x-1" @click.stop>
+                            <livewire:cart.add-to-cart 
+                                :inventory-id="$product['id']" 
+                                :wire:key="'card-add-to-cart-'.$product['id']"
+                                quantity-input-type="stepper"
+                                variant="compact"
+                                show-quantity="true"
+                                class="flex-1"
+                            />
+                        </div>
+                    @elseif(auth()->check())
+                        <!-- Not available button for authenticated users without pricing -->
+                        <button 
+                            type="button"
+                            class="px-2 py-1 text-xs font-medium text-white bg-gray-400 rounded cursor-not-allowed"
+                            disabled
+                        >
+                            Not Available
+                        </button>
                     @else
-                        <div class="text-red-500 text-xs uppercase font-semibold">Restricted</div>
+                        <!-- Login button for guests -->
+                        <a href="{{ route('login') }}" @click.stop class="px-2 py-1 text-xs font-medium text-white bg-gray-600 hover:bg-gray-700 rounded inline-block">Log In</a>
                     @endif
                 </div>
                 
-                <!-- Bulk Price -->
-                <div class="text-center">
-                    <div class="text-xs font-medium text-gray-600 mb-1">Bulk Discount</div>
-                    @if($bulkPrice)
-                        <div class="font-bold text-sm">${{ number_format($bulkPrice, 2) }}</div>
-                    @else
-                        <div class="text-gray-400 text-xs">N/A</div>
-                    @endif
+                <!-- View details link -->
+                <div class="text-center mt-2">
+                    <span class="text-xs text-gray-500 underline cursor-pointer">View Details</span>
                 </div>
             </div>
-            
-            <!-- Add to Cart Button with Quantity Selector -->
-            <livewire:cart.add-to-cart 
-                :inventory-id="$product['id']" 
-                :wire:key="'add-to-cart-'.$product['id']"
-                quantity-input-type="stepper" 
-            />
-            @else
-            <!-- Message for guests or users without pricing permission -->
-            <div class="py-3 text-center">
-                <p class="text-sm text-gray-500">Login to see pricing information</p>
-                <a href="{{ route('login') }}" class="inline-block mt-2 px-4 py-2 text-xs text-white bg-red-600 rounded-md hover:bg-red-700">Log In</a>
-            </div>
-            @endif
         </div>
     </div>
 </div>

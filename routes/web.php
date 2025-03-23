@@ -58,6 +58,11 @@ Route::middleware(['auth', 'permission:view catalog'])->prefix('api')->name('api
     Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory');
 });
 
+// Cart API routes - for authorized users
+Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
+    Route::get('/check-cart', [\App\Http\Controllers\InventoryController::class, 'checkCart'])->name('check-cart');
+});
+
 // NetSuite inventory views are now handled through the admin dashboard
 
 // Unified Catalog - accessible to both guests and authenticated users

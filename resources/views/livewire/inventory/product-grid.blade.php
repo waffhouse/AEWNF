@@ -30,8 +30,8 @@
         <!-- Spacer -->
         <div class="mb-4"></div>
         
-        <!-- Card Grid View -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Card Grid View - 1 column on mobile, more on larger screens -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             @foreach($products as $product)
                 <div wire:key="product-{{ $product['id'] }}">
                     <x-product-card :product="$product" />
