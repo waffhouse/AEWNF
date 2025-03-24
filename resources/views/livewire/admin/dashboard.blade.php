@@ -149,9 +149,11 @@
 
                     <!-- Orders Tab Panel -->
                     @if($canManageOrders)
-                    <div x-show="activeTab === 'orders'" style="display: none;">
-                        @livewire('admin.orders.order-management', [], key('orders-management'))
-                    </div>
+                    <x-admin.tab-content id="orders">
+                        <div>
+                            <livewire:admin.orders.order-management />
+                        </div>
+                    </x-admin.tab-content>
                     @endif
                 </div>
             </div>
