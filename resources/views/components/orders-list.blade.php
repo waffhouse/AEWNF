@@ -160,7 +160,7 @@
         </div>
     @else
         <!-- Accordion-style Orders List -->
-        <div 
+        <div id="orders-list-accordion" 
             wire:key="orders-list-{{ count($orders) }}-{{ time() }}"
             x-data="ordersAccordion()"
             x-init="
