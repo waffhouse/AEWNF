@@ -122,37 +122,35 @@
                     <!-- Users Tab Panel -->
                     @if($canManageUsers)
                     <x-admin.tab-content id="users">
-                        <livewire:admin.users.user-management />
+                        <livewire:admin.users.user-management :wire:key="'user-management-component'" />
                     </x-admin.tab-content>
                     @endif
                     
                     <!-- Roles Tab Panel -->
                     @if($canManageRoles)
                     <x-admin.tab-content id="roles">
-                        <livewire:admin.roles.role-management />
+                        <livewire:admin.roles.role-management :wire:key="'role-management-component'" />
                     </x-admin.tab-content>
                     @endif
                     
                     <!-- Permissions Tab Panel -->
                     @if($canManagePermissions)
                     <x-admin.tab-content id="permissions">
-                        <livewire:admin.permissions.permission-management />
+                        <livewire:admin.permissions.permission-management :wire:key="'permission-management-component'" />
                     </x-admin.tab-content>
                     @endif
 
                     <!-- Inventory Sync Tab Panel -->
                     @if($canSyncInventory)
                     <x-admin.tab-content id="inventory-sync">
-                        <livewire:admin.inventory.inventory-sync />
+                        <livewire:admin.inventory.inventory-sync :wire:key="'inventory-sync-component'" />
                     </x-admin.tab-content>
                     @endif
 
                     <!-- Orders Tab Panel -->
                     @if($canManageOrders)
                     <x-admin.tab-content id="orders">
-                        <div>
-                            <livewire:admin.orders.order-management />
-                        </div>
+                        <livewire:admin.orders.order-management :wire:key="'order-management-component'" />
                     </x-admin.tab-content>
                     @endif
                 </div>
