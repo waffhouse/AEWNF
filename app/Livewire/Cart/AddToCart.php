@@ -41,15 +41,22 @@ class AddToCart extends Component
         $this->maxQuantity = min($maxQuantity, 99); // Ensure max is never greater than 99
         $this->variant = $variant;
         
-        if (Auth::check()) {
-            // Check if item is in cart
-            $cart = Auth::user()->getOrCreateCart();
-            $cartItem = $cart->items()->where('inventory_id', $inventoryId)->first();
-            
-            if ($cartItem) {
-                $this->isInCart = true;
-                $this->quantity = $cartItem->quantity;
-            }
+        $this->refreshCartData();
+    }
+    
+    /**
+     * Load the latest cart data for this inventory item
+     */
+    private function refreshCartData()
+    {
+        $cartItems = app(CartService::class)->getCartItems();
+        
+        if (isset($cartItems[$this->inventoryId])) {
+            $this->isInCart = true;
+            $this->quantity = $cartItems[$this->inventoryId]['quantity'];
+        } else {
+            $this->isInCart = false;
+            $this->quantity = 0;
         }
     }
     
@@ -66,69 +73,25 @@ class AddToCart extends Component
             return redirect()->route('login');
         }
         
-        // Get inventory item
-        $inventory = Inventory::find($this->inventoryId);
-        if (!$inventory) {
-            $this->dispatch('notification', type: 'error', message: 'Product not found');
+        // Use CartService to handle cart operations
+        $cartService = app(CartService::class);
+        $result = $cartService->addToCart($this->inventoryId, $this->quantity, true);
+        
+        if (!$result['success']) {
+            $this->dispatch('notification', type: 'error', message: $result['message']);
             return;
         }
         
-        // Validate quantity
-        $quantity = (int)$this->quantity;
-        if ($quantity < 0) {
-            $quantity = 0;
-        }
-        
-        if ($quantity > 99) {
-            $quantity = 99;
-        }
-        
-        $user = Auth::user();
-        $cart = $user->getOrCreateCart();
-        
-        // Find existing cart item
-        $cartItem = $cart->items()->where('inventory_id', $this->inventoryId)->first();
-        
-        if ($cartItem) {
-            if ($quantity === 0) {
-                // Remove item if quantity is 0
-                $cartItem->delete();
-                $this->isInCart = false;
-                
-                // Send notifications
-                $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
-            } else {
-                // Update quantity
-                $cartItem->update([
-                    'quantity' => $quantity
-                ]);
-                
-                $this->isInCart = true;
-            }
-        } else {
-            // Don't add if quantity is 0
-            if ($quantity === 0) {
-                return;
-            }
-            
-            // Determine price based on user's state permissions
-            $priceField = $user->price_field;
-            $price = $inventory->$priceField;
-            
-            if (!$price) {
-                $this->dispatch('notification', type: 'error', message: 'Price not available for this item');
-                return;
-            }
-            
-            // Create new cart item
-            $cart->items()->create([
-                'inventory_id' => $this->inventoryId,
-                'quantity' => $quantity,
-                'price' => $price,
-            ]);
-            
+        // Update UI state based on result
+        if ($result['action'] === 'removed') {
+            $this->isInCart = false;
+            $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
+        } elseif ($result['action'] === 'added') {
             $this->isInCart = true;
             $this->dispatch('notification', type: 'success', message: 'Item added to cart');
+        } elseif ($result['action'] === 'updated') {
+            $this->isInCart = true;
+            // No notification for updates to reduce noise
         }
         
         // Emit events to update cart UI components
@@ -185,16 +148,15 @@ class AddToCart extends Component
             $this->quantity = $this->maxQuantity;
         }
         
-        // We're now using Alpine.js's x-model for the input value and explicitly updating via the update button
-        // The quantity value will be set by Alpine.js before calling addToCart
+        // Auto-update cart when quantity changes via input
+        $this->addToCart();
     }
     
     #[On('cartItemRemoved')]
     public function resetCartStatus(int $inventoryId)
     {
         if ($this->inventoryId === $inventoryId) {
-            $this->isInCart = false;
-            $this->quantity = 0;
+            $this->refreshCartData();
         }
     }
     
@@ -208,23 +170,7 @@ class AddToCart extends Component
     #[On('products-loaded')]
     public function refreshState()
     {
-        if (!Auth::check()) {
-            $this->isInCart = false;
-            $this->quantity = 0;
-            return;
-        }
-        
-        // Check if item is in database cart
-        $cart = Auth::user()->getOrCreateCart();
-        $cartItem = $cart->items()->where('inventory_id', $this->inventoryId)->first();
-        
-        if ($cartItem) {
-            $this->isInCart = true;
-            $this->quantity = $cartItem->quantity;
-        } else {
-            $this->isInCart = false;
-            $this->quantity = 0;
-        }
+        $this->refreshCartData();
     }
     
     public function render()

@@ -25,11 +25,31 @@
             <div class="mb-2">
                 <h3 class="text-lg font-bold text-gray-900 leading-tight overflow-hidden line-clamp-2">{{ $product['description'] }}</h3>
                 <!-- Stock status badge -->
-                <div class="mt-1">
+                <div class="mt-1 flex flex-wrap gap-2">
                     @if($quantity > 0)
                         <span class="inline-block px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">In Stock</span>
                     @else
                         <span class="inline-block px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
+                    @endif
+                    
+                    <!-- Cart status badge -->
+                    @php
+                        $isInCart = false;
+                        $cartQuantity = 0;
+                        $userCart = auth()->check() ? auth()->user()->cart : null;
+                        if ($userCart && $productId) {
+                            $cartItem = $userCart->items()->where('inventory_id', $productId)->first();
+                            if ($cartItem) {
+                                $isInCart = true;
+                                $cartQuantity = $cartItem->quantity;
+                            }
+                        }
+                    @endphp
+                    
+                    @if($isInCart)
+                        <span class="inline-block px-1.5 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <span class="font-semibold">{{ $cartQuantity }}</span> <span class="ml-1">in cart</span>
+                        </span>
                     @endif
                 </div>
             </div>
@@ -62,42 +82,6 @@
                     </div>
                     
                     <div class="flex items-center">
-                        <!-- Use a simpler cart indicator that won't interfere with other elements -->
-                        @if(auth()->check())
-                            @php
-                                $isInCart = false;
-                                $userCart = auth()->user()->cart;
-                                if ($userCart && $productId) {
-                                    $cartItem = $userCart->items()->where('inventory_id', $productId)->first();
-                                    $isInCart = $cartItem !== null;
-                                }
-                            @endphp
-                            
-                            <div 
-                                id="cart-indicator-{{ $productId }}"
-                                data-inventory-id="{{ $productId }}" 
-                                class="hidden"
-                            ></div>
-                            
-                            <div 
-                                x-data="{
-                                    isInCart: {{ $isInCart ? 'true' : 'false' }},
-                                    inventoryId: {{ $productId }},
-                                    init() {
-                                        // Listen for cart updates via browser events
-                                        document.addEventListener('product-cart-updated', (event) => {
-                                            if (event.detail && event.detail.inventoryId == this.inventoryId) {
-                                                this.isInCart = event.detail.isInCart;
-                                            }
-                                        });
-                                    }
-                                }"
-                                x-show="isInCart"
-                                class="mr-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800"
-                            >
-                                In Cart
-                            </div>
-                        @endif
                         
                         <!-- Primary price for authenticated users -->
                         @if(auth()->check() && $primaryPrice)
