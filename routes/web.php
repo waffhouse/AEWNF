@@ -65,6 +65,11 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
 
 // NetSuite inventory views are now handled through the admin dashboard
 
+// Order Pick Ticket generation
+Route::get('/orders/{id}/pick-ticket', [\App\Http\Controllers\OrderPickTicketController::class, 'generatePickTicket'])
+    ->middleware(['auth', 'permission:manage orders'])
+    ->name('orders.pick-ticket');
+
 // Age verification routes
 Route::middleware('guest')->group(function () {
     Route::get('/verify-age', [\App\Http\Controllers\AgeVerificationController::class, 'show'])

@@ -259,6 +259,13 @@
                                                 <span class="text-red-700">Cancelled</span>
                                             @endif
                                         </p>
+                                        <p><span class="font-medium">Delivery:</span> 
+                                            @if((is_array($order) ? ($order['delivery_type'] ?? 'pickup') : ($order->delivery_type ?? 'pickup')) === \App\Models\Order::DELIVERY_TYPE_PICKUP)
+                                                <span class="text-blue-700">Pickup</span>
+                                            @elseif((is_array($order) ? ($order['delivery_type'] ?? 'pickup') : ($order->delivery_type ?? 'pickup')) === \App\Models\Order::DELIVERY_TYPE_DELIVERY)
+                                                <span class="text-purple-700">Delivery</span>
+                                            @endif
+                                        </p>
                                         <p><span class="font-medium">Items:</span> {{ is_array($order) && isset($order['items']) ? count($order['items']) : (is_object($order) && method_exists($order, 'getTotalItems') ? $order->getTotalItems() : (is_object($order) ? $order->items()->count() : 'N/A')) }}</p>
                                         <p><span class="font-medium">Total:</span> ${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</p>
                                     </div>
@@ -297,18 +304,35 @@
                                 <!-- Actions -->
                                 <div class="bg-gray-50 rounded-lg p-3 flex flex-col sm:justify-between">
                                     <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Actions</h4>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-auto">
-                                        <!-- View Details Button -->
-                                        <button 
-                                            onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ is_array($order) ? $order['id'] : $order->id }} })" 
-                                            class="sm:col-span-2 inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            View Full Details
-                                        </button>
+                                    <div class="grid grid-cols-1 gap-2 mt-auto">
+                                            <!-- View Details Button -->
+                                            <button 
+                                                onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ is_array($order) ? $order['id'] : $order->id }} })" 
+                                                class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                Details
+                                            </button>
+                                            
+                                            <!-- Pick Ticket Button (Admin Only) -->
+                                            @can('manage orders')
+                                                <a 
+                                                    href="{{ route('orders.pick-ticket', is_array($order) ? $order['id'] : $order->id) }}" 
+                                                    target="_blank"
+                                                    class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                    </svg>
+                                                    Pick Ticket
+                                                </a>
+                                            @else
+                                                <div></div> <!-- Empty div to maintain grid layout -->
+                                            @endcan
+                                        </div>
                                         
                                         @if($isAdmin && (is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
                                             @can('manage orders')

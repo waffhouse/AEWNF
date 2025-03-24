@@ -47,6 +47,17 @@
                                     <p><span class="font-medium">Date:</span> @formatdate($selectedOrder->created_at)</p>
                                     <p><span class="font-medium">Total:</span> ${{ number_format($selectedOrder->total, 2) }}</p>
                                     <p><span class="font-medium">Items:</span> {{ $selectedOrder->getTotalItems() }}</p>
+                                    <p><span class="font-medium">Delivery:</span> 
+                                        @if($selectedOrder->delivery_type === \App\Models\Order::DELIVERY_TYPE_PICKUP)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                Pickup
+                                            </span>
+                                        @elseif($selectedOrder->delivery_type === \App\Models\Order::DELIVERY_TYPE_DELIVERY)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                Delivery
+                                            </span>
+                                        @endif
+                                    </p>
                                     <p><span class="font-medium">Status:</span> 
                                         @if($selectedOrder->status === \App\Models\Order::STATUS_PENDING)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">

@@ -17,6 +17,7 @@ class CartPage extends Component
     public $notes = '';
     public $viewingOrderDetails = false;
     public $selectedOrder = null;
+    public $deliveryType = 'pickup';
     
     protected OrderService $orderService;
     
@@ -191,7 +192,7 @@ class CartPage extends Component
         
         try {
             // Use OrderService to create the order
-            $order = $this->orderService->createOrder(Auth::user(), $notes);
+            $order = $this->orderService->createOrder(Auth::user(), $notes, $this->deliveryType);
             
             // Refresh the cart to show it's now empty
             $this->refreshCart();

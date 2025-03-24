@@ -53,22 +53,37 @@
     @if($itemCount > 0)
         <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 shadow-lg z-10">
             <div class="container mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
                     <div class="text-sm">
                         <div class="font-bold">Total: ${{ number_format($total, 2) }}</div>
                         <div class="text-xs text-gray-600">{{ $itemCount }} item(s)</div>
                     </div>
-                    <button 
-                        id="checkout-button"
-                        type="button"
-                        wire:click="checkout"
-                        wire:loading.attr="disabled"
-                        wire:confirm="Are you sure you want to place this order?"
-                        class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center justify-center"
-                    >
-                        <span wire:loading.remove wire:target="checkout">Place Order</span>
-                        <span wire:loading wire:target="checkout">Processing...</span>
-                    </button>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <!-- Delivery Type Selection -->
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center">
+                                <input wire:model="deliveryType" id="pickup" type="radio" value="pickup" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <label for="pickup" class="ml-2 block text-sm font-medium text-gray-700">Pickup</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input wire:model="deliveryType" id="delivery" type="radio" value="delivery" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300">
+                                <label for="delivery" class="ml-2 block text-sm font-medium text-gray-700">Delivery</label>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            id="checkout-button"
+                            type="button"
+                            wire:click="checkout"
+                            wire:loading.attr="disabled"
+                            wire:confirm="Are you sure you want to place this order?"
+                            class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center justify-center"
+                        >
+                            <span wire:loading.remove wire:target="checkout">Place Order</span>
+                            <span wire:loading wire:target="checkout">Processing...</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

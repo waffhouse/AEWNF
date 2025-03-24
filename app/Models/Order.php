@@ -21,6 +21,7 @@ class Order extends Model
         'total',
         'status',
         'notes',
+        'delivery_type',
     ];
 
     /**
@@ -38,6 +39,12 @@ class Order extends Model
     const STATUS_PENDING = 'pending';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
+    
+    /**
+     * Delivery types
+     */
+    const DELIVERY_TYPE_PICKUP = 'pickup';
+    const DELIVERY_TYPE_DELIVERY = 'delivery';
 
     /**
      * Get the user that owns the order.

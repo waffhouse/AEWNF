@@ -29,12 +29,17 @@ class OrderService
      * @return Order|false The created order or false if failed
      * @throws \Exception If an error occurs during order creation
      */
-    public function createOrder(User $user, ?string $notes = null): Order|false
+    public function createOrder(User $user, ?string $notes = null, string $deliveryType = 'pickup'): Order|false
     {
         // Ensure the user has a cart
         $cart = $user->cart;
         if (!$cart || $cart->items()->count() === 0) {
             throw new \Exception('Cart is empty');
+        }
+        
+        // Validate delivery type
+        if (!in_array($deliveryType, [Order::DELIVERY_TYPE_PICKUP, Order::DELIVERY_TYPE_DELIVERY])) {
+            $deliveryType = Order::DELIVERY_TYPE_PICKUP;
         }
         
         // Begin a database transaction
@@ -49,6 +54,7 @@ class OrderService
                 'total' => $cart->getTotal(),
                 'status' => Order::STATUS_PENDING,
                 'notes' => $notes,
+                'delivery_type' => $deliveryType,
             ]);
             
             // Add cart items to the order

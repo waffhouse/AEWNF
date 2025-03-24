@@ -5,7 +5,6 @@
 - **All-in-One Dev**: `composer run dev` (runs server, queue, logs, and vite concurrently)
 - **Asset Compilation**: `npm run dev` (development) or `npm run build` (production)
 - **Code Linting**: `./vendor/bin/pint` (Laravel Pint for PSR-12 formatting)
-- **Type Checking**: `php artisan dusk:check` (if available)
 - **Clear Cache**: `php artisan cache:clear && php artisan view:clear && php artisan route:clear`
 - **Debug Mode**: Set `APP_DEBUG=true` in .env for detailed error messages
 
@@ -15,6 +14,7 @@
 - **Test Specific File**: `php artisan test tests/Feature/Auth/RegistrationTest.php`
 - **Test Specific Method**: `php artisan test tests/Feature/Auth/RegistrationTest.php::test_new_users_can_register`
 - **With Coverage**: `php artisan test --coverage`
+- **Setup Test Data**: Use `seedTestDatabase()` method from TestCase for standard test data seeding
 
 ## Code Style Guidelines
 - **PHP Standard**: PSR-12 (enforced by Laravel Pint)
@@ -25,28 +25,15 @@
 - **Imports**: Group by type (PHP core, Laravel, third-party, App), alphabetical within groups
 - **Models**: Use typed properties, define relationships, casts, and fillable properties
 - **Error Handling**: Use try/catch with appropriate logging, never expose exceptions to users
-- **Permission Enforcement**: Implement at component methods, render methods, blade templates, and router middleware
-- **UI Components**: Follow existing patterns for modals, tables, cards, and responsive designs
+- **Permission Enforcement**: Implement at component methods, render methods, and router middleware
 - **Livewire Components**: Use form validation traits and appropriate lifecycle hooks
+- **Testing**: Use custom assertions `assertSeeLivewire` and `assertSeeVolt` for component testing
 
-## Styling Guide
-- **Color Palette**: The project uses a customized Tailwind configuration
-  - Primary accent colors: Use `text-red-500` and `bg-red-500` for main accent elements
-  - Use `bg-gray-900` for dark backgrounds (headers, footers)
-  - Use `text-gray-100` for light text on dark backgrounds
-- **Components**:
-  - Modals: Use the standard modal structure with a solid color header
-  - Cards: Use `rounded-lg`, `shadow-sm`, and `border border-gray-200` for consistency
-  - Buttons: Use `rounded-md` with appropriate color classes based on action type
-  - Accordions: Use Alpine.js with parent state management (`expandedId` pattern) to ensure only one accordion is open at a time
-- **Responsive Design**:
-  - Always implement both desktop and mobile views
-  - Use accordion patterns for complex data display on smaller screens
-  - Card-based layouts for mobile, table-based layouts for desktop
-- **Interactive Elements**:
-  - Use Alpine.js for client-side interactions
-  - Reset accordion states after status changes with `@order-status-updated.window` listener
-  - Implement "click outside" behavior for dropdowns and modals
+## UI/UX Guidelines
+- **Color Palette**: Primary: `text-red-500`/`bg-red-500`, Dark: `bg-gray-900`, Light text: `text-gray-100`
+- **Components**: Consistent styling for cards (`rounded-lg shadow-sm border-gray-200`), modals, buttons
+- **Responsive Design**: Always implement mobile (cards) and desktop (tables) views
+- **Interactive Elements**: Use Alpine.js for client-side interactions and parent state management
 
 ## Database Commands
 - **Run Migrations**: `php artisan migrate` (add `--seed` to seed)
