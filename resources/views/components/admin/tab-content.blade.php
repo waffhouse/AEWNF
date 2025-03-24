@@ -1,5 +1,7 @@
 @props(['id'])
 
 <div x-show="activeTab === '{{ $id }}'" {{ $attributes }} style="display: none;">
-    {{ $slot }}
+    <div>
+        {{ $slot }}
+    </div>
 </div>

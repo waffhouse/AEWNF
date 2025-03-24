@@ -72,8 +72,9 @@
             :search="$search ?? ''"
         />
     </div>
-    
-    @if($viewingOrderDetails && $selectedOrder)
-        <x-order-details-modal :order="$selectedOrder" />
-    @endif
 </div>
+
+<!-- Place modal outside main component div to avoid multiple root elements issue -->
+@if($viewingOrderDetails && $selectedOrder)
+    <x-order-details-modal :order="$selectedOrder" />
+@endif
