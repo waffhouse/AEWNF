@@ -13,7 +13,7 @@ Route::get('/', function () {
     
     // Show unified catalog for guests rather than login page
     return redirect()->route('inventory.catalog');
-});
+})->middleware('verify.age');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -65,9 +65,18 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
 
 // NetSuite inventory views are now handled through the admin dashboard
 
+// Age verification routes
+Route::middleware('guest')->group(function () {
+    Route::get('/verify-age', [\App\Http\Controllers\AgeVerificationController::class, 'show'])
+        ->name('verify.age');
+    Route::post('/verify-age', [\App\Http\Controllers\AgeVerificationController::class, 'verify'])
+        ->name('verify.age.submit');
+});
+
 // Unified Catalog - accessible to both guests and authenticated users
 // The component will handle different layouts and permission-based content
 Route::get('/catalog', \App\Livewire\Inventory\Catalog::class)
+    ->middleware('verify.age')
     ->name('inventory.catalog');
 
 require __DIR__.'/auth.php';
