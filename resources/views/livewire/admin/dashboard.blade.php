@@ -158,8 +158,8 @@
                     <!-- Orders Tab Panel -->
                     @if($canManageOrders)
                     <x-admin.tab-content id="orders">
-                        <div>
-                            @livewire('admin.orders.order-management')
+                        <div id="orders-tab-wrapper">
+                            @livewire('admin.orders.order-management', [], key('orders-management-'.now()->timestamp))
                         </div>
                     </x-admin.tab-content>
                     @endif
