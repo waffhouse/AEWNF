@@ -1,8 +1,9 @@
 <div>
     <!-- Alpine.js Component Definition -->
-    <script>
-        // Ensure the accordion component is available immediately
-        if (window.Alpine) {
+    <div class="hidden" x-data>
+        <script>
+            // Ensure the accordion component is available immediately
+            if (window.Alpine) {
             window.Alpine.data('ordersAccordion', () => ({
                 expandedId: null,
                 initialized: false,
@@ -120,7 +121,8 @@
                 }
             }));
         });
-    </script>
+        </script>
+    </div>
 
     @if(empty($orders) || (is_countable($orders) && count($orders) === 0))
         <div class="text-center py-12 bg-gray-50 rounded-lg">
@@ -182,7 +184,7 @@
             @foreach($orders as $order)
                 @php $orderId = is_array($order) ? $order['id'] : $order->id; @endphp
                 <div 
-                    wire:key="order-item-{{ $orderId }}"
+                    wire:key="order-item-{{ $orderId }}-{{ time() }}"
                     class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
                     <!-- Order Header (Always Visible) -->

@@ -120,49 +120,59 @@
                 <!-- Tab Contents using Modular Components -->
                 <div>
                     <!-- Users Tab Panel -->
-                    @if($canManageUsers)
-                    <x-admin.tab-content id="users">
-                        <div>
-                            <livewire:admin.users.user-management :wire:key="'user-management-component'" />
-                        </div>
-                    </x-admin.tab-content>
-                    @endif
+                    <div wire:key="users-tab-panel-container">
+                        @if($canManageUsers)
+                        <x-admin.tab-content id="users">
+                            <div id="users-tab-wrapper">
+                                @livewire('admin.users.user-management', [], key('users-management-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
                     
                     <!-- Roles Tab Panel -->
-                    @if($canManageRoles)
-                    <x-admin.tab-content id="roles">
-                        <div>
-                            <livewire:admin.roles.role-management :wire:key="'role-management-component'" />
-                        </div>
-                    </x-admin.tab-content>
-                    @endif
+                    <div wire:key="roles-tab-panel-container">
+                        @if($canManageRoles)
+                        <x-admin.tab-content id="roles">
+                            <div id="roles-tab-wrapper">
+                                @livewire('admin.roles.role-management', [], key('roles-management-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
                     
                     <!-- Permissions Tab Panel -->
-                    @if($canManagePermissions)
-                    <x-admin.tab-content id="permissions">
-                        <div>
-                            <livewire:admin.permissions.permission-management :wire:key="'permission-management-component'" />
-                        </div>
-                    </x-admin.tab-content>
-                    @endif
+                    <div wire:key="permissions-tab-panel-container">
+                        @if($canManagePermissions)
+                        <x-admin.tab-content id="permissions">
+                            <div id="permissions-tab-wrapper">
+                                @livewire('admin.permissions.permission-management', [], key('permissions-management-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
 
                     <!-- Inventory Sync Tab Panel -->
-                    @if($canSyncInventory)
-                    <x-admin.tab-content id="inventory-sync">
-                        <div>
-                            <livewire:admin.inventory.inventory-sync :wire:key="'inventory-sync-component'" />
-                        </div>
-                    </x-admin.tab-content>
-                    @endif
+                    <div wire:key="inventory-sync-tab-panel-container">
+                        @if($canSyncInventory)
+                        <x-admin.tab-content id="inventory-sync">
+                            <div id="inventory-sync-tab-wrapper">
+                                @livewire('admin.inventory.inventory-sync', [], key('inventory-sync-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
 
                     <!-- Orders Tab Panel -->
-                    @if($canManageOrders)
-                    <x-admin.tab-content id="orders">
-                        <div id="orders-tab-wrapper">
-                            @livewire('admin.orders.order-management', [], key('orders-management-'.now()->timestamp))
-                        </div>
-                    </x-admin.tab-content>
-                    @endif
+                    <div wire:key="orders-tab-panel-container">
+                        @if($canManageOrders)
+                        <x-admin.tab-content id="orders">
+                            <div id="orders-tab-wrapper">
+                                @livewire('admin.orders.order-management', [], key('orders-management-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

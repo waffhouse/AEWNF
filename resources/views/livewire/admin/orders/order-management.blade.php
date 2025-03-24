@@ -74,7 +74,9 @@
     </div>
     
     <!-- Place modal inside main component div to prevent multiple root elements issue -->
-    @if($viewingOrderDetails && $selectedOrder)
-        <x-order-details-modal :order="$selectedOrder" />
-    @endif
+    <div wire:key="order-details-modal-container">
+        @if($viewingOrderDetails && $selectedOrder)
+            <x-order-details-modal :order="$selectedOrder" />
+        @endif
+    </div>
 </div>
