@@ -150,7 +150,7 @@
                     <!-- Orders Tab Panel -->
                     @if($canManageOrders)
                     <x-admin.tab-content id="orders">
-                        <livewire:admin.orders.order-management :wire:key="'order-management-component'" />
+                        @livewire('admin.orders.order-management')
                     </x-admin.tab-content>
                     @endif
                 </div>

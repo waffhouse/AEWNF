@@ -1,4 +1,4 @@
-<div>
+<div class="order-management-component">
     <!-- Scroll to top button -->
     <x-scroll-to-top />
     
