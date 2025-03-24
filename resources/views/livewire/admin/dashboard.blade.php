@@ -150,7 +150,8 @@
                     <!-- Orders Tab Panel -->
                     @if($canManageOrders)
                     <x-admin.tab-content id="orders">
-                        <livewire:admin.orders.order-management />
+                        {{-- Use @livewire directive instead of livewire: tag to prevent double parsing --}}
+                        @livewire('admin.orders.order-management')
                     </x-admin.tab-content>
                     @endif
                 </div>
