@@ -182,6 +182,7 @@
             @foreach($orders as $order)
                 @php $orderId = is_array($order) ? $order['id'] : $order->id; @endphp
                 <div 
+                    wire:key="order-item-{{ $orderId }}"
                     class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
                     <!-- Order Header (Always Visible) -->
