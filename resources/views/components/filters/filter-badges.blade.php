@@ -5,40 +5,54 @@
 
 <div {{ $attributes->merge(['class' => 'flex flex-wrap gap-2 items-center']) }}>
     @if(count($filters) > 0)
-        <span class="text-sm font-medium text-gray-600">Active filters:</span>
+        <span class="text-sm font-medium text-gray-700">Active Filters:</span>
         
         <div class="flex flex-wrap gap-2">
             @foreach($filters as $filter)
                 @if($filter['active'])
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-800">
-                        {{ $filter['label'] }}: {{ $filter['value'] }}
+                    @php
+                        // Determine color based on filter label
+                        $bgColor = match($filter['label']) {
+                            'Search' => 'bg-blue-100 hover:bg-blue-200 text-blue-800',
+                            'Role' => 'bg-green-100 hover:bg-green-200 text-green-800',
+                            default => 'bg-purple-100 hover:bg-purple-200 text-purple-800'
+                        };
                         
-                        @if($filter['removable'] ?? true)
-                            <button 
-                                wire:click="{{ $filter['removeEvent'] }}"
-                                type="button" 
-                                class="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-600 focus:outline-none focus:bg-blue-500 focus:text-white"
-                            >
-                                <span class="sr-only">Remove {{ $filter['label'] }} filter</span>
-                                <svg class="h-2.5 w-2.5" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                                    <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
-                                </svg>
-                            </button>
-                        @endif
-                    </span>
+                        $iconColor = match($filter['label']) {
+                            'Search' => 'text-blue-500',
+                            'Role' => 'text-green-500',
+                            default => 'text-purple-500'
+                        };
+                    @endphp
+                    
+                    <button 
+                        type="button" 
+                        wire:click="{{ $filter['removeEvent'] }}"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $bgColor }} transition-colors focus:outline-none"
+                        aria-label="Remove {{ $filter['label'] }} filter"
+                    >
+                        {{ $filter['label'] }}: {{ $filter['value'] }}
+                        <span class="ml-1 {{ $iconColor }}">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </span>
+                    </button>
                 @endif
             @endforeach
             
-            <button 
-                wire:click="{{ $resetAllEvent }}"
-                type="button" 
-                class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Clear all
-            </button>
+            @if(count($filters) > 1)
+                <button 
+                    wire:click="{{ $resetAllEvent }}"
+                    type="button" 
+                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors focus:outline-none"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Clear all
+                </button>
+            @endif
         </div>
     @endif
 </div>
