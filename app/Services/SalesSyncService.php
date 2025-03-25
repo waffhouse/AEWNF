@@ -41,7 +41,10 @@ class SalesSyncService
                 return $this->stats;
             }
             
-            $this->stats['total'] = count($salesData['data']);
+            // Get total from the response if available
+            $this->stats['total'] = $salesData['totalTransactions'] ?? count($salesData['data']);
+            $this->stats['netsuite_processed'] = $salesData['totalRecordsProcessed'] ?? 0;
+            $this->stats['netsuite_pages'] = $salesData['totalPages'] ?? 1;
             
             // Process sales in a transaction
             DB::beginTransaction();
@@ -70,6 +73,8 @@ class SalesSyncService
             'updated' => 0,
             'failed' => 0,
             'total' => 0,
+            'netsuite_processed' => 0,
+            'netsuite_pages' => 0,
         ];
     }
     
@@ -99,9 +104,11 @@ class SalesSyncService
             throw new Exception('Error from NetSuite: ' . ($result['message'] ?? 'Unknown error'));
         }
         
+        // Log detailed stats from the updated RESTlet response
         Log::info("Retrieved sales data from NetSuite", [
             'total_pages' => $result['totalPages'] ?? 0,
-            'current_page' => $result['currentPage'] ?? 0,
+            'total_transactions' => $result['totalTransactions'] ?? count($result['data'] ?? []),
+            'total_records_processed' => $result['totalRecordsProcessed'] ?? 0,
             'transactions' => count($result['data'] ?? [])
         ]);
         
@@ -141,10 +148,14 @@ class SalesSyncService
             'lines_count' => count($transaction['lines'] ?? [])
         ]);
         
-        // Calculate the total amount from line items
-        $totalAmount = 0;
-        foreach ($transaction['lines'] as $line) {
-            $totalAmount += $line['amount'] ?? 0;
+        // Use totalAmount from the response if available, otherwise calculate from line items
+        $totalAmount = $transaction['totalAmount'] ?? 0;
+        
+        // If totalAmount is not in the response or is zero, calculate from line items
+        if ($totalAmount == 0 && !empty($transaction['lines'])) {
+            foreach ($transaction['lines'] as $line) {
+                $totalAmount += $line['amount'] ?? 0;
+            }
         }
         
         // Prepare sale data
@@ -218,5 +229,67 @@ class SalesSyncService
         
         $this->stats['failed'] = $this->stats['total'];
         $this->stats['error'] = $e->getMessage();
+    }
+    
+    /**
+     * Clear all sales data from the database.
+     *
+     * @return array Statistics about the cleared data
+     */
+    public function clearAllSalesData(): array
+    {
+        Log::info('Clearing all sales data from database');
+        
+        $startTime = microtime(true);
+        
+        try {
+            // Try getting a sale record to verify model is correctly configured
+            $sampleSale = \App\Models\Sale::first();
+            Log::info('Sample sale check', ['found' => $sampleSale !== null]);
+            
+            // Count records before deletion
+            $salesCount = \App\Models\Sale::count();
+            $itemsCount = \App\Models\SaleItem::count();
+            
+            Log::info('Record counts before deletion', [
+                'sales_count' => $salesCount,
+                'items_count' => $itemsCount
+            ]);
+            
+            // Try the raw SQL approach without transaction
+            $itemsDeleted = DB::delete('DELETE FROM sale_items');
+            Log::info('Sale items deleted (raw SQL)', ['count' => $itemsDeleted]);
+            
+            $salesDeleted = DB::delete('DELETE FROM sales');
+            Log::info('Sales deleted (raw SQL)', ['count' => $salesDeleted]);
+            
+            $duration = round(microtime(true) - $startTime, 2);
+            
+            Log::info('Sales data cleared successfully', [
+                'sales_deleted' => $salesCount,
+                'items_deleted' => $itemsCount,
+                'duration' => $duration
+            ]);
+            
+            return [
+                'success' => true,
+                'sales_deleted' => $salesCount,
+                'items_deleted' => $itemsCount,
+                'duration' => $duration . ' seconds'
+            ];
+            
+        } catch (Throwable $e) {
+            DB::rollBack();
+            
+            Log::error('Error clearing sales data', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return [
+                'success' => false,
+                'error' => 'Failed to clear sales data: ' . $e->getMessage()
+            ];
+        }
     }
 }

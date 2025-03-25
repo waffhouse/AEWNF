@@ -12,12 +12,15 @@ class SalesSync extends Component
 {
     use AdminAuthorization;
     
+    protected $listeners = ['clearData' => 'directClearData'];
+    
     public $isLoading = false;
     public $results = null;
     public $error = null;
+    public $lastSyncTime = null;
+    public $lastSyncStats = null;
     
     public $options = [
-        'pageIndex' => 0,
         'pageSize' => 1000,
         'date' => null,
     ];
@@ -25,6 +28,50 @@ class SalesSync extends Component
     public function mount()
     {
         $this->authorize('sync netsuite sales data');
+        $this->loadLastSyncInfo();
+    }
+    
+    /**
+     * Load information about the last sync operation
+     */
+    public function loadLastSyncInfo()
+    {
+        // Get the most recently synced sale
+        $lastSyncedSale = \App\Models\Sale::orderBy('last_synced_at', 'desc')->first();
+        
+        if ($lastSyncedSale && $lastSyncedSale->last_synced_at) {
+            $this->lastSyncTime = $lastSyncedSale->last_synced_at->format('Y-m-d H:i:s');
+            
+            // Calculate time since last sync
+            $timeSinceSync = $lastSyncedSale->last_synced_at->diffForHumans();
+            
+            // Get basic counts about the sales data
+            $totalSales = \App\Models\Sale::count() ?: 0;
+            
+            // Get counts by transaction type
+            $typeStats = \App\Models\Sale::select('type')
+                ->selectRaw('COUNT(*) as count')
+                ->selectRaw('SUM(total_amount) as total_amount')
+                ->groupBy('type')
+                ->get()
+                ->keyBy('type')
+                ->toArray();
+            
+            // Get count of items
+            $totalItems = \App\Models\SaleItem::count() ?: 0;
+            
+            // Compile all stats
+            $this->lastSyncStats = [
+                'total_sales' => $totalSales,
+                'total_items' => $totalItems,
+                'type_stats' => $typeStats,
+                'time_since_sync' => $timeSinceSync
+            ];
+        } else {
+            // Handle case where no sync has occurred yet
+            $this->lastSyncTime = null;
+            $this->lastSyncStats = null;
+        }
     }
     
     public function render()
@@ -49,19 +96,21 @@ class SalesSync extends Component
             }
             
             // Convert string values to integers
-            $this->options['pageIndex'] = (int) $this->options['pageIndex'];
             $this->options['pageSize'] = (int) $this->options['pageSize'];
             
-            $startTime = now();
-            $this->results = $salesSyncService->syncSales($this->options);
-            $duration = now()->diffInSeconds($startTime);
+            // Process the results consistently
+            $syncResults = $salesSyncService->syncSales($this->options);
+            $this->results = $syncResults;
             
-            $this->results['duration'] = "{$duration} seconds";
+            // Refresh the last sync stats
+            $this->loadLastSyncInfo();
             
             $this->dispatch('salesSyncCompleted', [
                 'success' => true,
                 'message' => 'Sales data sync completed successfully.',
             ]);
+            
+            // No automatic refresh - users will refresh manually
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             
@@ -74,9 +123,61 @@ class SalesSync extends Component
         }
     }
     
-    #[On('refreshSalesList')]
-    public function refreshList()
+    /**
+     * Clear all sales data method
+     */
+    public function directClearData(SalesSyncService $salesSyncService)
     {
-        $this->dispatch('refreshSalesList');
+        $this->authorize('sync netsuite sales data');
+        
+        $this->isLoading = true;
+        $this->results = null;
+        $this->error = null;
+        
+        \Illuminate\Support\Facades\Log::info('Direct clear method triggered');
+        
+        try {
+            $result = $salesSyncService->clearAllSalesData();
+            
+            if ($result['success']) {
+                $this->results = [
+                    'total' => $result['sales_deleted'],
+                    'created' => 0,
+                    'updated' => 0,
+                    'deleted' => $result['sales_deleted'],
+                    'items_deleted' => $result['items_deleted'],
+                    'duration' => $result['duration']
+                ];
+                
+                // Refresh the last sync stats
+                $this->loadLastSyncInfo();
+                
+                $this->dispatch('salesSyncCompleted', [
+                    'success' => true,
+                    'message' => 'Sales data cleared successfully.',
+                ]);
+                
+                // No automatic refresh - users will refresh manually
+            } else {
+                $this->error = $result['error'] ?? 'Unknown error clearing sales data';
+                $this->dispatch('salesSyncCompleted', [
+                    'success' => false,
+                    'message' => $this->error,
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+            $this->dispatch('salesSyncCompleted', [
+                'success' => false,
+                'message' => 'Failed to clear sales data: ' . $e->getMessage(),
+            ]);
+        } finally {
+            $this->isLoading = false;
+        }
     }
+    
+    
+    // This method is no longer needed as we dispatch the event directly
+    // The SalesList component will handle the event
 }

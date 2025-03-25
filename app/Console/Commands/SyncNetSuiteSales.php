@@ -14,8 +14,7 @@ class SyncNetSuiteSales extends Command
      * @var string
      */
     protected $signature = 'netsuite:sync-sales
-                           {--page= : Page number to retrieve}
-                           {--size= : Page size}
+                           {--size= : Items per page in NetSuite (internal)}
                            {--date= : Transaction date to filter by (YYYY-MM-DD)}';
 
     /**
@@ -60,10 +59,6 @@ class SyncNetSuiteSales extends Command
     {
         $options = [];
         
-        if ($this->option('page') !== null) {
-            $options['pageIndex'] = (int) $this->option('page');
-        }
-        
         if ($this->option('size') !== null) {
             $options['pageSize'] = (int) $this->option('size');
         }
@@ -82,15 +77,26 @@ class SyncNetSuiteSales extends Command
     {
         $this->info('NetSuite sales sync completed in ' . $duration . ' seconds');
         
+        $tableRows = [
+            ['Total transactions processed', $results['total']],
+            ['Created', $results['created']],
+            ['Updated', $results['updated']],
+            ['Failed', $results['failed']],
+            ['Duration', $results['duration'] ?? "$duration seconds"],
+        ];
+        
+        // Add NetSuite-specific metrics if available
+        if (isset($results['netsuite_pages'])) {
+            $tableRows[] = ['NetSuite Pages', $results['netsuite_pages']];
+        }
+        
+        if (isset($results['netsuite_processed'])) {
+            $tableRows[] = ['NetSuite Records Processed', $results['netsuite_processed']];
+        }
+        
         $this->table(
             ['Metric', 'Value'],
-            [
-                ['Total transactions processed', $results['total']],
-                ['Created', $results['created']],
-                ['Updated', $results['updated']],
-                ['Failed', $results['failed']],
-                ['Duration', $results['duration'] ?? "$duration seconds"],
-            ]
+            $tableRows
         );
         
         if (isset($results['error'])) {

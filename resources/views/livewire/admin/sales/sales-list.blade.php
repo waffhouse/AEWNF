@@ -1,7 +1,13 @@
 <div
     x-data="{
-        observe() {
-            const observer = new IntersectionObserver((entries) => {
+        observer: null,
+        setupObserver() {
+            // Clean up any existing observer
+            if (this.observer) {
+                this.observer.disconnect();
+            }
+            
+            this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         @this.loadMoreSales()
@@ -11,12 +17,17 @@
                 root: null,
                 rootMargin: '0px',
                 threshold: 0.1
-            })
+            });
             
-            observer.observe(this.$el.querySelector('#infinite-scroll-trigger'))
+            // Find the trigger element and observe it if it exists
+            const trigger = this.$el.querySelector('#infinite-scroll-trigger');
+            if (trigger) {
+                this.observer.observe(trigger);
+            }
         }
     }"
-    x-init="observe"
+    x-init="setupObserver()"
+    x-on:refreshed.window="setTimeout(() => setupObserver(), 100)"
 >
     <div class="px-4 sm:px-6 lg:px-8 py-6">
         <div class="mb-6">

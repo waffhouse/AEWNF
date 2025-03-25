@@ -5,12 +5,8 @@
             <p class="mt-2 text-sm text-gray-700">View and manage sales transactions from NetSuite</p>
         </div>
         
-        <div class="mb-8">
-            <livewire:admin.sales.sales-sync />
-        </div>
-        
         <div>
-            <livewire:admin.sales.sales-list />
+            <livewire:admin.sales.sales-sync />
         </div>
     </div>
 </div>

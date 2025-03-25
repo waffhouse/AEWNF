@@ -57,6 +57,13 @@ class Dashboard extends Component
             'icon' => 'shopping-bag',
             'color' => 'red',
             'countModel' => \App\Models\Order::class
+        ],
+        'sales' => [
+            'name' => 'Sales',
+            'permissions' => ['view netsuite sales data', 'sync netsuite sales data'],
+            'icon' => 'chart-bar',
+            'color' => 'teal',
+            'countModel' => null
         ]
     ];
     
@@ -77,7 +84,7 @@ class Dashboard extends Component
         $user = auth()->user();
         
         // Priority order for tabs
-        $priorities = ['orders', 'users', 'inventory-sync', 'roles', 'permissions'];
+        $priorities = ['orders', 'sales', 'users', 'inventory-sync', 'roles', 'permissions'];
         
         foreach ($priorities as $tabId) {
             if ($this->userCanAccessTab($tabId)) {
@@ -171,6 +178,7 @@ class Dashboard extends Component
             'canManagePermissions' => auth()->user()->hasPermissionTo('manage permissions'),
             'canSyncInventory' => auth()->user()->hasPermissionTo('sync inventory'),
             'canManageOrders' => auth()->user()->hasPermissionTo('manage orders') || auth()->user()->hasPermissionTo('view all orders'),
+            'canManageSales' => auth()->user()->hasPermissionTo('view netsuite sales data') || auth()->user()->hasPermissionTo('sync netsuite sales data'),
         ])->layout('layouts.app');
     }
 }

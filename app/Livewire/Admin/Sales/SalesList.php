@@ -16,6 +16,8 @@ class SalesList extends Component
 {
     use AdminAuthorization, Filterable, InfiniteScrollable;
     
+    // No listeners needed - manual refresh only
+    
     public $search = '';
     // Note: $sortField and $sortDirection are already defined in InfiniteScrollable trait
     // We'll override them in mount() instead
@@ -222,5 +224,23 @@ class SalesList extends Component
             ->groupBy('type');
             
         return $query->get();
+    }
+    
+    /**
+     * Refresh the sales list when data changes
+     */
+    public function refreshList()
+    {
+        \Illuminate\Support\Facades\Log::info('SalesList refreshList called - reloading data');
+        
+        // Reset the items collection completely
+        $this->items = [];
+        $this->loadedCount = 0;
+        $this->hasMorePages = true;
+        
+        // Load fresh data
+        $this->loadMore($this->getBaseQuery());
+        
+        // No need to dispatch additional events that might cause loops
     }
 }

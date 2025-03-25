@@ -46,9 +46,11 @@
                             </h2>
                             <p class="text-sm text-gray-600 mt-1">
                                 @if(auth()->user()->hasPermissionTo('access admin dashboard'))
-                                    Manage users, roles, permissions, inventory synchronization, and orders.
+                                    Manage users, roles, permissions, inventory synchronization, sales data, and orders.
                                 @elseif(auth()->user()->hasPermissionTo('manage orders') || auth()->user()->hasPermissionTo('view all orders'))
                                     Manage customer orders and track order history.
+                                @elseif(auth()->user()->hasPermissionTo('view netsuite sales data'))
+                                    View and manage sales transaction data.
                                 @else
                                     Access admin features based on your permissions.
                                 @endif
@@ -169,6 +171,17 @@
                         <x-admin.tab-content id="orders">
                             <div id="orders-tab-wrapper">
                                 @livewire('admin.orders.order-management', [], key('orders-management-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
+                    
+                    <!-- Sales Tab Panel -->
+                    <div wire:key="sales-tab-panel-container">
+                        @if($canManageSales)
+                        <x-admin.tab-content id="sales">
+                            <div id="sales-tab-wrapper">
+                                @livewire('admin.sales.sales-dashboard', [], key('sales-dashboard-'.time()))
                             </div>
                         </x-admin.tab-content>
                         @endif
