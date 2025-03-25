@@ -78,11 +78,23 @@ class OrderManagement extends Component
     }
     
     /**
+     * Flag to prevent race conditions
+     */
+    public $isProcessingStatusUpdate = false;
+    
+    /**
      * Listen for event to update order status
      */
     #[On('updateStatus')]
     public function handleUpdateStatus($orderId = null, $status = null, $data = null)
     {
+        // Prevent multiple concurrent status updates
+        if ($this->isProcessingStatusUpdate) {
+            return;
+        }
+        
+        $this->isProcessingStatusUpdate = true;
+        
         // Handle different parameter formats:
         // 1. Directly passed orderId and status
         // 2. Array format with indices [0, 1]
@@ -115,14 +127,15 @@ class OrderManagement extends Component
         }
         
         if (!$orderId || !$status) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Invalid order data provided'
-            ]);
+            // Notification removed
+            $this->isProcessingStatusUpdate = false;
             return;
         }
         
         $success = $this->updateStatus($orderId, $status);
+        
+        // Reset processing flag after operation completes
+        $this->isProcessingStatusUpdate = false;
         
         if ($success) {
             // Force a refresh of the orders to reflect the change immediately
@@ -218,6 +231,11 @@ class OrderManagement extends Component
     }
     
     /**
+     * Flag to prevent race conditions with modal
+     */
+    public $isProcessingViewDetails = false;
+    
+    /**
      * View order details
      * 
      * @param int $orderId The ID of the order to view
@@ -225,9 +243,28 @@ class OrderManagement extends Component
     #[On('viewOrderDetails')]
     public function viewOrderDetails($orderId)
     {
+        // Prevent multiple concurrent actions
+        if ($this->isProcessingViewDetails) {
+            return;
+        }
+        
+        $this->isProcessingViewDetails = true;
+        
         $this->selectedOrder = $this->orderService->getOrderById($orderId, ['items.inventory', 'user']);
         $this->viewingOrderDetails = true;
+        
+        // Reset the processing flag after a short delay using JavaScript
+        // This allows time for the DOM to update before accepting new actions
+        $this->js('setTimeout(function() { 
+            // Use proper Livewire 3 syntax for setting properties
+            $wire.set("isProcessingViewDetails", false);
+        }, 500)');
     }
+    
+    /**
+     * Flag to prevent race conditions with modal closing
+     */
+    public $isProcessingCloseDetails = false;
     
     /**
      * Close order details modal
@@ -235,11 +272,24 @@ class OrderManagement extends Component
     #[On('closeOrderDetails')]
     public function closeOrderDetails()
     {
+        // Prevent multiple concurrent actions
+        if ($this->isProcessingCloseDetails) {
+            return;
+        }
+        
+        $this->isProcessingCloseDetails = true;
+        
         // Remove the body lock through inline JavaScript for immediate effect
         $this->js('document.body.classList.remove("overflow-hidden")');
         
         $this->viewingOrderDetails = false;
         $this->selectedOrder = null;
+        
+        // Reset the processing flag after a short delay
+        $this->js('setTimeout(function() {
+            // Use proper Livewire 3 syntax for setting properties
+            $wire.set("isProcessingCloseDetails", false);
+        }, 500)');
     }
     
     /**
@@ -253,17 +303,14 @@ class OrderManagement extends Component
     {
         // Check if user has permission to manage orders
         if (!Auth::user()->can('manage orders')) {
-            $this->dispatch('error', 'You do not have permission to update order status');
+            // Notification removed
             return false;
         }
         
         $success = $this->orderService->updateOrderStatus($orderId, $status, Auth::user());
         
         if ($success) {
-            $this->dispatch('notification', [
-                'type' => 'success',
-                'message' => 'Order status updated successfully'
-            ]);
+            // Notification removed
             
             // Refresh the selected order if we're viewing details
             if ($this->selectedOrder && $this->selectedOrder->id === $orderId) {
@@ -273,10 +320,7 @@ class OrderManagement extends Component
             // Dispatch event to refresh orders
             $this->dispatch('order-status-updated');
         } else {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Failed to update order status'
-            ]);
+            // Notification removed
         }
         
         return $success;

@@ -38,7 +38,7 @@ class OrderDetails extends Component
     {
         // Check if user has permission to manage orders
         if (!Auth::user()->can('manage orders')) {
-            $this->dispatch('error', 'You do not have permission to update order status');
+            // Notification removed
             return;
         }
         
@@ -46,10 +46,7 @@ class OrderDetails extends Component
         $success = $this->orderService->updateOrderStatus($this->order->id, $status, Auth::user());
         
         if ($success) {
-            $this->dispatch('notification', [
-                'type' => 'success',
-                'message' => 'Order status updated successfully'
-            ]);
+            // Notification removed
             
             // Refresh the order details
             $this->order = $this->orderService->getOrderById($this->order->id, ['items.inventory', 'user']);
@@ -57,10 +54,7 @@ class OrderDetails extends Component
             // Dispatch event to refresh orders list
             $this->dispatch('order-status-updated');
         } else {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Failed to update order status'
-            ]);
+            // Notification removed
         }
     }
     

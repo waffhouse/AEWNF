@@ -1,128 +1,4 @@
 <div>
-    <!-- Alpine.js Component Definition -->
-    <div class="hidden" x-data>
-        <script>
-            // Ensure the accordion component is available immediately
-            if (window.Alpine) {
-            window.Alpine.data('ordersAccordion', () => ({
-                expandedId: null,
-                initialized: false,
-                
-                init() {
-                    console.log('Initializing orders accordion');
-                    
-                    // Mark as initialized
-                    this.initialized = true;
-                    
-                    // Force a reset to ensure everything is properly set up
-                    this.$nextTick(() => {
-                        // Ensure this component is fully initialized before watching
-                        this.$watch('expandedId', value => {
-                            console.log('Expanded ID changed to:', value);
-                        });
-                    });
-                    
-                    // Listen for order status updates
-                    if (window.Livewire) {
-                        window.Livewire.on('order-status-updated', () => {
-                            console.log('Order status updated, clearing expandedId');
-                            this.expandedId = null;
-                        });
-                        
-                        window.Livewire.on('ordersUpdated', () => {
-                            console.log('Orders updated, clearing expandedId');
-                            this.expandedId = null;
-                        });
-                    }
-                    
-                    // Listen for navigation-related reinitialization
-                    window.addEventListener('alpine-reinit', () => {
-                        console.log('Alpine reinit detected, ensuring order accordion is initialized');
-                        // Force Alpine to reevaluate this component
-                        if (!this.initialized) {
-                            this.initialized = true;
-                        }
-                        this.$nextTick(() => {
-                            console.log('Component re-evaluated after navigation');
-                        });
-                    });
-                    
-                    // Also handle direct page loads
-                    window.addEventListener('DOMContentLoaded', () => {
-                        console.log('DOMContentLoaded, ensuring order accordion is ready');
-                        this.$nextTick(() => {
-                            console.log('Component checked after DOMContentLoaded');
-                        });
-                    });
-                },
-                
-                toggle(id) {
-                    console.log('Toggle called for ID:', id, 'Current expandedId:', this.expandedId);
-                    this.expandedId = (this.expandedId === id) ? null : id;
-                },
-                
-                isExpanded(id) {
-                    return this.expandedId === id;
-                }
-            }));
-        }
-        
-        // Also register on alpine:init for consistency
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('ordersAccordion', () => ({
-                expandedId: null,
-                initialized: false,
-                
-                init() {
-                    console.log('Initializing orders accordion (via alpine:init)');
-                    
-                    // Mark as initialized
-                    this.initialized = true;
-                    
-                    // Force a reset to ensure everything is properly set up
-                    this.$nextTick(() => {
-                        // Ensure this component is fully initialized before watching
-                        this.$watch('expandedId', value => {
-                            console.log('Expanded ID changed to:', value);
-                        });
-                    });
-                    
-                    // Listen for order status updates
-                    Livewire.on('order-status-updated', () => {
-                        console.log('Order status updated, clearing expandedId');
-                        this.expandedId = null;
-                    });
-                    
-                    Livewire.on('ordersUpdated', () => {
-                        console.log('Orders updated, clearing expandedId');
-                        this.expandedId = null;
-                    });
-                    
-                    // Listen for navigation-related reinitialization
-                    window.addEventListener('alpine-reinit', () => {
-                        console.log('Alpine reinit detected, ensuring order accordion is initialized');
-                        // Force Alpine to reevaluate this component
-                        if (!this.initialized) {
-                            this.initialized = true;
-                        }
-                        this.$nextTick(() => {
-                            console.log('Component re-evaluated after navigation');
-                        });
-                    });
-                },
-                
-                toggle(id) {
-                    console.log('Toggle called for ID:', id, 'Current expandedId:', this.expandedId);
-                    this.expandedId = (this.expandedId === id) ? null : id;
-                },
-                
-                isExpanded(id) {
-                    return this.expandedId === id;
-                }
-            }));
-        });
-        </script>
-    </div>
 
     @if(empty($orders) || (is_countable($orders) && count($orders) === 0))
         <div class="text-center py-12 bg-gray-50 rounded-lg">
@@ -161,213 +37,302 @@
             @endif
         </div>
     @else
-        <!-- Accordion-style Orders List -->
-        <div id="orders-list-accordion" 
-            wire:key="orders-list-{{ count($orders) }}-{{ time() }}"
-            x-data="ordersAccordion()"
-            x-init="
-                $nextTick(() => { 
-                    console.log('Orders accordion fully initialized');
-                    
-                    // Dispatch an event to alert any parent components
-                    window.dispatchEvent(new CustomEvent('orders-accordion-initialized'));
-                    
-                    // Force layout recalculation to ensure Alpine.js bindings are active
-                    setTimeout(() => {
-                        console.log('Delayed initialization check running');
-                        let triggerLayout = document.body.offsetHeight;
-                    }, 100);
-                });
-            "
-            class="space-y-4"
-        >
-            @foreach($orders as $order)
-                @php $orderId = is_array($order) ? $order['id'] : $order->id; @endphp
-                <div 
-                    wire:key="order-item-{{ $orderId }}-{{ time() }}"
-                    class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
-                    <!-- Order Header (Always Visible) -->
-                    <div 
-                        @click="toggle({{ $orderId }})" 
-                        class="px-4 py-4 flex flex-wrap justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors duration-150"
-                    >
-                        <div class="flex items-center space-x-3">
-                            <div class="flex flex-col">
-                                <div class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                    </svg>
-                                    <span class="text-sm font-medium text-gray-900">Order #{{ is_array($order) ? $order['id'] : $order->id }}</span>
-                                </div>
-                                <span class="text-xs text-gray-500 mt-1">@formatdate(is_array($order) ? $order['created_at'] : $order->created_at)</span>
+        <!-- Responsive Layout: Cards for Mobile/Small Screens, Table for Larger Screens -->
+        <div>
+            <!-- Mobile Cards View (SM and below) -->
+            <div class="md:hidden space-y-4">
+                @foreach($orders as $order)
+                    @php $orderId = is_array($order) ? $order['id'] : $order->id; @endphp
+                    <div wire:key="order-item-mobile-{{ $orderId }}" class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-900">Order #{{ $orderId }}</span>
                             </div>
-                            
+                            <span class="text-sm font-medium text-gray-900">${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-3">
                             <div>
-                                @if((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        Pending
-                                    </span>
-                                @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_COMPLETED)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        Completed
-                                    </span>
-                                @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_CANCELLED)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        Cancelled
-                                    </span>
-                                @endif
+                                <p class="text-xs text-gray-500">Date</p>
+                                <p class="text-sm">@formatdate(is_array($order) ? $order['created_at'] : $order->created_at)</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Status</p>
+                                <div class="mt-1">
+                                    @if((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Pending
+                                        </span>
+                                    @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_COMPLETED)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Completed
+                                        </span>
+                                    @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_CANCELLED)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Cancelled
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center">
-                                <span class="mr-2 font-medium text-gray-900">${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</span>
-                                <span 
-                                    x-bind:class="isExpanded({{ $orderId }}) ? 'rotate-180' : ''" 
-                                    class="transform transition-transform duration-200 text-gray-500"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </span>
-                            </div>
+                        @if($isAdmin)
+                        <div class="mb-3">
+                            <p class="text-xs text-gray-500">Customer</p>
+                            <p class="text-sm font-medium">
+                                {{ is_array($order) 
+                                    ? (isset($order['user']) ? (is_array($order['user']) ? ($order['user']['name'] ?? 'Unknown') : $order['user']->name) : 'Unknown') 
+                                    : (isset($order->user) ? $order->user->name : 'Unknown') }}
+                            </p>
+                            @if(is_array($order) 
+                                ? (isset($order['user']) && (is_array($order['user']) 
+                                    ? isset($order['user']['customer_number']) && $order['user']['customer_number'] 
+                                    : isset($order['user']->customer_number) && $order['user']->customer_number)) 
+                                : (isset($order->user) && isset($order->user->customer_number) && $order->user->customer_number))
+                                <p class="text-xs text-gray-500">
+                                    Customer #: {{ is_array($order) 
+                                        ? (isset($order['user']) 
+                                            ? (is_array($order['user']) 
+                                                ? ($order['user']['customer_number'] ?? 'N/A') 
+                                                : ($order['user']->customer_number ?? 'N/A')) 
+                                            : 'N/A') 
+                                        : ($order->user->customer_number ?? 'N/A') }}
+                                </p>
+                            @endif
+                        </div>
+                        @endif
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <!-- View Details Button -->
+                            <button 
+                                onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ $orderId }} })" 
+                                class="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Details
+                            </button>
+                            
+                            <!-- Pick Ticket Button (Admin Only) -->
+                            @if($isAdmin)
+                                @can('manage orders')
+                                    <a 
+                                        href="{{ route('orders.pick-ticket', $orderId) }}" 
+                                        target="_blank"
+                                        class="inline-flex items-center px-3 py-1.5 border border-indigo-300 text-xs font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                        </svg>
+                                        Ticket
+                                    </a>
+                                @endcan
+                            @endif
+                            
+                            <!-- Admin Action Buttons -->
+                            @if($isAdmin && (is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
+                                @can('manage orders')
+                                    <button 
+                                        onclick="if(confirm('Are you sure you want to mark this order as completed?')) { 
+                                            Livewire.dispatch('updateStatus', { 
+                                                orderId: {{ $orderId }}, 
+                                                status: '{{ \App\Models\Order::STATUS_COMPLETED }}' 
+                                            });
+                                        }" 
+                                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Complete
+                                    </button>
+                                    
+                                    <button 
+                                        onclick="if(confirm('Are you sure you want to cancel this order?')) { 
+                                            Livewire.dispatch('updateStatus', { 
+                                                orderId: {{ $orderId }}, 
+                                                status: '{{ \App\Models\Order::STATUS_CANCELLED }}' 
+                                            });
+                                        }" 
+                                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        Cancel
+                                    </button>
+                                @endcan
+                            @endif
                         </div>
                     </div>
-                    
-                    <!-- Expandable Content (Order Details & Actions) -->
-                    <div x-show="isExpanded({{ $orderId }})" x-collapse class="border-t border-gray-100">
-                        <div class="p-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                                <!-- Order Info -->
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Order Info</h4>
-                                    <div class="space-y-1 text-sm">
-                                        <p><span class="font-medium">Date:</span> @formatdate(is_array($order) ? $order['created_at'] : $order->created_at)</p>
-                                        <p><span class="font-medium">Status:</span> 
-                                            @if((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
-                                                <span class="text-yellow-700">Pending</span>
-                                            @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_COMPLETED)
-                                                <span class="text-green-700">Completed</span>
-                                            @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_CANCELLED)
-                                                <span class="text-red-700">Cancelled</span>
-                                            @endif
-                                        </p>
-                                        <p><span class="font-medium">Delivery:</span> 
-                                            @if((is_array($order) ? ($order['delivery_type'] ?? 'pickup') : ($order->delivery_type ?? 'pickup')) === \App\Models\Order::DELIVERY_TYPE_PICKUP)
-                                                <span class="text-blue-700">Pickup</span>
-                                            @elseif((is_array($order) ? ($order['delivery_type'] ?? 'pickup') : ($order->delivery_type ?? 'pickup')) === \App\Models\Order::DELIVERY_TYPE_DELIVERY)
-                                                <span class="text-purple-700">Delivery</span>
-                                            @endif
-                                        </p>
-                                        <p><span class="font-medium">Items:</span> {{ is_array($order) && isset($order['items']) ? count($order['items']) : (is_object($order) && method_exists($order, 'getTotalItems') ? $order->getTotalItems() : (is_object($order) ? $order->items()->count() : 'N/A')) }}</p>
-                                        <p><span class="font-medium">Total:</span> ${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</p>
+                @endforeach
+            </div>
+            
+            <!-- Desktop Table View (MD and up) -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Order #
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            @if($isAdmin)
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Customer
+                            </th>
+                            @endif
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Total
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($orders as $order)
+                            @php $orderId = is_array($order) ? $order['id'] : $order->id; @endphp
+                            <tr wire:key="order-item-{{ $orderId }}">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        <span class="text-sm font-medium text-gray-900">{{ $orderId }}</span>
                                     </div>
-                                </div>
-                                
-                                <!-- Customer Info (Admin Only) -->
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-500">@formatdate(is_array($order) ? $order['created_at'] : $order->created_at)</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Pending
+                                        </span>
+                                    @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_COMPLETED)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Completed
+                                        </span>
+                                    @elseif((is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_CANCELLED)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Cancelled
+                                        </span>
+                                    @endif
+                                </td>
                                 @if($isAdmin)
-                                <div class="bg-gray-50 rounded-lg p-3">
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Customer</h4>
-                                    <div class="space-y-1 text-sm">
-                                        <p class="font-medium">{{ is_array($order) 
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ is_array($order) 
                                             ? (isset($order['user']) ? (is_array($order['user']) ? ($order['user']['name'] ?? 'Unknown') : $order['user']->name) : 'Unknown') 
-                                            : (isset($order->user) ? $order->user->name : 'Unknown') }}</p>
-                                        <p class="text-gray-500">{{ is_array($order) 
-                                            ? (isset($order['user']) ? (is_array($order['user']) ? ($order['user']['email'] ?? '') : $order['user']->email) : '') 
-                                            : (isset($order->user) ? $order->user->email : '') }}</p>
-                                        @if(is_array($order) 
-                                            ? (isset($order['user']) && (is_array($order['user']) 
-                                                ? isset($order['user']['customer_number']) && $order['user']['customer_number'] 
-                                                : isset($order['user']->customer_number) && $order['user']->customer_number)) 
-                                            : (isset($order->user) && isset($order->user->customer_number) && $order->user->customer_number))
-                                            <p class="text-gray-500">
-                                                Customer #: {{ is_array($order) 
-                                                    ? (isset($order['user']) 
-                                                        ? (is_array($order['user']) 
-                                                            ? ($order['user']['customer_number'] ?? 'N/A') 
-                                                            : ($order['user']->customer_number ?? 'N/A')) 
-                                                        : 'N/A') 
-                                                    : ($order->user->customer_number ?? 'N/A') }}
-                                            </p>
-                                        @endif
+                                            : (isset($order->user) ? $order->user->name : 'Unknown') }}
                                     </div>
-                                </div>
+                                    @if(is_array($order) 
+                                        ? (isset($order['user']) && (is_array($order['user']) 
+                                            ? isset($order['user']['customer_number']) && $order['user']['customer_number'] 
+                                            : isset($order['user']->customer_number) && $order['user']->customer_number)) 
+                                        : (isset($order->user) && isset($order->user->customer_number) && $order->user->customer_number))
+                                        <div class="text-xs text-gray-500">
+                                            Customer #: {{ is_array($order) 
+                                                ? (isset($order['user']) 
+                                                    ? (is_array($order['user']) 
+                                                        ? ($order['user']['customer_number'] ?? 'N/A') 
+                                                        : ($order['user']->customer_number ?? 'N/A')) 
+                                                    : 'N/A') 
+                                                : ($order->user->customer_number ?? 'N/A') }}
+                                        </div>
+                                    @endif
+                                </td>
                                 @endif
-                                
-                                <!-- Actions -->
-                                <div class="bg-gray-50 rounded-lg p-3 flex flex-col sm:justify-between">
-                                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Actions</h4>
-                                    <div class="grid grid-cols-1 gap-2 mt-auto">
-                                            <!-- View Details Button -->
-                                            <button 
-                                                onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ is_array($order) ? $order['id'] : $order->id }} })" 
-                                                class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                Details
-                                            </button>
-                                            
-                                            <!-- Pick Ticket Button (Admin Only) -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-medium text-gray-900">${{ number_format(is_array($order) ? $order['total'] : $order->total, 2) }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <!-- View Details Button -->
+                                        <button 
+                                            onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ $orderId }} })" 
+                                            class="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            Details
+                                        </button>
+                                        
+                                        <!-- Pick Ticket Button (Admin Only) -->
+                                        @if($isAdmin)
                                             @can('manage orders')
                                                 <a 
-                                                    href="{{ route('orders.pick-ticket', is_array($order) ? $order['id'] : $order->id) }}" 
+                                                    href="{{ route('orders.pick-ticket', $orderId) }}" 
                                                     target="_blank"
-                                                    class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm"
+                                                    class="inline-flex items-center px-3 py-1.5 border border-indigo-300 text-xs font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                                     </svg>
-                                                    Pick Ticket
+                                                    Ticket
                                                 </a>
-                                            @else
-                                                <div></div> <!-- Empty div to maintain grid layout -->
                                             @endcan
-                                        </div>
+                                        @endif
                                         
+                                        <!-- Admin Action Buttons -->
                                         @if($isAdmin && (is_array($order) ? $order['status'] : $order->status) === \App\Models\Order::STATUS_PENDING)
                                             @can('manage orders')
-                                                <!-- Complete Order Button -->
                                                 <button 
-                                                    @click.stop="if(confirm('Are you sure you want to mark this order as completed?')) { 
-                                                        expandedId = null;
+                                                    onclick="if(confirm('Are you sure you want to mark this order as completed?')) { 
                                                         Livewire.dispatch('updateStatus', { 
-                                                            orderId: {{ is_array($order) ? $order['id'] : $order->id }}, 
+                                                            orderId: {{ $orderId }}, 
                                                             status: '{{ \App\Models\Order::STATUS_COMPLETED }}' 
                                                         });
                                                     }" 
-                                                    class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                     Complete
                                                 </button>
                                                 
-                                                <!-- Cancel Order Button -->
                                                 <button 
-                                                    @click.stop="if(confirm('Are you sure you want to cancel this order?')) { 
-                                                        expandedId = null;
+                                                    onclick="if(confirm('Are you sure you want to cancel this order?')) { 
                                                         Livewire.dispatch('updateStatus', { 
-                                                            orderId: {{ is_array($order) ? $order['id'] : $order->id }}, 
+                                                            orderId: {{ $orderId }}, 
                                                             status: '{{ \App\Models\Order::STATUS_CANCELLED }}' 
                                                         });
                                                     }" 
-                                                    class="sm:col-span-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
                                                     Cancel
@@ -375,12 +340,12 @@
                                             @endcan
                                         @endif
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     @endif
 

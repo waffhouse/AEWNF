@@ -320,7 +320,7 @@ class Catalog extends Component
                 $itemCount = $cart->items()->count();
                 
                 if ($itemCount === 0) {
-                    $this->dispatch('notification', type: 'info', message: 'Your cart is already empty');
+                    // Notification removed
                     return;
                 }
                 
@@ -329,10 +329,7 @@ class Catalog extends Component
                 
                 // Use the redirect approach with flash message instead of Livewire events
                 // This avoids the component errors by doing a full page refresh
-                session()->flash('notification', [
-                    'type' => 'warning',
-                    'message' => 'Your cart has been cleared (' . $itemCount . ' ' . ($itemCount === 1 ? 'item' : 'items') . ')'
-                ]);
+                // Session notification removed
                 
                 // This will do a full page refresh, avoiding the component errors
                 return redirect(request()->header('Referer'));

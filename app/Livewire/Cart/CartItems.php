@@ -53,7 +53,7 @@ class CartItems extends Component
         }
         
         if (!$cartItem) {
-            $this->dispatch('notification', type: 'error', message: 'Item not found');
+            // Notification removed
             return;
         }
         
@@ -64,7 +64,7 @@ class CartItems extends Component
         $result = $cartService->addToCart($inventoryId, $quantity, true);
         
         if (!$result['success']) {
-            $this->dispatch('notification', type: 'error', message: $result['message']);
+            // Notification removed
             return;
         }
         
@@ -79,7 +79,7 @@ class CartItems extends Component
             $this->dispatch('cartItemRemoved');
             
             // Dispatch notification
-            $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
+            // Notification removed
         } else {
             // Notify parent component to refresh cart
             $this->dispatch('cartItemUpdated');
@@ -98,7 +98,7 @@ class CartItems extends Component
         }
         
         if (!$cartItem) {
-            $this->dispatch('notification', type: 'error', message: 'Item not found');
+            // Notification removed
             return;
         }
         
@@ -109,7 +109,7 @@ class CartItems extends Component
         $result = $cartService->removeFromCart($inventoryId);
         
         if (!$result['success']) {
-            $this->dispatch('notification', type: 'error', message: $result['message']);
+            // Notification removed
             return;
         }
         
@@ -125,7 +125,7 @@ class CartItems extends Component
         // Update cart count
         $this->dispatch('cart-updated');
         
-        $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
+        // Notification removed
     }
     
     public function render()

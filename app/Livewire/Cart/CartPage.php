@@ -65,10 +65,7 @@ class CartPage extends Component
         $cartItem = CartItem::find($itemId);
         
         if (!$cartItem) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Item not found'
-            ]);
+            // Notification removed
             return;
         }
         
@@ -100,10 +97,7 @@ class CartPage extends Component
         $cartItem = CartItem::find($itemId);
         
         if (!$cartItem) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Item not found'
-            ]);
+            // Notification removed
             return;
         }
         
@@ -119,10 +113,7 @@ class CartPage extends Component
         $this->refreshCart();
         $this->dispatch('cart-updated');
         
-        $this->dispatch('notification', [
-            'type' => 'warning',
-            'message' => 'Item removed from cart'
-        ]);
+        // Notification removed
     }
     
     public function clearCart()
@@ -135,10 +126,7 @@ class CartPage extends Component
             
             // Rather than trying to update component state through events,
             // use the redirect approach to fully refresh the page
-            session()->flash('notification', [
-                'type' => 'warning',
-                'message' => 'Cart cleared'
-            ]);
+            // Session notification removed
             
             // This will do a full page refresh, avoiding the component errors
             return redirect()->route('customer.cart');
@@ -174,19 +162,13 @@ class CartPage extends Component
         
         // Check if the user has permission to place orders
         if (!Auth::user()->can('place orders')) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'You do not have permission to place orders'
-            ]);
+            // Notification removed
             return;
         }
         
         // Check if cart is empty
         if ($this->cartItems->isEmpty()) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Your cart is empty'
-            ]);
+            // Notification removed
             return;
         }
         
@@ -200,10 +182,7 @@ class CartPage extends Component
             // Update cart count for other components
             $this->dispatch('cart-updated');
             
-            $this->dispatch('notification', [
-                'type' => 'success',
-                'message' => 'Order placed successfully'
-            ]);
+            // Notification removed
             
             // Reset form 
             $this->notes = '';
@@ -212,10 +191,7 @@ class CartPage extends Component
             $this->dispatch('showOrderDetails', ['orderId' => $order->id])->to('cart.order-confirmation');
             
         } catch (\Exception $e) {
-            $this->dispatch('notification', [
-                'type' => 'error',
-                'message' => 'Error placing order: ' . $e->getMessage()
-            ]);
+            // Notification removed
         }
     }
     

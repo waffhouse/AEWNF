@@ -1,4 +1,7 @@
 <div>
+    <!-- Scroll to Top Button -->
+    <x-scroll-to-top />
+    
     <h3 class="text-lg font-medium text-gray-900 mb-2">Order Management</h3>
     <p>{{ $pendingCount }} pending, {{ $completedCount }} completed, {{ $cancelledCount }} cancelled</p>
     
@@ -12,26 +15,21 @@
         />
     </div>
     
-    @if(count($orders) > 0)
-        <ul class="mt-4 list-disc pl-4">
-            @foreach($orders as $order)
-                @php 
-                    $orderId = is_array($order) ? $order['id'] : $order->id;
-                    $total = is_array($order) ? $order['total'] : $order->total;
-                @endphp
-                <li wire:key="simple-order-{{ $orderId }}">
-                    Order #{{ $orderId }} - ${{ number_format($total, 2) }}
-                </li>
-            @endforeach
-        </ul>
-    @else
-        <p class="mt-4">No orders found</p>
-    @endif
+    <!-- Orders List Component -->
+    <div class="mt-4">
+        <x-orders-list 
+            :orders="$orders" 
+            :is-admin="true" 
+            :total-count="$totalCount" 
+            :loaded-count="$loadedCount" 
+            :has-more-pages="$hasMorePages" 
+            :is-loading="$isLoading"
+            :search="$search ?? ''"
+        />
+    </div>
     
+    <!-- Order Details Modal -->
     @if($viewingOrderDetails && $selectedOrder)
-        <div class="mt-4 p-4 border border-gray-200 rounded">
-            <h4>Order #{{ $selectedOrder->id }} Details</h4>
-            <p>Total: ${{ number_format($selectedOrder->total, 2) }}</p>
-        </div>
+        <x-order-details-modal :order="$selectedOrder" />
     @endif
 </div>

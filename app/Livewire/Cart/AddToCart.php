@@ -78,17 +78,17 @@ class AddToCart extends Component
         $result = $cartService->addToCart($this->inventoryId, $this->quantity, true);
         
         if (!$result['success']) {
-            $this->dispatch('notification', type: 'error', message: $result['message']);
+            // Notification removed
             return;
         }
         
         // Update UI state based on result
         if ($result['action'] === 'removed') {
             $this->isInCart = false;
-            $this->dispatch('notification', type: 'warning', message: 'Item removed from cart');
+            // Notification removed
         } elseif ($result['action'] === 'added') {
             $this->isInCart = true;
-            $this->dispatch('notification', type: 'success', message: 'Item added to cart');
+            // Notification removed
         } elseif ($result['action'] === 'updated') {
             $this->isInCart = true;
             // No notification for updates to reduce noise
@@ -138,8 +138,7 @@ class AddToCart extends Component
             // Reset to 99
             $this->quantity = 99;
             
-            // This is the only notification we want to keep
-            $this->dispatch('notification', type: 'warning', message: 'For orders of 100+ items, please contact our office directly.');
+            // Notification removed
             return;
         }
         
