@@ -136,8 +136,8 @@ class UserList extends AdminComponent
     }
     
     /**
-     * Simple database verification function
-     * Shows basic database query results for comparison with UI data
+     * Scalable database verification function
+     * Shows summary statistics and a limited sample of users
      */
     public function verifyDatabaseConsistency()
     {
@@ -145,15 +145,29 @@ class UserList extends AdminComponent
         $this->authorizeAction('manage roles');
         
         try {
-            // Get users with a simple direct query
-            $users = \DB::table('users')
-                ->select('id', 'name', 'email', 'customer_number')
-                ->orderBy('name')
+            // 1. Get total user count
+            $totalUsers = \DB::table('users')->count();
+            
+            // 2. Get role counts
+            $roleCounts = \DB::table('model_has_roles')
+                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                ->where('model_has_roles.model_type', 'App\\Models\\User')
+                ->select('roles.name')
+                ->selectRaw('COUNT(*) as count')
+                ->groupBy('roles.name')
+                ->pluck('count', 'name')
+                ->toArray();
+            
+            // 3. Get the 10 most recently created users for sampling
+            $recentUsers = \DB::table('users')
+                ->select('id', 'name', 'email', 'customer_number', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
                 ->get();
             
-            // Get roles for each user
+            // 4. Get roles for these sample users
             $userRoles = [];
-            foreach($users as $user) {
+            foreach($recentUsers as $user) {
                 $role = \DB::table('model_has_roles')
                     ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
                     ->where('model_has_roles.model_id', $user->id)
@@ -164,20 +178,31 @@ class UserList extends AdminComponent
                 $userRoles[$user->id] = $role ? $role->name : 'No role';
             }
             
-            // Format for display
-            $formattedResults = [];
-            foreach($users as $user) {
-                $formattedResults[] = [
+            // 5. Format sample users for display
+            $formattedUsers = [];
+            foreach($recentUsers as $user) {
+                $formattedUsers[] = [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $userRoles[$user->id],
                     'customer_number' => $user->customer_number,
+                    // Format created_at as a human-readable date
+                    'created_at' => date('Y-m-d H:i', strtotime($user->created_at))
                 ];
             }
             
+            // 6. Prepare summary statistics
+            $summary = [
+                'total_users' => $totalUsers,
+                'role_counts' => $roleCounts,
+                'users_without_roles' => $totalUsers - array_sum($roleCounts),
+                'sample_size' => count($formattedUsers),
+                'sample_type' => 'Most recently created users'
+            ];
+            
             // Show simple success message
-            $this->flashSuccess('Found ' . count($formattedResults) . ' users in database.');
+            $this->flashSuccess('Database check: Found ' . $totalUsers . ' total users.');
             
             // Open the modal and send data
             $this->dispatch('open-modal', 'database-verification-modal');
@@ -185,7 +210,10 @@ class UserList extends AdminComponent
             $this->js("
                 setTimeout(() => {
                     window.dispatchEvent(new CustomEvent('database-verification-data', {
-                        detail: " . json_encode($formattedResults) . "
+                        detail: {
+                            users: " . json_encode($formattedUsers) . ",
+                            summary: " . json_encode($summary) . "
+                        }
                     }));
                 }, 500);
             ");

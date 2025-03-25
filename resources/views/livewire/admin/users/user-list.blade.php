@@ -227,71 +227,185 @@
     <x-modals.detail-modal
         name="database-verification-modal"
         title="Database Verification"
-        maxWidth="5xl"
+        maxWidth="4xl"
         hidePrimaryAction="true"
     >
         <div 
             x-data="{
                 users: [],
+                summary: null,
                 init() {
                     // Listen for database verification data
                     window.addEventListener('database-verification-data', (event) => {
                         if (event.detail) {
-                            this.users = event.detail;
+                            this.users = event.detail.users || [];
+                            this.summary = event.detail.summary || null;
                         } else {
                             this.users = [];
+                            this.summary = null;
                         }
                     });
                 }
             }"
             class="space-y-4"
         >
-            <div class="mb-2 p-3 bg-blue-50 rounded-md border border-blue-200">
-                <p class="text-sm text-blue-800">
-                    <span class="font-medium">Verification Tool:</span> This shows raw database query results to verify that what's displayed in the user interface matches the actual database records.
-                </p>
+            <!-- Summary Statistics Section -->
+            <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Total User Stats -->
+                <div class="p-4 bg-blue-50 rounded-md border border-blue-200">
+                    <h3 class="text-sm font-medium text-blue-800 mb-2">User Statistics</h3>
+                    
+                    <template x-if="summary">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-700">Total users in database:</span>
+                                <span class="text-sm font-medium" x-text="summary.total_users"></span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-700">Users without roles:</span>
+                                <span class="text-sm font-medium" x-text="summary.users_without_roles"></span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-700">Displaying:</span>
+                                <span class="text-sm font-medium" x-text="summary.sample_type"></span>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <template x-if="!summary">
+                        <div class="text-sm text-gray-500">Loading summary statistics...</div>
+                    </template>
+                </div>
+                
+                <!-- Role Distribution -->
+                <div class="p-4 bg-green-50 rounded-md border border-green-200">
+                    <h3 class="text-sm font-medium text-green-800 mb-2">Role Distribution</h3>
+                    
+                    <template x-if="summary && summary.role_counts">
+                        <div class="space-y-2">
+                            <!-- Dynamically generate role counts -->
+                            <template x-for="(count, role) in summary.role_counts">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-700 capitalize" x-text="role"></span>
+                                    <span class="text-sm font-medium" x-text="count"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    
+                    <template x-if="!summary">
+                        <div class="text-sm text-gray-500">Loading role statistics...</div>
+                    </template>
+                </div>
             </div>
             
+            <!-- Sample Users Section Header -->
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-sm font-medium text-gray-700">
+                    Recently Created Users (Sample)
+                </h3>
+                <template x-if="summary">
+                    <span class="text-xs text-gray-500">
+                        Showing <span x-text="summary.sample_size"></span> of <span x-text="summary.total_users"></span> users
+                    </span>
+                </template>
+            </div>
+            
+            <!-- Responsive Table Design -->
             <div class="border rounded-lg overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer #</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <template x-if="users.length === 0">
+                <!-- Desktop Table (hidden on mobile) -->
+                <div class="hidden md:block">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <td colspan="5" class="px-3 py-3 text-center text-sm text-gray-500">
-                                    Loading database records...
-                                </td>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer #</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                             </tr>
-                        </template>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-if="users.length === 0">
+                                <tr>
+                                    <td colspan="6" class="px-3 py-3 text-center text-sm text-gray-500">
+                                        Loading database records...
+                                    </td>
+                                </tr>
+                            </template>
+                            <template x-for="user in users" :key="user.id">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 text-sm text-gray-500" x-text="user.id"></td>
+                                    <td class="px-3 py-2 text-sm font-medium text-gray-900" x-text="user.name"></td>
+                                    <td class="px-3 py-2 text-sm text-gray-500" x-text="user.email"></td>
+                                    <td class="px-3 py-2 text-sm text-gray-500">
+                                        <span 
+                                            x-text="user.role" 
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                            :class="{
+                                                'bg-red-100 text-red-800': user.role === 'admin',
+                                                'bg-blue-100 text-blue-800': user.role === 'staff',
+                                                'bg-green-100 text-green-800': user.role && user.role.includes('customer')
+                                            }"
+                                        ></span>
+                                    </td>
+                                    <td class="px-3 py-2 text-sm font-mono text-gray-500" x-text="user.customer_number || '-'"></td>
+                                    <td class="px-3 py-2 text-xs text-gray-500" x-text="user.created_at"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Mobile Card View (shown on small screens) -->
+                <div class="block md:hidden">
+                    <template x-if="users.length === 0">
+                        <div class="px-4 py-3 text-center text-sm text-gray-500">
+                            Loading database records...
+                        </div>
+                    </template>
+                    <div class="divide-y divide-gray-200">
                         <template x-for="user in users" :key="user.id">
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-3 py-2 text-sm text-gray-500" x-text="user.id"></td>
-                                <td class="px-3 py-2 text-sm font-medium text-gray-900" x-text="user.name"></td>
-                                <td class="px-3 py-2 text-sm text-gray-500" x-text="user.email"></td>
-                                <td class="px-3 py-2 text-sm text-gray-500">
+                            <div class="p-4 hover:bg-gray-50">
+                                <div class="flex justify-between items-start">
+                                    <div class="font-medium text-gray-900" x-text="user.name"></div>
                                     <span 
                                         x-text="user.role" 
-                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ml-2"
                                         :class="{
                                             'bg-red-100 text-red-800': user.role === 'admin',
                                             'bg-blue-100 text-blue-800': user.role === 'staff',
                                             'bg-green-100 text-green-800': user.role && user.role.includes('customer')
                                         }"
                                     ></span>
-                                </td>
-                                <td class="px-3 py-2 text-sm font-mono text-gray-500" x-text="user.customer_number || '-'"></td>
-                            </tr>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-500" x-text="user.email"></div>
+                                <div class="mt-1 flex justify-between items-center">
+                                    <div class="text-xs text-gray-500">ID: <span x-text="user.id"></span></div>
+                                    <div class="text-xs font-mono text-gray-500">
+                                        <template x-if="user.customer_number">
+                                            <span>Cust #: <span x-text="user.customer_number"></span></span>
+                                        </template>
+                                        <template x-if="!user.customer_number">
+                                            <span>No customer number</span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-gray-100">
+                                    <div class="text-xs text-gray-500 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Created: <span class="ml-1" x-text="user.created_at"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             </div>
             <!-- No custom footer needed - the modal has a built-in close button -->
         </div>
