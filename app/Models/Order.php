@@ -69,6 +69,36 @@ class Order extends Model
     {
         return $this->items->sum('quantity');
     }
+    
+    /**
+     * Get items grouped by category/class
+     */
+    public function getItemsByCategory(): array
+    {
+        $categorized = [];
+        
+        foreach ($this->items as $item) {
+            // Get inventory item and its class/category
+            if ($item->inventory_id) {
+                $inventory = $item->inventory;
+                $category = $inventory ? $inventory->class : 'Other';
+            } else {
+                $category = 'Other';
+            }
+            
+            if (!isset($categorized[$category])) {
+                $categorized[$category] = [
+                    'items' => [],
+                    'total_quantity' => 0
+                ];
+            }
+            
+            $categorized[$category]['items'][] = $item;
+            $categorized[$category]['total_quantity'] += $item->quantity;
+        }
+        
+        return $categorized;
+    }
 
     /**
      * Check if the order can be cancelled.
