@@ -141,12 +141,6 @@ class UserList extends AdminComponent
      */
     public function verifyDatabaseConsistency()
     {
-        // Only allow this in non-production environments
-        if (app()->environment('production')) {
-            $this->flashError('Database verification is not available in production environment.');
-            return;
-        }
-        
         // Authorize this action to admin users only
         $this->authorizeAction('manage roles');
         
