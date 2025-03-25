@@ -1,21 +1,34 @@
 <div>
     <!-- Search Bar -->
     <div class="mb-4">
-        <div class="flex items-center border rounded-md overflow-hidden shadow-sm">
-            <div class="px-3 py-2 bg-gray-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+        <form wire:submit.prevent="searchPermissions" class="flex items-center">
+            <div class="flex flex-1 items-center border rounded-md overflow-hidden shadow-sm">
+                <div class="px-3 py-2 bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input 
+                    wire:model="permissionSearch" 
+                    type="text" 
+                    id="permission-search" 
+                    placeholder="Search permissions..." 
+                    class="flex-1 px-3 py-2 text-sm focus:outline-none border-none"
+                >
             </div>
-            <input 
-                wire:model.live.debounce.300ms="permissionSearch" 
-                type="text" 
-                id="permission-search"
-                name="permission-search"
-                placeholder="Search permissions..." 
-                class="flex-1 px-3 py-2 text-sm focus:outline-none border-none"
+            <button type="submit" class="ml-2 px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-md text-sm font-medium transition-colors duration-150">
+                Search
+            </button>
+            @if($permissionSearch)
+            <button 
+                type="button" 
+                wire:click="clearPermissionSearch" 
+                class="ml-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors duration-150"
             >
-        </div>
+                Clear
+            </button>
+            @endif
+        </form>
     </div>
 
     <!-- Responsive Permission List -->
@@ -141,12 +154,12 @@
         }"
     >
         <!-- Loading Indicator -->
-        <div wire:loading wire:target="loadMore" class="py-4">
-            <svg class="animate-spin h-5 w-5 text-blue-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div wire:loading wire:target="loadMore, searchPermissions, clearPermissionSearch" class="py-4">
+            <svg class="animate-spin h-5 w-5 text-purple-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="ml-2 text-sm text-gray-600">Loading more permissions...</span>
+            <span class="ml-2 text-sm text-gray-600">Loading permissions...</span>
         </div>
 
         <!-- End of Results Message -->

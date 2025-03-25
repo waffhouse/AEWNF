@@ -157,10 +157,19 @@ class PermissionList extends AdminComponent
     }
     
     /**
-     * When search changes, reset the permission list
+     * Search permissions with form submission
      */
-    public function updatedPermissionSearch()
+    public function searchPermissions()
     {
+        $this->resetItems();
+    }
+    
+    /**
+     * Clear permission search
+     */
+    public function clearPermissionSearch()
+    {
+        $this->permissionSearch = '';
         $this->resetItems();
     }
     

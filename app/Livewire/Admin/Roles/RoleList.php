@@ -160,10 +160,19 @@ class RoleList extends AdminComponent
     }
     
     /**
-     * When search changes, reset the role list
+     * Search roles with form submission
      */
-    public function updatedRoleSearch()
+    public function searchRoles()
     {
+        $this->resetItems();
+    }
+    
+    /**
+     * Clear role search
+     */
+    public function clearRoleSearch()
+    {
+        $this->roleSearch = '';
         $this->resetItems();
     }
     

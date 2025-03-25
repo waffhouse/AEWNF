@@ -6,7 +6,12 @@
     <div class="bg-white p-6 rounded-lg border border-gray-200">
         <div class="space-y-6">
             <div>
-                <h3 class="text-lg font-medium text-gray-900">Inventory Synchronization</h3>
+                <h2 class="text-lg font-semibold flex items-center text-amber-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Inventory Synchronization
+                </h2>
                 <p class="mt-1 text-sm text-gray-500">
                     Manually run the NetSuite inventory synchronization process. This process retrieves inventory data from NetSuite 
                     and updates the local database to ensure product information is current.
@@ -14,46 +19,46 @@
             </div>
             
             @if($lastSyncTime)
-            <div class="bg-blue-50 p-4 rounded-md">
+            <div class="bg-amber-100 p-4 rounded-md border border-amber-200">
                 <div class="flex flex-col space-y-2">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                             </svg>
                         </div>
                         <div class="ml-3 flex-1 md:flex md:justify-between">
-                            <p class="text-sm text-blue-700">Last sync completed at: <span class="font-semibold">@formatdate($lastSyncTime)</span></p>
+                            <p class="text-sm text-amber-800">Last sync completed at: <span class="font-semibold">@formatdate($lastSyncTime)</span></p>
                         </div>
                     </div>
                     
                     @if($lastSyncStats)
-                    <div class="mt-2 pt-3 border-t border-blue-100">
+                    <div class="mt-2 pt-3 border-t border-amber-200">
                         <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-sm font-medium text-blue-800">Current Inventory Summary</h4>
-                            <span class="text-xs text-gray-500">Last updated {{ $lastSyncStats['time_since_sync'] }}</span>
+                            <h4 class="text-sm font-medium text-amber-900">Current Inventory Summary</h4>
+                            <span class="text-xs text-amber-700">Last updated {{ $lastSyncStats['time_since_sync'] }}</span>
                         </div>
                         
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            <div class="bg-white p-3 rounded-md shadow-sm border border-blue-100">
+                            <div class="bg-white p-3 rounded-md shadow-sm border border-amber-200">
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['total']) }}</div>
-                                <div class="text-xs text-gray-500">Total Items</div>
+                                <div class="text-xs text-gray-600">Total Items</div>
                             </div>
-                            <div class="bg-white p-3 rounded-md shadow-sm border border-blue-100">
+                            <div class="bg-white p-3 rounded-md shadow-sm border border-amber-200">
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['in_stock_items']) }}</div>
-                                <div class="text-xs text-gray-500">In Stock</div>
+                                <div class="text-xs text-gray-600">In Stock</div>
                             </div>
-                            <div class="bg-white p-3 rounded-md shadow-sm border border-blue-100">
+                            <div class="bg-white p-3 rounded-md shadow-sm border border-amber-200">
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['out_of_stock_items']) }}</div>
-                                <div class="text-xs text-gray-500">Out of Stock</div>
+                                <div class="text-xs text-gray-600">Out of Stock</div>
                             </div>
-                            <div class="bg-white p-3 rounded-md shadow-sm border border-blue-100">
+                            <div class="bg-white p-3 rounded-md shadow-sm border border-amber-200">
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['florida_items']) }}</div>
-                                <div class="text-xs text-gray-500">Florida Items</div>
+                                <div class="text-xs text-gray-600">Florida Items</div>
                             </div>
-                            <div class="bg-white p-3 rounded-md shadow-sm border border-blue-100">
+                            <div class="bg-white p-3 rounded-md shadow-sm border border-amber-200">
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['georgia_items']) }}</div>
-                                <div class="text-xs text-gray-500">Georgia Items</div>
+                                <div class="text-xs text-gray-600">Georgia Items</div>
                             </div>
                         </div>
                     </div>

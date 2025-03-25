@@ -18,7 +18,7 @@
                         class="flex-1 px-3 py-2 text-sm focus:outline-none border-none"
                     >
                 </div>
-                <button type="submit" class="ml-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors duration-150">
+                <button type="submit" class="ml-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm font-medium transition-colors duration-150">
                     Search
                 </button>
             </form>
