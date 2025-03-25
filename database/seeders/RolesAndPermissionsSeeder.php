@@ -40,6 +40,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'view catalog',
             'view sales history',
             
+            // NetSuite Integration permissions
+            'view netsuite sales data',
+            'sync netsuite sales data',
+            
             // Item visibility permissions
             'view unrestricted items',
             'view florida items',
@@ -91,6 +95,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view florida items',
             'view georgia items',
             'view sales history',
+            'view netsuite sales data',
             'view all orders',
             'manage orders'
         ]);

@@ -137,11 +137,28 @@ trait InfiniteScrollable
     /**
      * Reset items when filters change
      *
+     * @return void
+     */
+    public function resetItems(): void
+    {
+        $this->items = [];
+        $this->loadedCount = 0;
+        $this->hasMorePages = true;
+        
+        // Call loadItems if a query is available via an overridable method
+        if (method_exists($this, 'getQuery')) {
+            $this->loadItems($this->getQuery());
+        }
+    }
+    
+    /**
+     * Reset items with a specific query
+     *
      * @param Builder $query The base query to paginate
      * @param string $itemsProperty The component property to store items in
      * @return void
      */
-    public function resetItems(Builder $query, string $itemsProperty = 'items')
+    public function resetItemsWithQuery(Builder $query, string $itemsProperty = 'items'): void
     {
         $this->{$itemsProperty} = [];
         $this->loadedCount = 0;
@@ -167,6 +184,6 @@ trait InfiniteScrollable
             $this->sortDirection = 'asc';
         }
         
-        $this->resetItems($query, $itemsProperty);
+        $this->resetItemsWithQuery($query, $itemsProperty);
     }
 }

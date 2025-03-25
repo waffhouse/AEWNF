@@ -27,6 +27,11 @@ Route::view('profile', 'profile')
 Route::middleware(['auth', 'permission:access admin dashboard|view users|manage orders|view all orders'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard accessible to admin users and staff with appropriate permissions
     Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+    
+    // Sales dashboard accessible to users with NetSuite sales data permissions
+    Route::get('/sales', \App\Livewire\Admin\Sales\SalesDashboard::class)
+        ->middleware('permission:view netsuite sales data')
+        ->name('sales');
 });
 
 // Staff routes deprecated - users should access management through admin dashboard
@@ -69,6 +74,11 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
 Route::get('/orders/{id}/pick-ticket', [\App\Http\Controllers\OrderPickTicketController::class, 'generatePickTicket'])
     ->middleware(['auth', 'permission:manage orders'])
     ->name('orders.pick-ticket');
+    
+// Sales Invoice generation
+Route::get('/sales/{id}/invoice', [\App\Http\Controllers\SalesInvoiceController::class, 'generateInvoice'])
+    ->middleware(['auth', 'permission:view netsuite sales data'])
+    ->name('sales.invoice');
 
 // Age verification routes
 Route::middleware('guest')->group(function () {

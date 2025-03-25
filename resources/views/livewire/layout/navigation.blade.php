@@ -46,6 +46,12 @@ new class extends Component
                     </x-nav-link>
                     @endcan
                     
+                    @can('view netsuite sales data')
+                    <x-nav-link :href="route('admin.sales')" :active="request()->routeIs('admin.sales')" wire:navigate>
+                        {{ __('Sales Data') }}
+                    </x-nav-link>
+                    @endcan
+                    
                     @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate>
                         {{ __('Order Management') }}
@@ -157,6 +163,12 @@ new class extends Component
             @can('access admin dashboard')
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate @click="open = false">
                 {{ __('Admin Dashboard') }}
+            </x-responsive-nav-link>
+            @endcan
+            
+            @can('view netsuite sales data')
+            <x-responsive-nav-link :href="route('admin.sales')" :active="request()->routeIs('admin.sales')" wire:navigate @click="open = false">
+                {{ __('Sales Data') }}
             </x-responsive-nav-link>
             @endcan
             

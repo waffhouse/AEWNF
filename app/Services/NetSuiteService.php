@@ -38,11 +38,26 @@ class NetSuiteService
         $deployId = $deployId ?? $this->config['deploy_id'];
 
         if (empty($scriptId) || empty($deployId)) {
+            Log::error('NetSuite configuration error', [
+                'script_id' => $scriptId,
+                'deploy_id' => $deployId,
+                'config' => $this->config
+            ]);
             throw new \Exception('NetSuite script ID or deploy ID not configured');
         }
 
-        $url = $this->buildRestletUrl($scriptId, $deployId);
+        // Use a specific URL for the sales RESTlet
+        $customBaseUrl = ($scriptId === '1270') ? $this->config['sales_restlet_url'] : null;
+        $url = $this->buildRestletUrl($scriptId, $deployId, $customBaseUrl);
         $headers = $this->generateAuthorizationHeaders($url, $method);
+
+        Log::info('Making NetSuite RESTlet request', [
+            'method' => $method,
+            'url' => $url,
+            'script_id' => $scriptId,
+            'deploy_id' => $deployId,
+            'data' => $data
+        ]);
 
         try {
             $response = $this->client->request($method, $url, [
@@ -53,14 +68,31 @@ class NetSuiteService
 
             $content = $response->getBody()->getContents();
             
+            // Log response for debugging
+            Log::info('NetSuite RESTlet response', [
+                'status_code' => $response->getStatusCode(),
+                'content_length' => strlen($content),
+                'content_preview' => substr($content, 0, 200) . (strlen($content) > 200 ? '...' : '')
+            ]);
+            
             // Try to decode as JSON, but return raw content if not valid JSON
             $decoded = json_decode($content, true);
-            return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $content;
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            } else {
+                Log::warning('NetSuite response is not valid JSON', [
+                    'json_error' => json_last_error_msg(),
+                    'content_preview' => substr($content, 0, 200)
+                ]);
+                return $content;
+            }
         } catch (GuzzleException $e) {
             Log::error('NetSuite RESTlet error', [
                 'message' => $e->getMessage(),
                 'method' => $method,
                 'url' => $url,
+                'script_id' => $scriptId,
+                'deploy_id' => $deployId,
             ]);
             
             throw new \Exception('Error calling NetSuite RESTlet: ' . $e->getMessage(), 0, $e);
@@ -97,12 +129,22 @@ class NetSuiteService
      *
      * @param string $scriptId NetSuite script ID
      * @param string $deployId NetSuite deploy ID
+     * @param string|null $customBaseUrl Optional custom base URL
      * @return string Complete URL
      */
-    protected function buildRestletUrl(string $scriptId, string $deployId): string
+    protected function buildRestletUrl(string $scriptId, string $deployId, ?string $customBaseUrl = null): string
     {
+        // Determine which base URL to use
+        $baseUrl = $customBaseUrl ?? $this->config['base_url'];
+        
+        // For sales data, use the dedicated URL if script ID matches
+        if ($scriptId === '1270' && isset($this->config['sales_restlet_url'])) {
+            $baseUrl = $this->config['sales_restlet_url'];
+            Log::info('Using sales-specific RESTlet URL');
+        }
+        
         // Parse the base URL to ensure we don't duplicate query parameters
-        $baseUrl = rtrim($this->config['base_url'], '?&');
+        $baseUrl = rtrim($baseUrl, '?&');
         
         // Check if the base URL already contains a query string
         if (strpos($baseUrl, '?') !== false) {
