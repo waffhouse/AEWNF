@@ -292,6 +292,15 @@ class UserList extends AdminComponent
     }
     
     /**
+     * Listen for verify database event from parent component
+     */
+    #[On('verify-database')]
+    public function handleVerifyDatabase()
+    {
+        $this->verifyDatabaseConsistency();
+    }
+    
+    /**
      * Render the component
      */
     public function render()
