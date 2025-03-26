@@ -28,10 +28,6 @@ Route::middleware(['auth', 'permission:access admin dashboard|view users|manage 
     // Dashboard accessible to admin users and staff with appropriate permissions
     Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
     
-    // Sales dashboard accessible to users with NetSuite sales data permissions
-    Route::get('/sales', \App\Livewire\Admin\Sales\SalesDashboard::class)
-        ->middleware('permission:view netsuite sales data')
-        ->name('sales');
 });
 
 // Staff routes deprecated - users should access management through admin dashboard
@@ -54,6 +50,12 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::middleware(['permission:view own orders'])->group(function () {
         Route::get('/orders', \App\Livewire\Cart\OrdersList::class)->name('orders');
     });
+    
+    // Sales data routes - redirect to main sales dashboard
+    Route::get('/sales', function() {
+        return redirect()->route('sales');
+    })
+        ->middleware('permission:view own orders');
         
     // Order details functionality is now handled by modals within OrdersList and CartPage components
 });
@@ -75,9 +77,9 @@ Route::get('/orders/{id}/pick-ticket', [\App\Http\Controllers\OrderPickTicketCon
     ->middleware(['auth', 'permission:manage orders'])
     ->name('orders.pick-ticket');
     
-// Sales Invoice generation
+// Sales Invoice generation - allows both admin and customer access
 Route::get('/sales/{id}/invoice', [\App\Http\Controllers\SalesInvoiceController::class, 'generateInvoice'])
-    ->middleware(['auth', 'permission:view netsuite sales data'])
+    ->middleware(['auth', 'permission:view netsuite sales data|view own orders'])
     ->name('sales.invoice');
 
 // Age verification routes
@@ -93,5 +95,11 @@ Route::middleware('guest')->group(function () {
 Route::get('/catalog', \App\Livewire\Inventory\Catalog::class)
     ->middleware('verify.age')
     ->name('inventory.catalog');
+    
+// Unified Sales Dashboard - accessible to authenticated users with appropriate permissions
+// The component will handle different views based on permissions
+Route::get('/sales', \App\Livewire\Sales\SalesDashboard::class)
+    ->middleware(['auth', 'permission:view netsuite sales data|view own orders'])
+    ->name('sales');
 
 require __DIR__.'/auth.php';

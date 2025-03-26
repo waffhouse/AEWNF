@@ -46,11 +46,11 @@ new class extends Component
                     </x-nav-link>
                     @endcan
                     
-                    @can('view netsuite sales data')
-                    <x-nav-link :href="route('admin.sales')" :active="request()->routeIs('admin.sales')" wire:navigate>
-                        {{ __('Sales Data') }}
+                    @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+                    <x-nav-link :href="route('sales')" :active="request()->routeIs('sales')" wire:navigate>
+                        {{ __('Sales History') }}
                     </x-nav-link>
-                    @endcan
+                    @endif
                     
                     @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate>
@@ -101,6 +101,12 @@ new class extends Component
                             {{ __('My Orders') }}
                         </x-dropdown-link>
                         @endcan
+                        
+                        @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+                        <x-dropdown-link :href="route('sales')" wire:navigate>
+                            {{ __('Sales History') }}
+                        </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
@@ -166,11 +172,11 @@ new class extends Component
             </x-responsive-nav-link>
             @endcan
             
-            @can('view netsuite sales data')
-            <x-responsive-nav-link :href="route('admin.sales')" :active="request()->routeIs('admin.sales')" wire:navigate @click="open = false">
-                {{ __('Sales Data') }}
+            @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+            <x-responsive-nav-link :href="route('sales')" :active="request()->routeIs('sales')" wire:navigate @click="open = false">
+                {{ __('Sales History') }}
             </x-responsive-nav-link>
-            @endcan
+            @endif
             
             @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate @click="open = false">
@@ -212,6 +218,12 @@ new class extends Component
                     {{ __('My Orders') }}
                 </x-responsive-nav-link>
                 @endcan
+                
+                @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+                <x-responsive-nav-link :href="route('sales')" wire:navigate @click="open = false">
+                    {{ __('Sales History') }}
+                </x-responsive-nav-link>
+                @endif
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start" @click="open = false">

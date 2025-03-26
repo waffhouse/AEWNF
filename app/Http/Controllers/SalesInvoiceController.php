@@ -20,6 +20,15 @@ class SalesInvoiceController extends Controller
         // Get the sale with all its items
         $sale = Sale::with('items')->findOrFail($id);
         
+        // Security check: If user is not an admin with 'view netsuite sales data' permission
+        // they must be the owner of this sale (entity_id must match their customer_number)
+        if (!Auth::user()->hasPermissionTo('view netsuite sales data')) {
+            // If user doesn't have customer_number or it doesn't match sale's entity_id
+            if (!Auth::user()->customer_number || $sale->entity_id !== Auth::user()->customer_number) {
+                abort(403, 'You are not authorized to view this invoice');
+            }
+        }
+        
         // Create the PDF
         $pdf = Pdf::loadView('pdfs.sale-invoice', [
             'sale' => $sale,
