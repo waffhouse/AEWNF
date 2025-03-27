@@ -233,8 +233,18 @@
                                                     </div>
                                                     <span class="block text-xs text-gray-500">{{ $transaction->date->format('M d, Y') }}</span>
                                                 </div>
-                                                <div class="text-right">
+                                                <div class="text-right flex flex-col items-end">
                                                     <span class="block text-sm font-medium">${{ number_format($transaction->total_amount, 2) }}</span>
+                                                    <a 
+                                                        href="{{ route('sales.invoice', $transaction->id) }}"
+                                                        target="_blank" 
+                                                        class="text-xs text-red-600 hover:text-red-800 mt-1 inline-flex items-center"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Invoice
+                                                    </a>
                                                 </div>
                                             </div>
                                         @endforeach

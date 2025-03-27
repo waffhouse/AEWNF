@@ -43,6 +43,11 @@ class CartPage extends Component
             return redirect()->route('login');
         }
         
+        // Handle cart clearing from form submission
+        if (request()->has('clear_cart') && request()->input('clear_cart') == 1) {
+            $this->clearCart();
+        }
+        
         $this->refreshCart();
     }
     
