@@ -74,8 +74,20 @@ Route::get('dashboard', function() {
         $popularBrands = collect($brandProducts);
     }
     
+    // Get cart quantities for products
+    $cartQuantities = [];
+    if (auth()->check()) {
+        $cartService = app(\App\Services\CartService::class);
+        $cartItems = $cartService->getCartItems();
+        
+        foreach ($cartItems as $inventoryId => $item) {
+            $cartQuantities[$inventoryId] = $item['quantity'];
+        }
+    }
+    
     return view('dashboard', [
-        'popularBrands' => $popularBrands
+        'popularBrands' => $popularBrands,
+        'cartQuantities' => $cartQuantities
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

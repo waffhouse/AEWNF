@@ -33,6 +33,33 @@ class AddToCart extends Component
         $this->addToCart();
     }
     
+    #[On('add-to-cart-increment')]
+    public function handleIncrement($id, $change)
+    {
+        // If this component is for a different product, ignore the event
+        if ($this->inventoryId !== $id) {
+            return;
+        }
+        
+        if ($change > 0) {
+            $this->incrementQuantity();
+        } else {
+            $this->decrementQuantity();
+        }
+    }
+    
+    #[On('add-to-cart-quantity')]
+    public function handleSetQuantity($id, $quantity)
+    {
+        // If this component is for a different product, ignore the event
+        if ($this->inventoryId !== $id) {
+            return;
+        }
+        
+        $this->quantity = (int)$quantity;
+        $this->updatedQuantity();
+    }
+    
     public function mount(int $inventoryId, bool $showQuantity = true, string $quantityInputType = 'stepper', int $maxQuantity = 99, string $variant = 'default')
     {
         $this->inventoryId = $inventoryId;

@@ -57,57 +57,109 @@
                         </div>
                     </div>
                     
-                    <!-- Popular Brands Section -->
+                    <!-- Popular Brands Section with Accordion -->
                     @if(isset($popularBrands) && $popularBrands->count() > 0)
                     <div class="mb-6 bg-white p-4 rounded-lg border border-gray-200 shadow">
                         <h3 class="text-lg font-medium text-gray-800 mb-3">Popular Brands</h3>
                         
-                        <div class="space-y-5">
+                        <div class="space-y-2" x-data="{ openBrand: null }">
                             @foreach($popularBrands as $brand => $products)
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">{{ $brand }}</h4>
-                                    <a href="{{ route('inventory.catalog') }}?search={{ urlencode($brand) }}" class="text-xs text-red-600 hover:text-red-800">
+                            <div class="border border-gray-100 rounded-md overflow-hidden">
+                                <div 
+                                    class="flex justify-between items-center p-3 bg-gray-50 cursor-pointer"
+                                    @click="openBrand = openBrand === '{{ $brand }}' ? null : '{{ $brand }}'"
+                                >
+                                    <div class="flex items-center">
+                                        <svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            class="h-4 w-4 transform transition-transform duration-200 mr-2" 
+                                            :class="openBrand === '{{ $brand }}' ? 'rotate-180' : ''"
+                                            fill="none" 
+                                            viewBox="0 0 24 24" 
+                                            stroke="currentColor"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                        <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">{{ $brand }}</h4>
+                                    </div>
+                                    <a href="{{ route('inventory.catalog') }}?search={{ urlencode($brand) }}" 
+                                       class="text-xs text-red-600 hover:text-red-800"
+                                       @click.stop
+                                    >
                                         View All →
                                     </a>
                                 </div>
-                                <ul class="divide-y divide-gray-100">
-                                    @foreach($products as $product)
-                                    <li class="py-2">
-                                        <div class="flex justify-between items-center">
-                                            <div class="flex-grow pr-4">
-                                                <h5 class="text-xs font-medium text-gray-800 truncate">{{ $product->description }}</h5>
-                                                <span class="text-xs text-gray-900">${{ number_format(Auth::user()->canViewFloridaItems() ? $product->fl_price : $product->ga_price, 2) }}</span>
+                                
+                                <div 
+                                    x-show="openBrand === '{{ $brand }}'" 
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform scale-y-90"
+                                    x-transition:enter-end="opacity-100 transform scale-y-100"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 transform scale-y-100"
+                                    x-transition:leave-end="opacity-0 transform scale-y-90"
+                                    class="origin-top"
+                                    style="display: none;"
+                                >
+                                    <ul class="divide-y divide-gray-100">
+                                        @foreach($products as $product)
+                                        <li class="py-2 px-3">
+                                            <div class="flex flex-col sm:flex-row">
+                                                <div class="flex-grow pr-2 mb-2 sm:mb-0">
+                                                    <h5 class="text-xs font-medium text-gray-800 truncate max-w-[180px] sm:max-w-full">{{ $product->description }}</h5>
+                                                    <span class="text-xs text-gray-900">${{ number_format(Auth::user()->canViewFloridaItems() ? $product->fl_price : $product->ga_price, 2) }}</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2 self-start sm:self-center">
+                                                    @can('add to cart')
+                                                    <div class="flex rounded-md overflow-hidden border border-gray-300 h-7">
+                                                        <button 
+                                                            type="button"
+                                                            onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: -1 });"
+                                                            aria-label="Decrease quantity"
+                                                            class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                                        >
+                                                            <span class="font-bold text-sm">−</span>
+                                                        </button>
+                                                        <input 
+                                                            type="number"
+                                                            min="0"
+                                                            max="99"
+                                                            value="{{ isset($cartQuantities[$product->id]) ? $cartQuantities[$product->id] : 0 }}"
+                                                            onchange="window.Livewire.dispatch('add-to-cart-quantity', { id: {{ $product->id }}, quantity: this.value });"
+                                                            class="w-10 text-center text-xs bg-white outline-none border-x border-gray-200 px-1"
+                                                            id="quantity-input-{{ $product->id }}"
+                                                        >
+                                                        <button
+                                                            type="button"
+                                                            onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: 1 });"
+                                                            aria-label="Increase quantity"
+                                                            class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                                        >
+                                                            <span class="font-bold text-sm">+</span>
+                                                        </button>
+                                                    </div>
+                                                    @endcan
+                                                    <button
+                                                        type="button"
+                                                        x-data
+                                                        @click="$dispatch('open-modal', 'dashboard-product-{{ $product->id }}')"
+                                                        class="inline-flex items-center px-2 py-1 bg-red-50 border border-red-200 rounded text-xs font-medium text-red-700 hover:bg-red-100 whitespace-nowrap"
+                                                    >
+                                                        View Details
+                                                    </button>
+                                                    
+                                                    <x-product-detail-modal :product="$product" :modalId="'dashboard-product-'.$product->id" />
+                                                </div>
                                             </div>
-                                            <div class="flex items-center space-x-2">
-                                                @can('add to cart')
-                                                <button
-                                                    onclick="window.Livewire.dispatch('add-to-cart-quick', { id: {{ $product->id }}, quantity: 1 }); 
-                                                            setTimeout(function() { 
-                                                                window.location.href = '{{ route('customer.cart') }}';
-                                                            }, 300);"
-                                                    class="inline-flex items-center px-2 py-1 bg-green-50 border border-green-200 rounded text-xs font-medium text-green-700 hover:bg-green-100 whitespace-nowrap"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                    </svg>
-                                                    Add & View Cart
-                                                </button>
-                                                @endcan
-                                                <a href="{{ route('inventory.catalog') }}?search={{ urlencode($product->sku) }}" 
-                                                class="inline-flex items-center px-2 py-1 bg-red-50 border border-red-200 rounded text-xs font-medium text-red-700 hover:bg-red-100 whitespace-nowrap">
-                                                    View
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    @endforeach
-                                </ul>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             </div>
                             @endforeach
                         </div>
                         
-                        <div class="mt-3 pt-2 border-t border-gray-100 text-center">
+                        <div class="mt-4 pt-2 border-t border-gray-100 text-center">
                             <a href="{{ route('inventory.catalog') }}" class="text-sm text-red-600 hover:text-red-800">
                                 Browse Full Catalog →
                             </a>
@@ -200,11 +252,40 @@
         </div>
     </div>
     
-    <!-- Include hidden AddToCart components for all products to handle the quick add events -->
+    <!-- Include hidden AddToCart components for all products to handle the quantity incrementer -->
+    <script>
+        // Listen for cart updates and refresh the quantity inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            window.Livewire.on('cart-updated', (data) => {
+                // Request the latest cart data
+                fetch('/api/check-cart')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update all quantity inputs based on the received data
+                        if (data.items) {
+                            // Set all inputs to 0 first 
+                            document.querySelectorAll('[id^="quantity-input-"]').forEach(input => {
+                                input.value = 0;
+                            });
+                            
+                            // Update inputs that have items in cart
+                            Object.keys(data.items).forEach(id => {
+                                const input = document.getElementById('quantity-input-' + id);
+                                if (input) {
+                                    input.value = data.items[id].quantity;
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching cart data:', error));
+            });
+        });
+    </script>
+    
     @foreach($popularBrands as $brand => $products)
         @foreach($products as $product)
             <div class="hidden">
-                @livewire('cart.add-to-cart', ['inventoryId' => $product->id], key('cart-component-'.$product->id))
+                @livewire('cart.add-to-cart', ['inventoryId' => $product->id, 'variant' => 'compact'], key('cart-component-'.$product->id))
             </div>
         @endforeach
     @endforeach

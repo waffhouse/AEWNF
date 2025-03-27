@@ -1,6 +1,6 @@
-@props(['product'])
+@props(['product', 'modalId' => null])
 
-<x-modal name="product-detail-{{ $product['id'] }}" maxWidth="lg"
+<x-modal name="{{ $modalId ?? 'product-detail-'.$product['id'] }}" maxWidth="lg"
 >
     <div class="p-6">
         <!-- Header with close button -->
@@ -8,7 +8,7 @@
             <h2 class="text-xl font-bold text-gray-900 pr-8">{{ $product['description'] }}</h2>
             <button 
                 type="button" 
-                @click="$dispatch('close-modal', 'product-detail-{{ $product['id'] }}')"
+                @click="$dispatch('close-modal', '{{ $modalId ?? 'product-detail-'.$product['id'] }}')"
                 class="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                 aria-label="Close product details"
             >

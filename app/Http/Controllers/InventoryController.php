@@ -51,27 +51,52 @@ class InventoryController extends Controller
     public function checkCart(Request $request)
     {
         try {
-            // Validate request
-            $request->validate([
-                'id' => 'required|numeric'
-            ]);
-            
-            $id = $request->input('id');
-            $inCart = false;
-            
-            // Check if user has a cart
-            $user = auth()->user();
-            $cart = $user->cart;
-            
-            if ($cart) {
-                // Check if item is in cart
-                $cartItem = $cart->items()->where('inventory_id', $id)->first();
-                $inCart = !is_null($cartItem);
+            // If checking a specific item
+            if ($request->has('id')) {
+                // Validate request
+                $request->validate([
+                    'id' => 'required|numeric'
+                ]);
+                
+                $id = $request->input('id');
+                $inCart = false;
+                
+                // Check if user has a cart
+                $user = auth()->user();
+                $cart = $user->cart;
+                
+                if ($cart) {
+                    // Check if item is in cart
+                    $cartItem = $cart->items()->where('inventory_id', $id)->first();
+                    $inCart = !is_null($cartItem);
+                }
+                
+                return response()->json([
+                    'inCart' => $inCart
+                ]);
+            } 
+            // Return all cart items
+            else {
+                $user = auth()->user();
+                $cart = $user->cart;
+                $items = [];
+                
+                if ($cart) {
+                    $cartItems = $cart->items()->with('inventory')->get();
+                    foreach ($cartItems as $item) {
+                        $items[$item->inventory_id] = [
+                            'quantity' => $item->quantity,
+                            'sku' => $item->inventory->sku,
+                            'description' => $item->inventory->description
+                        ];
+                    }
+                }
+                
+                return response()->json([
+                    'count' => count($items),
+                    'items' => $items
+                ]);
             }
-            
-            return response()->json([
-                'inCart' => $inCart
-            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to check cart status',
