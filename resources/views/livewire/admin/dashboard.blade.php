@@ -186,6 +186,17 @@
                         </x-admin.tab-content>
                         @endif
                     </div>
+                    
+                    <!-- Featured Brands Tab Panel -->
+                    <div wire:key="featured-brands-tab-panel-container">
+                        @if($canManageFeaturedBrands)
+                        <x-admin.tab-content id="featured-brands">
+                            <div id="featured-brands-tab-wrapper">
+                                @livewire('admin.featured-brands.featured-brand-management', [], key('featured-brands-management-'.time()))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

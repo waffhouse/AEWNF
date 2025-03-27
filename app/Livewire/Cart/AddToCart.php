@@ -123,6 +123,7 @@ class AddToCart extends Component
         
         // Emit events to update cart UI components
         $this->dispatch('cart-updated');
+        $this->dispatch('quantity-updated', ['id' => $this->inventoryId, 'quantity' => $this->quantity]);
     }
     
     public function incrementQuantity()

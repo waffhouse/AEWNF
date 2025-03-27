@@ -11,7 +11,7 @@ abstract class AdminComponent extends Component
     
     // Common properties for all admin components
     protected int $perPage = 10;
-    protected string $searchQuery = '';
+    public string $searchQuery = '';
     
     public function mount()
     {

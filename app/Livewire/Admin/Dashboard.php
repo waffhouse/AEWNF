@@ -64,6 +64,13 @@ class Dashboard extends Component
             'icon' => 'chart-bar',
             'color' => 'teal',
             'countModel' => null
+        ],
+        'featured-brands' => [
+            'name' => 'Featured Brands',
+            'permissions' => ['access admin dashboard'],
+            'icon' => 'sparkles',
+            'color' => 'indigo',
+            'countModel' => \App\Models\FeaturedBrand::class
         ]
     ];
     
@@ -179,6 +186,7 @@ class Dashboard extends Component
             'canSyncInventory' => auth()->user()->hasPermissionTo('sync inventory'),
             'canManageOrders' => auth()->user()->hasPermissionTo('manage orders') || auth()->user()->hasPermissionTo('view all orders'),
             'canManageSales' => auth()->user()->hasPermissionTo('view netsuite sales data') || auth()->user()->hasPermissionTo('sync netsuite sales data'),
+            'canManageFeaturedBrands' => auth()->user()->hasPermissionTo('access admin dashboard'),
         ])->layout('layouts.app');
     }
 }

@@ -57,10 +57,101 @@
                         </div>
                     </div>
                     
-                    <!-- Popular Brands Section with Accordion -->
+                    <!-- Your Top Items Section with View More -->
+                    @if(isset($topItems) && $topItems->count() > 0)
+                    <div class="mb-6 bg-white p-4 rounded-lg border border-gray-200 shadow" x-data="{ showMore: false }">
+                        <div class="mb-3">
+                            <h3 class="text-lg font-medium text-gray-800">Your Top Items</h3>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <ul class="divide-y divide-gray-100">
+                                @foreach($topItems as $index => $product)
+                                <li class="py-2" 
+                                    x-show="showMore || {{ $index }} < 4"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform scale-y-95"
+                                    x-transition:enter-end="opacity-100 transform scale-y-100"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 transform scale-y-100"
+                                    x-transition:leave-end="opacity-0 transform scale-y-95"
+                                >
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex-grow pr-4">
+                                            <h5 class="text-xs font-medium text-gray-800 truncate">{{ $product->description }}</h5>
+                                            <span class="text-xs text-gray-900">${{ number_format(Auth::user()->canViewFloridaItems() ? $product->fl_price : $product->ga_price, 2) }}</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            @can('add to cart')
+                                            <div class="flex rounded-md overflow-hidden border border-gray-300 h-7">
+                                                <button 
+                                                    type="button"
+                                                    onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: -1 });"
+                                                    aria-label="Decrease quantity"
+                                                    class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                                >
+                                                    <span class="font-bold text-sm">−</span>
+                                                </button>
+                                                <input 
+                                                    type="number"
+                                                    min="0"
+                                                    max="99"
+                                                    value="{{ isset($cartQuantities[$product->id]) ? $cartQuantities[$product->id] : 0 }}"
+                                                    onchange="window.Livewire.dispatch('add-to-cart-quantity', { id: {{ $product->id }}, quantity: this.value });"
+                                                    class="w-10 text-center text-xs bg-white outline-none border-x border-gray-200 px-1"
+                                                    id="quantity-input-{{ $product->id }}"
+                                                >
+                                                <button
+                                                    type="button"
+                                                    onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: 1 });"
+                                                    aria-label="Increase quantity"
+                                                    class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                                                >
+                                                    <span class="font-bold text-sm">+</span>
+                                                </button>
+                                            </div>
+                                            @endcan
+                                            <button
+                                                type="button"
+                                                x-data
+                                                @click="$dispatch('open-modal', 'top-item-{{ $product->id }}')"
+                                                class="inline-flex items-center px-2 py-1 bg-red-50 border border-red-200 rounded text-xs font-medium text-red-700 hover:bg-red-100 whitespace-nowrap"
+                                            >
+                                                View Details
+                                            </button>
+                                            
+                                            <x-product-detail-modal :product="$product" :modalId="'top-item-'.$product->id" />
+                                        </div>
+                                    </div>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        
+                        <div class="mt-3 pt-2 border-t border-gray-100 flex justify-center items-center space-x-6">
+                            @if($topItems->count() > 4)
+                            <button
+                                type="button"
+                                @click="showMore = !showMore"
+                                class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none"
+                            >
+                                <span x-text="showMore ? 'Show Less' : 'View More Items'"></span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform" :class="showMore ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            @endif
+                            <a href="{{ route('inventory.catalog') }}" class="text-sm text-red-600 hover:text-red-800">
+                                Browse Full Catalog →
+                            </a>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    <!-- Featured Brands Section with Accordion -->
                     @if(isset($popularBrands) && $popularBrands->count() > 0)
                     <div class="mb-6 bg-white p-4 rounded-lg border border-gray-200 shadow">
-                        <h3 class="text-lg font-medium text-gray-800 mb-3">Popular Brands</h3>
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Featured Brands</h3>
                         
                         <div class="space-y-2" x-data="{ openBrand: null }">
                             @foreach($popularBrands as $brand => $products)
@@ -266,6 +357,7 @@
     <script>
         // Listen for cart updates and refresh the quantity inputs
         document.addEventListener('DOMContentLoaded', function() {
+            // Listen for general cart updates
             window.Livewire.on('cart-updated', (data) => {
                 // Request the latest cart data
                 fetch('/api/check-cart')
@@ -289,9 +381,27 @@
                     })
                     .catch(error => console.error('Error fetching cart data:', error));
             });
+            
+            // Listen for specific quantity updates (faster response)
+            window.Livewire.on('quantity-updated', (data) => {
+                const input = document.getElementById('quantity-input-' + data.id);
+                if (input) {
+                    input.value = data.quantity;
+                }
+            });
         });
     </script>
     
+    <!-- Include hidden components for top items -->
+    @if(isset($topItems) && $topItems->count() > 0)
+        @foreach($topItems as $product)
+            <div class="hidden">
+                @livewire('cart.add-to-cart', ['inventoryId' => $product->id, 'variant' => 'compact'], key('top-item-cart-'.$product->id))
+            </div>
+        @endforeach
+    @endif
+    
+    <!-- Include hidden components for featured brands -->
     @foreach($popularBrands as $brand => $products)
         @foreach($products as $product)
             <div class="hidden">

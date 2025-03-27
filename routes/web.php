@@ -28,7 +28,7 @@ Route::get('dashboard', function() {
         }
     }
     
-    // Fetch popular brands
+    // Fetch featured brands (or fall back to popular brands if none are configured)
     $popularBrands = collect([]);
     $user = auth()->user();
     
@@ -45,20 +45,28 @@ Route::get('dashboard', function() {
             };
         }
         
-        // Get popular brands based on sales volume
-        $popularBrandNames = \App\Models\SaleItem::join('inventories', 'sale_items.sku', '=', 'inventories.sku')
-            ->select('inventories.brand', \DB::raw('SUM(sale_items.quantity) as total_quantity'))
-            ->whereNotNull('inventories.brand')
-            ->where('inventories.brand', '!=', '')
-            ->groupBy('inventories.brand')
-            ->orderBy('total_quantity', 'desc')
-            ->take(4) // Increased from 3 to 4 to show more brands
+        // Get featured brands from admin configuration
+        $featuredBrandNames = \App\Models\FeaturedBrand::active()
+            ->ordered()
             ->pluck('brand')
             ->toArray();
         
-        // For each popular brand, get a few products
+        // If no featured brands are configured, fall back to popular brands based on sales
+        if (empty($featuredBrandNames)) {
+            $featuredBrandNames = \App\Models\SaleItem::join('inventories', 'sale_items.sku', '=', 'inventories.sku')
+                ->select('inventories.brand', \DB::raw('SUM(sale_items.quantity) as total_quantity'))
+                ->whereNotNull('inventories.brand')
+                ->where('inventories.brand', '!=', '')
+                ->groupBy('inventories.brand')
+                ->orderBy('total_quantity', 'desc')
+                ->take(4)
+                ->pluck('brand')
+                ->toArray();
+        }
+        
+        // For each brand, get a few products
         $brandProducts = [];
-        foreach ($popularBrandNames as $brand) {
+        foreach ($featuredBrandNames as $brand) {
             $products = \App\Models\Inventory::where('brand', $brand)
                 ->where('quantity', '>', 0)
                 ->when($stateCondition, $stateCondition)
@@ -76,18 +84,27 @@ Route::get('dashboard', function() {
     
     // Get cart quantities for products
     $cartQuantities = [];
+    $topItems = collect([]);
+    
     if (auth()->check()) {
+        $user = auth()->user();
         $cartService = app(\App\Services\CartService::class);
         $cartItems = $cartService->getCartItems();
         
         foreach ($cartItems as $inventoryId => $item) {
             $cartQuantities[$inventoryId] = $item['quantity'];
         }
+        
+        // Get user's top purchased items
+        if ($user->customer_number) {
+            $topItems = $user->getTopPurchasedItems(10); // Get top 10 items
+        }
     }
     
     return view('dashboard', [
         'popularBrands' => $popularBrands,
-        'cartQuantities' => $cartQuantities
+        'cartQuantities' => $cartQuantities,
+        'topItems' => $topItems
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

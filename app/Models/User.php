@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -126,5 +127,40 @@ class User extends Authenticatable
         
         // Default to Florida price for staff/admin (who can view both states)
         return 'fl_price';
+    }
+    
+    /**
+     * Get this user's most frequently purchased items.
+     * 
+     * @param int $limit Maximum number of items to return
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getTopPurchasedItems($limit = 5)
+    {
+        if (!$this->customer_number) {
+            return collect([]);
+        }
+        
+        // Find all sales for this customer
+        $salesIds = Sale::where('entity_id', $this->customer_number)
+            ->pluck('id');
+            
+        if ($salesIds->isEmpty()) {
+            return collect([]);
+        }
+        
+        // Get top items by quantity purchased
+        return SaleItem::whereIn('sale_id', $salesIds)
+            ->select('sku', \DB::raw('SUM(quantity) as total_quantity'))
+            ->groupBy('sku')
+            ->orderBy('total_quantity', 'desc')
+            ->limit($limit)
+            ->with('inventory') // Eager load inventory details
+            ->get()
+            ->map(function ($item) {
+                return $item->inventory; // Just return the inventory object
+            })
+            ->filter() // Remove any null inventory items
+            ->values(); // Re-index the collection
     }
 }
