@@ -15,9 +15,69 @@ Route::get('/', function () {
     return redirect()->route('inventory.catalog');
 })->middleware('verify.age');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Dashboard route with controller
+Route::get('dashboard', function() {
+    // Handle clear cart action
+    if (request()->has('clear_cart') && auth()->check()) {
+        $user = auth()->user();
+        $cart = $user->cart;
+        
+        if ($cart) {
+            $cart->items()->delete();
+            session()->flash('message', 'Your cart has been cleared.');
+        }
+    }
+    
+    // Fetch popular brands
+    $popularBrands = collect([]);
+    $user = auth()->user();
+    
+    if ($user) {
+        // Set up state restrictions for queries
+        $stateCondition = null;
+        if ($user->canViewFloridaItems() && !$user->canViewGeorgiaItems()) {
+            $stateCondition = function($q) {
+                $q->availableInFlorida();
+            };
+        } elseif ($user->canViewGeorgiaItems() && !$user->canViewFloridaItems()) {
+            $stateCondition = function($q) {
+                $q->availableInGeorgia();
+            };
+        }
+        
+        // Get popular brands based on sales volume
+        $popularBrandNames = \App\Models\SaleItem::join('inventories', 'sale_items.sku', '=', 'inventories.sku')
+            ->select('inventories.brand', \DB::raw('SUM(sale_items.quantity) as total_quantity'))
+            ->whereNotNull('inventories.brand')
+            ->where('inventories.brand', '!=', '')
+            ->groupBy('inventories.brand')
+            ->orderBy('total_quantity', 'desc')
+            ->take(4) // Increased from 3 to 4 to show more brands
+            ->pluck('brand')
+            ->toArray();
+        
+        // For each popular brand, get a few products
+        $brandProducts = [];
+        foreach ($popularBrandNames as $brand) {
+            $products = \App\Models\Inventory::where('brand', $brand)
+                ->where('quantity', '>', 0)
+                ->when($stateCondition, $stateCondition)
+                ->orderBy('description')
+                ->take(3)
+                ->get();
+                
+            if ($products->count() > 0) {
+                $brandProducts[$brand] = $products;
+            }
+        }
+        
+        $popularBrands = collect($brandProducts);
+    }
+    
+    return view('dashboard', [
+        'popularBrands' => $popularBrands
+    ]);
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
