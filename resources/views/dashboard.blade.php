@@ -76,12 +76,12 @@
                                     x-transition:leave-start="opacity-100 transform scale-y-100"
                                     x-transition:leave-end="opacity-0 transform scale-y-95"
                                 >
-                                    <div class="flex justify-between items-center">
-                                        <div class="flex-grow pr-4">
-                                            <h5 class="text-xs font-medium text-gray-800 truncate">{{ $product->description }}</h5>
+                                    <div class="flex flex-col sm:flex-row">
+                                        <div class="flex-grow pr-2 mb-2 sm:mb-0">
+                                            <h5 class="text-xs font-medium text-gray-800 truncate max-w-[180px] sm:max-w-full">{{ $product->description }}</h5>
                                             <span class="text-xs text-gray-900">${{ number_format(Auth::user()->canViewFloridaItems() ? $product->fl_price : $product->ga_price, 2) }}</span>
                                         </div>
-                                        <div class="flex items-center space-x-2">
+                                        <div class="flex items-center space-x-2 self-start sm:self-center">
                                             @can('add to cart')
                                             <div class="flex rounded-md overflow-hidden border border-gray-300 h-7">
                                                 <button 
