@@ -39,6 +39,8 @@
 - **Sales Data Sync**: `php artisan netsuite:sync-sales` (syncs sales transactions)
   - Optional parameters: `--date=YYYY-MM-DD` to filter by specific date
   - Optional parameters: `--size=1000` to set internal page size (default: 1000)
+- **API Timeout**: Default timeout is set to 300 seconds (5 minutes) for large syncs. Configure with `NETSUITE_TIMEOUT` in .env
+- **Execution Time**: PHP execution time limit is automatically increased to 300 seconds during sync operations
 - **Test NetSuite Connection**: `php artisan netsuite:test-sales` (verifies connection to sales RESTlet)
 - **PDF Generation**:
   - **Pick Tickets**: For warehouse orders, use `/orders/{id}/pick-ticket` route
@@ -49,6 +51,7 @@
     - `NETSUITE_TOKEN_ID`, `NETSUITE_TOKEN_SECRET`
     - `NETSUITE_SCRIPT_ID`, `NETSUITE_DEPLOY_ID` (for inventory)
     - `NETSUITE_SALES_DATA_SCRIPT_ID`, `NETSUITE_SALES_DATA_DEPLOY_ID` (for sales)
+    - `NETSUITE_TIMEOUT` (API timeout in seconds, default: 300)
   - Integration Model: OAuth 1.0a for authentication with script/deploy IDs to identify RESTlets
 - **RESTlet Implementation**:
   - Inventory RESTlet: Returns paginated inventory data from NetSuite

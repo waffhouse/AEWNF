@@ -29,13 +29,15 @@ class NetSuiteService
      * @param array $data Data to send with the request
      * @param string|null $scriptId Override default script ID
      * @param string|null $deployId Override default deploy ID
+     * @param int|null $timeout Override default timeout (in seconds)
      * @return mixed Response data (array or string)
      * @throws \Exception
      */
-    public function callRestlet(string $method, array $data = [], ?string $scriptId = null, ?string $deployId = null): mixed
+    public function callRestlet(string $method, array $data = [], ?string $scriptId = null, ?string $deployId = null, ?int $timeout = null): mixed
     {
         $scriptId = $scriptId ?? $this->config['script_id'];
         $deployId = $deployId ?? $this->config['deploy_id'];
+        $timeout = $timeout ?? $this->config['timeout'];
 
         if (empty($scriptId) || empty($deployId)) {
             Log::error('NetSuite configuration error', [
@@ -56,6 +58,7 @@ class NetSuiteService
             'url' => $url,
             'script_id' => $scriptId,
             'deploy_id' => $deployId,
+            'timeout' => $timeout,
             'data' => $data
         ]);
 
@@ -63,7 +66,7 @@ class NetSuiteService
             $response = $this->client->request($method, $url, [
                 'headers' => $headers,
                 'json' => $data,
-                'timeout' => $this->config['timeout'],
+                'timeout' => $timeout,
             ]);
 
             $content = $response->getBody()->getContents();
@@ -108,7 +111,14 @@ class NetSuiteService
      */
     public function getInventory(array $params = []): mixed
     {
-        $result = $this->callRestlet('GET', $params);
+        // Extract timeout if it's in the params
+        $timeout = null;
+        if (isset($params['timeout'])) {
+            $timeout = $params['timeout'];
+            unset($params['timeout']);
+        }
+        
+        $result = $this->callRestlet('GET', $params, null, null, $timeout);
         
         // Log what we got back for debugging
         Log::debug('NetSuite inventory response', ['type' => gettype($result), 'data' => $result]);

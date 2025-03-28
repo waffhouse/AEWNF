@@ -83,6 +83,9 @@ class SalesSync extends Component
     {
         $this->authorize('sync netsuite sales data');
         
+        // Increase PHP execution time limit to 5 minutes
+        set_time_limit(300);
+        
         $this->isLoading = true;
         $this->results = null;
         $this->error = null;
@@ -129,6 +132,9 @@ class SalesSync extends Component
     public function directClearData(SalesSyncService $salesSyncService)
     {
         $this->authorize('sync netsuite sales data');
+        
+        // Increase PHP execution time limit to 5 minutes 
+        set_time_limit(300);
         
         $this->isLoading = true;
         $this->results = null;

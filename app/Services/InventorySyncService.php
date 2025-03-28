@@ -50,7 +50,7 @@ class InventorySyncService
         
         try {
             // Fetch inventory data
-            $inventoryData = $this->fetchInventoryData();
+            $inventoryData = $this->fetchInventoryData($options);
             $this->stats['total'] = count($inventoryData);
             
             // Process inventory in a transaction
@@ -94,9 +94,9 @@ class InventorySyncService
      * @return array
      * @throws Exception If NetSuite returns invalid data
      */
-    protected function fetchInventoryData(): array
+    protected function fetchInventoryData(array $options = []): array
     {
-        $inventoryData = $this->netSuiteService->getInventory();
+        $inventoryData = $this->netSuiteService->getInventory($options);
         
         if (!is_array($inventoryData)) {
             throw new Exception('Invalid response from NetSuite: ' . 

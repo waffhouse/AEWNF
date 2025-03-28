@@ -13,7 +13,7 @@ class SyncNetSuiteInventory extends Command
      *
      * @var string
      */
-    protected $signature = 'netsuite:sync-inventory {--force : Force sync even if last sync was recent}';
+    protected $signature = 'netsuite:sync-inventory {--force : Force sync even if last sync was recent} {--timeout= : Custom timeout in seconds for large syncs (default: 300)}';
 
     /**
      * The console command description.
@@ -27,7 +27,13 @@ class SyncNetSuiteInventory extends Command
      */
     public function handle(InventorySyncService $syncService)
     {
+        // Increase PHP execution time limit to match our timeout
+        $timeoutOption = $this->option('timeout');
+        $executionTimeLimit = $timeoutOption ? (int)$timeoutOption : 300;
+        set_time_limit($executionTimeLimit);
+        
         $this->info('Starting NetSuite inventory sync...');
+        $this->info("PHP execution time limit set to {$executionTimeLimit} seconds");
         $this->newLine();
         
         try {

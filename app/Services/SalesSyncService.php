@@ -80,9 +80,17 @@ class SalesSyncService
     
     protected function fetchSalesData(array $options = []): array
     {
+        // Extract and remove timeout from options to pass separately
+        $timeout = null;
+        if (isset($options['timeout'])) {
+            $timeout = $options['timeout'];
+            unset($options['timeout']);
+        }
+        
         // Add debugging for connection parameters
         Log::info("Calling NetSuite RESTlet for sales data:", [
             'options' => $options,
+            'timeout' => $timeout ?? config('netsuite.timeout') . ' (default)',
             'script_id' => config('netsuite.sales_script_id') ?? 'not set',
             'deploy_id' => config('netsuite.sales_deploy_id') ?? 'not set'
         ]);
@@ -92,7 +100,8 @@ class SalesSyncService
             'GET', 
             $options, 
             '1270', // Script ID from the provided URL
-            '2'     // Deploy ID from the provided URL
+            '2',    // Deploy ID from the provided URL
+            $timeout
         );
         
         if (!is_array($result)) {

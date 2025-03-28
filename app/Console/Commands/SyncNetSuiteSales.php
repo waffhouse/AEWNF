@@ -15,7 +15,8 @@ class SyncNetSuiteSales extends Command
      */
     protected $signature = 'netsuite:sync-sales
                            {--size= : Items per page in NetSuite (internal)}
-                           {--date= : Transaction date to filter by (YYYY-MM-DD)}';
+                           {--date= : Transaction date to filter by (YYYY-MM-DD)}
+                           {--timeout= : Custom timeout in seconds for large syncs (default: 300)}';
 
     /**
      * The console command description.
@@ -29,7 +30,13 @@ class SyncNetSuiteSales extends Command
      */
     public function handle(SalesSyncService $salesSyncService)
     {
+        // Increase PHP execution time limit to match our timeout
+        $timeoutOption = $this->option('timeout');
+        $executionTimeLimit = $timeoutOption ? (int)$timeoutOption : 300;
+        set_time_limit($executionTimeLimit);
+        
         $this->info('Starting NetSuite sales sync...');
+        $this->info("PHP execution time limit set to {$executionTimeLimit} seconds");
         
         $options = $this->buildOptions();
         
@@ -65,6 +72,10 @@ class SyncNetSuiteSales extends Command
         
         if ($this->option('date') !== null) {
             $options['date'] = $this->option('date');
+        }
+        
+        if ($this->option('timeout') !== null) {
+            $options['timeout'] = (int) $this->option('timeout');
         }
         
         return $options;

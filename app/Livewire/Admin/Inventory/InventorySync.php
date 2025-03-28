@@ -81,6 +81,9 @@ class InventorySync extends AdminComponent
             return;
         }
         
+        // Increase PHP execution time limit to 5 minutes
+        set_time_limit(300);
+        
         $this->syncRunning = true;
         $this->syncResults = null;
         $this->dispatch('message', 'Starting inventory sync process...');

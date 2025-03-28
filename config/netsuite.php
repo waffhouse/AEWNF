@@ -25,5 +25,5 @@ return [
     'sales_restlet_url' => env('NETSUITE_SALES_RESTLET_URL', 'https://3984077.restlets.api.netsuite.com/app/site/hosting/restlet.nl'),
     
     // Request settings with sensible defaults
-    'timeout' => env('NETSUITE_TIMEOUT', 30),
+    'timeout' => env('NETSUITE_TIMEOUT', 300), // Increased from 30s to 300s (5 minutes) for large syncs
 ];
