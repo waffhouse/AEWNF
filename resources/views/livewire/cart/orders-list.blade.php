@@ -25,9 +25,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Order Details Modal -->
-    @if($viewingOrderDetails && $selectedOrder)
-        <x-order-details-modal :order="$selectedOrder" />
-    @endif
 </div>

@@ -49,6 +49,15 @@
             <main>
                 {{ $slot }}
             </main>
+            
+            <!-- Global Modal Components - Available on all pages using this layout -->
+            <!-- Used for viewing order details across the dashboard and order history pages -->
+            <livewire:modals.order-detail-modal />
+            <!-- Used for viewing transaction details across the dashboard and sales history pages -->
+            <livewire:modals.transaction-detail-modal />
+            
+            <!-- Scroll to Top Component -->
+            <x-scroll-to-top />
         </div>
     </body>
 </html>

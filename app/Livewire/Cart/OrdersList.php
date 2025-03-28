@@ -22,7 +22,7 @@ class OrdersList extends Component
     }
 
     /**
-     * View order details - can be called directly or via event
+     * View order details - redirected to use the global modal system
      * 
      * @param int|array $orderId The order ID or event data containing orderId
      */
@@ -34,23 +34,9 @@ class OrdersList extends Component
             $orderId = $orderId['orderId'];
         }
         
-        $this->selectedOrder = Order::with(['items.inventory', 'user'])
-            ->where('user_id', Auth::id())
-            ->findOrFail($orderId);
-        $this->viewingOrderDetails = true;
-    }
-    
-    /**
-     * Close order details modal
-     */
-    #[On('closeOrderDetails')]
-    public function closeOrderDetails()
-    {
-        // Remove the body lock through inline JavaScript for immediate effect
-        $this->js('document.body.classList.remove("overflow-hidden")'); 
-        
-        $this->viewingOrderDetails = false;
-        $this->selectedOrder = null;
+        // Instead of loading the order here, dispatch the global event
+        // that will be caught by the global OrderDetailModal component
+        $this->dispatch('showOrderDetail', $orderId);
     }
 
     #[Title('Your Orders')]

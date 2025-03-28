@@ -1,14 +1,25 @@
 @props(['product', 'modalId' => null])
 
-<x-modal name="{{ $modalId ?? 'product-detail-'.$product['id'] }}" maxWidth="lg"
+@php
+    // Determine if product is an object or array and extract properties accordingly
+    $isArray = is_array($product);
+    
+    // Get ID in a way that works for both arrays and objects
+    $productId = $isArray ? $product['id'] : $product->id;
+    
+    // Derive modal ID
+    $derivedModalId = $modalId ?? ('product-detail-' . $productId);
+@endphp
+
+<x-modal name="{{ $derivedModalId }}" maxWidth="lg"
 >
     <div class="p-6">
         <!-- Header with close button -->
         <div class="flex justify-between items-start mb-4">
-            <h2 class="text-xl font-bold text-gray-900 pr-8">{{ $product['description'] }}</h2>
+            <h2 class="text-xl font-bold text-gray-900 pr-8">{{ $isArray ? $product['description'] : $product->description }}</h2>
             <button 
                 type="button" 
-                @click="$dispatch('close-modal', '{{ $modalId ?? 'product-detail-'.$product['id'] }}')"
+                @click="$dispatch('close-modal', '{{ $derivedModalId }}')"
                 class="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                 aria-label="Close product details"
             >
@@ -42,17 +53,17 @@
                     <div class="space-y-2">
                         <div class="flex items-start">
                             <span class="text-xs font-semibold text-gray-500 w-24">Item #:</span>
-                            <span class="text-sm font-medium text-gray-800">{{ $product['sku'] }}</span>
+                            <span class="text-sm font-medium text-gray-800">{{ $isArray ? ($product['sku'] ?? '') : ($product->sku ?? '') }}</span>
                         </div>
                         
                         <div class="flex items-start">
                             <span class="text-xs font-semibold text-gray-500 w-24">Brand:</span>
-                            <span class="text-sm font-medium text-gray-800">{{ $product['brand'] }}</span>
+                            <span class="text-sm font-medium text-gray-800">{{ $isArray ? ($product['brand'] ?? '') : ($product->brand ?? '') }}</span>
                         </div>
                         
                         <div class="flex items-start">
                             <span class="text-xs font-semibold text-gray-500 w-24">Category:</span>
-                            <span class="text-sm text-gray-700">{{ $product['class'] }}</span>
+                            <span class="text-sm text-gray-700">{{ $isArray ? ($product['class'] ?? '') : ($product->class ?? '') }}</span>
                         </div>
                         
                         <div class="flex items-start">

@@ -1,8 +1,13 @@
-{{-- This component has been deprecated in favor of the global OrderDetailModal component in App\Livewire\Modals\OrderDetailModal --}}
+<div
+    x-data="{}"
+    x-init=""
+    x-on:before-render="document.body.classList.remove('overflow-hidden');"
+>
+@if($show && $order)
 <div
     x-data="{}"
     x-init="$nextTick(() => { document.body.classList.add('overflow-hidden'); })"
-    x-on:keydown.escape.window="$wire.closeOrderDetails()"
+    x-on:keydown.escape.window="$wire.close()"
     class="fixed inset-0 z-50 overflow-y-auto"
     aria-labelledby="modal-title"
     role="dialog"
@@ -21,7 +26,7 @@
                         Order #{{ $order->id }} Details
                     </h3>
                     <button 
-                        wire:click="closeOrderDetails" 
+                        wire:click="close" 
                         class="text-gray-400 hover:text-gray-500"
                     >
                         <span class="sr-only">Close</span>
@@ -37,7 +42,7 @@
                 <div class="mb-4 pb-4 border-b">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <div class="flex items-center">
-                            <p class="text-sm text-gray-600 mr-2">Date: <span class="font-medium">@formatdate($order->created_at)</span></p>
+                            <p class="text-sm text-gray-600 mr-2">Date: <span class="font-medium">{{ $order->created_at->format('M d, Y') }}</span></p>
                         </div>
                         <div class="flex items-center">
                             <p class="text-sm text-gray-600 mr-2">Status:</p>
@@ -65,7 +70,7 @@
                             @endif
                         </div>
                         <div class="text-right">
-                            <p class="text-sm text-gray-600">Items: <span class="font-medium">{{ $order->getTotalItems() }}</span></p>
+                            <p class="text-sm text-gray-600">Items: <span class="font-medium">{{ $order->items->sum('quantity') }}</span></p>
                             <p class="font-bold text-gray-900">Total: ${{ number_format($order->total, 2) }}</p>
                         </div>
                     </div>
@@ -168,6 +173,22 @@
                     </a>
                 @endcan
                 
+                <!-- Complete Order Button - Only for admins with pending orders -->
+                @can('manage orders')
+                    @if($order->status === \App\Models\Order::STATUS_PENDING)
+                        <button 
+                            wire:click="updateStatus('{{ \App\Models\Order::STATUS_COMPLETED }}')"
+                            type="button"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Complete Order
+                        </button>
+                    @endif
+                @endcan
+                
                 <!-- Continue Shopping Button - Only visible to customers -->
                 @if(!auth()->user()->can('manage orders'))
                     <a 
@@ -179,7 +200,7 @@
                 @endif
                 
                 <button 
-                    wire:click="closeOrderDetails" 
+                    wire:click="close" 
                     type="button" 
                     class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
@@ -188,4 +209,6 @@
             </div>
         </div>
     </div>
+</div>
+@endif
 </div>

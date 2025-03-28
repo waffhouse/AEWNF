@@ -76,53 +76,11 @@
                                     x-transition:leave-start="opacity-100 transform scale-y-100"
                                     x-transition:leave-end="opacity-0 transform scale-y-95"
                                 >
-                                    <div class="flex flex-col sm:flex-row">
-                                        <div class="flex-grow pr-2 mb-2 sm:mb-0">
-                                            <h5 class="text-xs font-medium text-gray-800 truncate max-w-[180px] sm:max-w-full">{{ $product->description }}</h5>
-                                            <span class="text-xs text-gray-900">${{ number_format(Auth::user()->canViewFloridaItems() ? $product->fl_price : $product->ga_price, 2) }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2 self-start sm:self-center">
-                                            @can('add to cart')
-                                            <div class="flex rounded-md overflow-hidden border border-gray-300 h-7">
-                                                <button 
-                                                    type="button"
-                                                    onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: -1 });"
-                                                    aria-label="Decrease quantity"
-                                                    class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                                >
-                                                    <span class="font-bold text-sm">−</span>
-                                                </button>
-                                                <input 
-                                                    type="number"
-                                                    min="0"
-                                                    max="99"
-                                                    value="{{ isset($cartQuantities[$product->id]) ? $cartQuantities[$product->id] : 0 }}"
-                                                    onchange="window.Livewire.dispatch('add-to-cart-quantity', { id: {{ $product->id }}, quantity: this.value });"
-                                                    class="w-10 text-center text-xs bg-white outline-none border-x border-gray-200 px-1"
-                                                    id="quantity-input-{{ $product->id }}"
-                                                >
-                                                <button
-                                                    type="button"
-                                                    onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: 1 });"
-                                                    aria-label="Increase quantity"
-                                                    class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                                >
-                                                    <span class="font-bold text-sm">+</span>
-                                                </button>
-                                            </div>
-                                            @endcan
-                                            <button
-                                                type="button"
-                                                x-data
-                                                @click="$dispatch('open-modal', 'top-item-{{ $product->id }}')"
-                                                class="inline-flex items-center px-2 py-1 bg-red-50 border border-red-200 rounded text-xs font-medium text-red-700 hover:bg-red-100 whitespace-nowrap"
-                                            >
-                                                View Details
-                                            </button>
-                                            
-                                            <x-product-detail-modal :product="$product" :modalId="'top-item-'.$product->id" />
-                                        </div>
-                                    </div>
+                                    <x-product-item 
+                                        :product="$product" 
+                                        variant="compact" 
+                                        :itemKey="'top-item-'.$product->id" 
+                                    />
                                 </li>
                                 @endforeach
                             </ul>
@@ -195,53 +153,11 @@
                                     <ul class="divide-y divide-gray-100">
                                         @foreach($products as $product)
                                         <li class="py-2 px-3">
-                                            <div class="flex flex-col sm:flex-row">
-                                                <div class="flex-grow pr-2 mb-2 sm:mb-0">
-                                                    <h5 class="text-xs font-medium text-gray-800 truncate max-w-[180px] sm:max-w-full">{{ $product->description }}</h5>
-                                                    <span class="text-xs text-gray-900">${{ number_format(Auth::user()->canViewFloridaItems() ? $product->fl_price : $product->ga_price, 2) }}</span>
-                                                </div>
-                                                <div class="flex items-center space-x-2 self-start sm:self-center">
-                                                    @can('add to cart')
-                                                    <div class="flex rounded-md overflow-hidden border border-gray-300 h-7">
-                                                        <button 
-                                                            type="button"
-                                                            onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: -1 });"
-                                                            aria-label="Decrease quantity"
-                                                            class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                                        >
-                                                            <span class="font-bold text-sm">−</span>
-                                                        </button>
-                                                        <input 
-                                                            type="number"
-                                                            min="0"
-                                                            max="99"
-                                                            value="{{ isset($cartQuantities[$product->id]) ? $cartQuantities[$product->id] : 0 }}"
-                                                            onchange="window.Livewire.dispatch('add-to-cart-quantity', { id: {{ $product->id }}, quantity: this.value });"
-                                                            class="w-10 text-center text-xs bg-white outline-none border-x border-gray-200 px-1"
-                                                            id="quantity-input-{{ $product->id }}"
-                                                        >
-                                                        <button
-                                                            type="button"
-                                                            onclick="window.Livewire.dispatch('add-to-cart-increment', { id: {{ $product->id }}, change: 1 });"
-                                                            aria-label="Increase quantity"
-                                                            class="w-6 bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                                        >
-                                                            <span class="font-bold text-sm">+</span>
-                                                        </button>
-                                                    </div>
-                                                    @endcan
-                                                    <button
-                                                        type="button"
-                                                        x-data
-                                                        @click="$dispatch('open-modal', 'dashboard-product-{{ $product->id }}')"
-                                                        class="inline-flex items-center px-2 py-1 bg-red-50 border border-red-200 rounded text-xs font-medium text-red-700 hover:bg-red-100 whitespace-nowrap"
-                                                    >
-                                                        View Details
-                                                    </button>
-                                                    
-                                                    <x-product-detail-modal :product="$product" :modalId="'dashboard-product-'.$product->id" />
-                                                </div>
-                                            </div>
+                                            <x-product-item 
+                                                :product="$product" 
+                                                variant="compact" 
+                                                :itemKey="'featured-brand-'.$product->id" 
+                                            />
                                         </li>
                                         @endforeach
                                     </ul>
@@ -283,13 +199,24 @@
                                                 </div>
                                                 <div class="text-right">
                                                     <span class="block text-sm font-medium">${{ number_format($order->total, 2) }}</span>
-                                                    <span class="inline-block px-2 py-1 text-xs rounded 
-                                                        {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                                        {{ $order->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
-                                                        {{ $order->status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
-                                                        {{ ucfirst($order->status) }}
-                                                    </span>
+                                                    <div class="flex items-center justify-end space-x-2">
+                                                        <span class="inline-block px-2 py-1 text-xs rounded 
+                                                            {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                            {{ $order->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
+                                                            {{ $order->status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
+                                                            {{ ucfirst($order->status) }}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onclick="Livewire.dispatch('showOrderDetail', [{{ $order->id }}])"
+                                                            class="text-xs text-blue-600 hover:text-blue-800 underline"
+                                                        >
+                                                            Details
+                                                        </button>
+                                                    </div>
                                                 </div>
+                                                
+<!-- Order details now handled by the global OrderDetailModal component -->
                                             </div>
                                         @endforeach
                                     </div>
@@ -326,17 +253,28 @@
                                                 </div>
                                                 <div class="text-right flex flex-col items-end">
                                                     <span class="block text-sm font-medium">${{ number_format($transaction->total_amount, 2) }}</span>
-                                                    <a 
-                                                        href="{{ route('sales.invoice', $transaction->id) }}"
-                                                        target="_blank" 
-                                                        class="text-xs text-red-600 hover:text-red-800 mt-1 inline-flex items-center"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                        </svg>
-                                                        Invoice
-                                                    </a>
+                                                    <div class="flex items-center mt-1 space-x-2">
+                                                        <button
+                                                            type="button"
+                                                            onclick="Livewire.dispatch('showTransactionDetail', [{{ $transaction->id }}])"
+                                                            class="text-xs text-blue-600 hover:text-blue-800 underline"
+                                                        >
+                                                            Details
+                                                        </button>
+                                                        <a 
+                                                            href="{{ route('sales.invoice', $transaction->id) }}"
+                                                            target="_blank" 
+                                                            class="text-xs text-red-600 hover:text-red-800 inline-flex items-center"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                            </svg>
+                                                            Invoice
+                                                        </a>
+                                                    </div>
                                                 </div>
+                                                
+                                                <!-- Transaction details now handled by the global TransactionDetailModal component -->
                                             </div>
                                         @endforeach
                                     </div>
@@ -392,21 +330,5 @@
         });
     </script>
     
-    <!-- Include hidden components for top items -->
-    @if(isset($topItems) && $topItems->count() > 0)
-        @foreach($topItems as $product)
-            <div class="hidden">
-                @livewire('cart.add-to-cart', ['inventoryId' => $product->id, 'variant' => 'compact'], key('top-item-cart-'.$product->id))
-            </div>
-        @endforeach
-    @endif
-    
-    <!-- Include hidden components for featured brands -->
-    @foreach($popularBrands as $brand => $products)
-        @foreach($products as $product)
-            <div class="hidden">
-                @livewire('cart.add-to-cart', ['inventoryId' => $product->id, 'variant' => 'compact'], key('cart-component-'.$product->id))
-            </div>
-        @endforeach
-    @endforeach
+    <!-- Hidden components are no longer needed since they're included in the product-item component -->
 </x-app-layout>

@@ -56,7 +56,8 @@ class AddToCart extends Component
             return;
         }
         
-        $this->quantity = (int)$quantity;
+        // Handle empty or non-numeric values
+        $this->quantity = empty($quantity) || !is_numeric($quantity) ? 0 : (int)$quantity;
         $this->updatedQuantity();
     }
     
@@ -147,8 +148,8 @@ class AddToCart extends Component
     
     public function updatedQuantity()
     {
-        // Validate quantity input is a number
-        if (!is_numeric($this->quantity)) {
+        // Validate quantity input is a number and not empty
+        if (empty($this->quantity) || !is_numeric($this->quantity)) {
             $this->quantity = 0;
             return;
         }

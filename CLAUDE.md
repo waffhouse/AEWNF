@@ -96,3 +96,29 @@
   - Use consistent fonts, sizing, and spacing throughout
   - Include proper document metadata (title, number, date)
   - For financial documents, right-align monetary values
+
+## Global Components
+The application includes several reusable global components you should use for consistency:
+
+### Blade Components
+- **`<x-product-item>`**: Product display with 3 variants (default, compact, list). Use for all product displays.
+  - Props: product, variant, showDetails, showQuantity, showPrice, itemKey
+  - Example: `<x-product-item :product="$product" variant="compact" />`
+- **`<x-product-detail-modal>`**: Product detail modal automatically included in product-item
+  - Props: product, modalId
+- **`<x-orders-list>`**: Reusable order listing with responsive design
+  - Props: orders, isAdmin
+
+### Livewire Components
+- **`<livewire:modals.order-detail-modal />`**: Global order detail modal (registered in app layout)
+- **`<livewire:modals.transaction-detail-modal />`**: Global transaction detail modal (registered in app layout)
+- **`<livewire:cart.add-to-cart />`**: Cart functionality with quantity controls
+  - Props: inventory-id, variant, quantity-input-type, show-quantity
+- **`<livewire:cart.cart-counter />`**: Cart item counter for navigation
+
+### Global Events
+- **showOrderDetail**: Display order details (`Livewire.dispatch('showOrderDetail', [orderId])`)
+- **showTransactionDetail**: Display transaction details (`Livewire.dispatch('showTransactionDetail', [transactionId])`)
+- **add-to-cart-increment**: Increment cart quantity (`Livewire.dispatch('add-to-cart-increment', { id, change })`)
+- **add-to-cart-quantity**: Set cart quantity (`Livewire.dispatch('add-to-cart-quantity', { id, quantity })`)
+- **cart-updated**: Listen for cart updates to refresh UI

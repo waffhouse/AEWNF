@@ -23,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(CartService::class, function ($app) {
             return new CartService();
         });
+        
+        // Register OrderService as a singleton
+        $this->app->singleton(\App\Services\OrderService::class, function ($app) {
+            return new \App\Services\OrderService();
+        });
     }
 
     /**
@@ -42,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('cart.add-to-cart', \App\Livewire\Cart\AddToCart::class);
         \Livewire\Livewire::component('cart.cart-page', \App\Livewire\Cart\CartPage::class);
         \Livewire\Livewire::component('cart.cart-counter', \App\Livewire\Cart\CartCounter::class);
+        
+        // Modal components
+        \Livewire\Livewire::component('modals.order-detail-modal', \App\Livewire\Modals\OrderDetailModal::class);
+        \Livewire\Livewire::component('modals.transaction-detail-modal', \App\Livewire\Modals\TransactionDetailModal::class);
         
         // Set default timezone for Carbon
         Carbon::setToStringFormat('m/d/Y g:i A');

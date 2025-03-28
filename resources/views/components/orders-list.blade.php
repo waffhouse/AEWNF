@@ -117,7 +117,7 @@
                         <div class="flex flex-wrap gap-2">
                             <!-- View Details Button -->
                             <button 
-                                onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ $orderId }} })" 
+                                onclick="Livewire.dispatch('showOrderDetail', [{{ $orderId }}])" 
                                 class="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -279,7 +279,7 @@
                                     <div class="flex space-x-2">
                                         <!-- View Details Button -->
                                         <button 
-                                            onclick="Livewire.dispatch('viewOrderDetails', { orderId: {{ $orderId }} })" 
+                                            onclick="Livewire.dispatch('showOrderDetail', [{{ $orderId }}])" 
                                             class="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
