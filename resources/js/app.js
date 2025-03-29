@@ -1,8 +1,6 @@
 import './bootstrap';
-import Chart from 'chart.js/auto';
 
-// Make Chart globally available
-window.Chart = Chart;
+// Chart.js removed as it's no longer needed
 
 // Fix for Alpine.js components during navigation
 document.addEventListener('livewire:navigating', () => {
