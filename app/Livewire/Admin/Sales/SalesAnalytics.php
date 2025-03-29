@@ -214,8 +214,10 @@ class SalesAnalytics extends Component
     private function logDataAvailability()
     {
         // Log counts to help debug what's available
-        $classCount = SaleItem::whereNotNull('class')->count();
-        $brandCount = SaleItem::whereNotNull('brand')->count();
+        $classCount = SaleItem::join('inventories', 'sale_items.sku', '=', 'inventories.sku')
+            ->whereNotNull('inventories.class')->count();
+        $brandCount = SaleItem::join('inventories', 'sale_items.sku', '=', 'inventories.sku')
+            ->whereNotNull('inventories.brand')->count();
         $skuCount = SaleItem::whereNotNull('sku')->count();
         $itemDescCount = SaleItem::whereNotNull('item_description')->count();
         
