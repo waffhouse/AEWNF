@@ -22,7 +22,8 @@
             // Handle hash changes from browser back/forward buttons
             window.addEventListener('hashchange', () => {
                 const hashValue = window.location.hash.substring(1);
-                if (hashValue && this.activeTab !== hashValue) {
+                // Only process if the hash value is actually valid
+                if (hashValue && Object.keys($wire.accessibleTabs).includes(hashValue)) {
                     this.activeTab = hashValue;
                     $wire.setActiveTab(hashValue);
                 }

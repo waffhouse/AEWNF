@@ -60,10 +60,14 @@ class SalesSync extends Component
             // Get count of items
             $totalItems = \App\Models\SaleItem::count() ?: 0;
             
+            // Calculate net transaction total (sum of all transaction amounts)
+            $netTotal = \App\Models\Sale::sum('total_amount') ?: 0;
+            
             // Compile all stats
             $this->lastSyncStats = [
                 'total_sales' => $totalSales,
                 'total_items' => $totalItems,
+                'net_total' => $netTotal,
                 'type_stats' => $typeStats,
                 'time_since_sync' => $timeSinceSync
             ];

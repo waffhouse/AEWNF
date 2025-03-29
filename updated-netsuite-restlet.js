@@ -43,7 +43,6 @@ define(['N/search', 'N/log'], (search, log) => {
                     const tranId = result.getValue({ name: 'tranid' });
                     const tranType = result.getText({ name: 'type' }); 
                     const tranDate = result.getValue({ name: 'trandate' });
-                    const totalAmount = parseFloat(result.getValue({ name: 'total' })) || 0;
 
                     // From "Customer" join
                     const entityId = result.getValue({ name: 'entityid', join: 'customer' }) || '';
@@ -61,7 +60,6 @@ define(['N/search', 'N/log'], (search, log) => {
                             date: tranDate,
                             entityId: entityId,
                             customerName: customerName,
-                            totalAmount: totalAmount,
                             lines: []
                         };
                     }

@@ -5,8 +5,19 @@
             <p class="mt-2 text-sm text-gray-700">View and manage sales transactions from NetSuite</p>
         </div>
         
-        <div>
+        <!-- Sync Tool -->
+        <div class="mb-8">
             <livewire:admin.sales.sales-sync />
+        </div>
+        
+        <!-- Analytics Component -->
+        <div class="mb-8">
+            <livewire:admin.sales.sales-analytics />
+        </div>
+        
+        <!-- Sales List -->
+        <div>
+            <livewire:admin.sales.sales-list />
         </div>
     </div>
 </div>

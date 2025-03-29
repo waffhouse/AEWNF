@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\CartService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -68,6 +69,11 @@ class AppServiceProvider extends ServiceProvider
         // Create a Blade directive for time only
         Blade::directive('formattime', function ($expression) {
             return "<?php echo \Carbon\Carbon::parse($expression)->format('g:i A'); ?>";
+        });
+        
+        // Create a custom Vite directive that loads scripts synchronously
+        Blade::directive('vitesync', function () {
+            return "<?php \$viteTags = vite(['resources/css/app.css', 'resources/js/app.js']); echo str_replace([' defer', ' async'], '', \$viteTags); ?>";
         });
     }
 }

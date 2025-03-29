@@ -87,6 +87,9 @@ class SalesSyncService
             unset($options['timeout']);
         }
         
+        // Ensure we include credit memos in the data
+        $options['includeCredits'] = true;
+        
         // Add debugging for connection parameters
         Log::info("Calling NetSuite RESTlet for sales data:", [
             'options' => $options,
@@ -113,12 +116,22 @@ class SalesSyncService
             throw new Exception('Error from NetSuite: ' . ($result['message'] ?? 'Unknown error'));
         }
         
+        // Count transaction types to verify we're receiving credits
+        $transactionTypes = [];
+        if (!empty($result['data'])) {
+            foreach ($result['data'] as $transaction) {
+                $type = $transaction['type'] ?? 'Unknown';
+                $transactionTypes[$type] = ($transactionTypes[$type] ?? 0) + 1;
+            }
+        }
+        
         // Log detailed stats from the updated RESTlet response
         Log::info("Retrieved sales data from NetSuite", [
             'total_pages' => $result['totalPages'] ?? 0,
             'total_transactions' => $result['totalTransactions'] ?? count($result['data'] ?? []),
             'total_records_processed' => $result['totalRecordsProcessed'] ?? 0,
-            'transactions' => count($result['data'] ?? [])
+            'transactions' => count($result['data'] ?? []),
+            'transaction_types' => $transactionTypes
         ]);
         
         return $result;
@@ -149,12 +162,14 @@ class SalesSyncService
     
     protected function processSaleTransaction(array $transaction): Sale
     {
-        // Debug the transaction type
+        // Debug the transaction type with more details
         Log::info('Processing transaction', [
             'tranId' => $transaction['tranId'] ?? 'unknown',
             'type' => $transaction['type'] ?? 'unknown',
             'date' => $transaction['date'] ?? 'unknown',
-            'lines_count' => count($transaction['lines'] ?? [])
+            'lines_count' => count($transaction['lines'] ?? []),
+            'is_credit' => strtolower($transaction['type'] ?? '') === 'credit memo',
+            'raw_transaction' => $transaction
         ]);
         
         // Use totalAmount from the response if available, otherwise calculate from line items
@@ -162,9 +177,31 @@ class SalesSyncService
         
         // If totalAmount is not in the response or is zero, calculate from line items
         if ($totalAmount == 0 && !empty($transaction['lines'])) {
+            $calculatedAmount = 0;
             foreach ($transaction['lines'] as $line) {
-                $totalAmount += $line['amount'] ?? 0;
+                $calculatedAmount += $line['amount'] ?? 0;
             }
+            
+            // Log the calculated amount for debugging
+            Log::info('Calculated amount', [
+                'tranId' => $transaction['tranId'] ?? 'unknown',
+                'type' => $transaction['type'] ?? 'unknown',
+                'totalAmount' => $totalAmount,
+                'calculatedAmount' => $calculatedAmount,
+                'line_items' => $transaction['lines']
+            ]);
+            
+            $totalAmount = $calculatedAmount;
+        }
+        
+        // For Credit Memos, ensure amount is stored as negative if it's not already
+        if (strtolower($transaction['type'] ?? '') === 'credit memo' && $totalAmount > 0) {
+            Log::info('Converting credit memo amount to negative', [
+                'tranId' => $transaction['tranId'],
+                'original_amount' => $totalAmount,
+                'new_amount' => -$totalAmount
+            ]);
+            $totalAmount = -$totalAmount;
         }
         
         // Prepare sale data
@@ -208,12 +245,29 @@ class SalesSyncService
                 continue; // Skip empty lines
             }
             
+            // Log line item for debugging
+            Log::info('Processing line item', [
+                'tran_id' => $sale->tran_id,
+                'type' => $sale->type,
+                'sku' => $line['sku'] ?? null,
+                'item' => $line['item'] ?? null,
+                'quantity' => $line['quantity'] ?? 0,
+                'amount' => $line['amount'] ?? 0,
+                'is_credit' => strtolower($sale->type ?? '') === 'credit memo'
+            ]);
+            
+            // For Credit Memos, ensure line item amounts are negative if not already
+            $amount = $line['amount'] ?? 0;
+            if (strtolower($sale->type ?? '') === 'credit memo' && $amount > 0) {
+                $amount = -$amount;
+            }
+            
             SaleItem::create([
                 'sale_id' => $sale->id,
                 'sku' => $line['sku'] ?? null,
                 'item_description' => $line['item'] ?? null,
                 'quantity' => $line['quantity'] ?? 0,
-                'amount' => $line['amount'] ?? 0,
+                'amount' => $amount,
             ]);
         }
     }

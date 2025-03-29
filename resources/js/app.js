@@ -1,4 +1,8 @@
 import './bootstrap';
+import Chart from 'chart.js/auto';
+
+// Make Chart globally available
+window.Chart = Chart;
 
 // Fix for Alpine.js components during navigation
 document.addEventListener('livewire:navigating', () => {
@@ -45,51 +49,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Force scroll to top on page refresh/reload
-// Using both the load event and readystatechange for broader browser support
-if (window.performance) {
-    // Add the event outside of a DOMContentLoaded listener to ensure it runs first
-    window.addEventListener('load', () => {
-        try {
-            // Try to detect if this is a refresh/reload
-            let isReload = false;
-            
-            // Check the older navigation API
-            if (window.performance.navigation && 
-                window.performance.navigation.type === window.performance.navigation.TYPE_RELOAD) {
-                isReload = true;
-            }
-            // Check the newer Navigation API
-            else if (performance.getEntriesByType && performance.getEntriesByType('navigation').length) {
-                const navEntries = performance.getEntriesByType('navigation');
-                if (navEntries.length && navEntries[0].type === 'reload') {
-                    isReload = true;
-                }
-            }
-            
-            if (isReload) {
-                console.log('Page refresh detected, scrolling to top smoothly');
-                
-                // Initial smooth scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                
-                // Prevent sudden jumps while smooth scrolling is in progress
-                const preventJumps = () => {
-                    // Only allow smooth scrolling toward the top
-                    if (window.scrollY > 10) {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                };
-                
-                window.addEventListener('scroll', preventJumps);
-                
-                // Allow normal scrolling after a delay that gives smooth scrolling time to complete
-                setTimeout(() => {
-                    window.removeEventListener('scroll', preventJumps);
-                }, 1000);
-            }
-        } catch (e) {
-            console.error('Error in scroll-to-top handler:', e);
-        }
-    }, { once: true }); // Only run once per page load
-}
+// Scroll-to-top functionality removed to prevent issues with charts and other interactive elements

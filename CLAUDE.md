@@ -15,9 +15,11 @@
 - **Test Specific Method**: `php artisan test tests/Feature/Auth/RegistrationTest.php::test_new_users_can_register`
 - **With Coverage**: `php artisan test --coverage`
 - **Setup Test Data**: Use `seedTestDatabase()` method from TestCase for standard test data seeding
+- **Run with Specific Environment**: `APP_ENV=testing php artisan test`
 
 ## Code Style Guidelines
 - **PHP Standard**: PSR-12 (enforced by Laravel Pint)
+- **Import Order**: Group imports by type: PHP core, framework, third-party packages, then application classes
 - **Naming Conventions**:
   - Classes/Interfaces: PascalCase (`UserController`, `AppServiceProvider`)
   - Methods/Properties/Variables: camelCase (`getUserById`, `$customerNumber`)
@@ -45,6 +47,13 @@
 - **PDF Generation**:
   - **Pick Tickets**: For warehouse orders, use `/orders/{id}/pick-ticket` route
   - **Sales Invoices**: For customer sales, use `/sales/{id}/invoice` route
+- **Transaction Types**:
+  - The system handles multiple transaction types including **Invoices** and **Credit Memos**
+  - Credit Memos must be stored as negative values in the database 
+  - Always pass `includeCredits => true` parameter to the RESTlet when retrieving sales data
+  - When processing Credit Memos, the `SalesSyncService` automatically converts positive amounts to negative
+  - Line items for Credit Memos should also be stored with negative amounts
+  - The dashboard and reports handle both transaction types appropriately 
 - **Configuration**:
   - Environment variables: 
     - `NETSUITE_ACCOUNT_ID`, `NETSUITE_CONSUMER_KEY`, `NETSUITE_CONSUMER_SECRET`
@@ -57,6 +66,10 @@
   - Inventory RESTlet: Returns paginated inventory data from NetSuite
   - Sales RESTlet: Returns all sales data across all pages in a single response
   - Both use SuiteScript 2.1 with saved searches for optimal performance
+  - Sales RESTlet expects the following fields in the saved search:
+    - Transaction fields: tranid, type, trandate
+    - Customer join fields: entityid, altname
+    - Item join fields: quantity, amount, salesdescription, itemid
 
 ## Dashboard Design Patterns
 - **Admin Dashboard Structure**: 
@@ -72,6 +85,17 @@
   - Show aggregate statistics by relevant categories (e.g., transaction types for sales)
   - Use color coding to distinguish between different metric types
   - Implement a `loadLastSyncInfo()` method to update statistics after operations
+
+- **Data Visualization with Chart.js**:
+  - Store chart data in the component using `$chartData` array with JSON-encoded values
+  - Create hidden HTML elements to hold current chart data that update with Livewire refreshes
+  - Use a global state object (`window.salesAnalyticsState`) to track chart instances
+  - Apply proper chart cleanup during re-initialization to prevent memory leaks
+  - Handle Livewire update events with multiple delayed initialization attempts
+  - For charts with multiple metrics (e.g., amount and quantity), use dual Y-axes
+  - Add event listeners to filter controls to trigger chart re-rendering
+  - Implement robust error handling with try/catch blocks for all chart operations
+  - For date-based charts, use consistent date formatting for readability
 
 - **Component Communication**:
   - For dashboard events, use Livewire's `$dispatch()` method with specific event names
@@ -99,6 +123,50 @@
   - Use consistent fonts, sizing, and spacing throughout
   - Include proper document metadata (title, number, date)
   - For financial documents, right-align monetary values
+
+## Chart.js Integration
+When implementing Chart.js visualizations in Livewire components, follow these best practices:
+
+1. **Data Preparation**:
+   - Prepare chart data in the PHP component's `render()` method
+   - Use JSON encoding for arrays to pass to JavaScript (`$data->toJson()`)
+   - Store data in a structured component property like `$chartData`
+   - For time series data, ensure consistent date formatting
+
+2. **HTML Structure**:
+   - Place chart canvases in appropriate grid layouts (e.g., 2-column for dashboard)
+   - Use fixed height containers (e.g., `h-80`) for consistent chart sizing
+   - Add hidden data elements that update with Livewire refreshes:
+     ```html
+     <div class="hidden">
+         <div id="chart-data-labels">{{ $chartData["labels"] }}</div>
+         <div id="chart-data-values">{{ $chartData["values"] }}</div>
+     </div>
+     ```
+
+3. **JavaScript Implementation**:
+   - Use a global state object to track chart instances across component updates
+   - Extract data from hidden DOM elements instead of inline JS variables
+   - Implement multiple initialization attempts with different delays
+   - Add event listeners for Livewire-specific events:
+     ```javascript
+     document.addEventListener('livewire:load', initCharts);
+     document.addEventListener('livewire:update', initCharts);
+     ```
+   - For filter controls, add Alpine.js event listeners:
+     ```html
+     <select wire:model.live="filter" 
+             x-on:change="setTimeout(() => initCharts(), 200)">
+     ```
+   - Always implement complete try/catch blocks around chart initialization
+   - Destroy charts properly before recreating them
+   - For dual metrics, use dual y-axes configuration
+
+4. **Performance Tips**:
+   - Disable animations for better performance (`animation: false`)
+   - Use `Math.abs()` for financial data with credit/debit values
+   - Limit complex charts to 10-15 data points for readability
+   - Add console logging during development to track initialization
 
 ## Global Components
 The application includes several reusable global components you should use for consistency:

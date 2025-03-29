@@ -43,13 +43,18 @@
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['total_items']) }}</div>
                                 <div class="text-xs text-gray-600">Total Line Items</div>
                             </div>
+                            <div class="bg-white p-3 rounded-md shadow-sm border border-red-200">
+                                <div class="text-xl lg:text-2xl font-bold {{ $lastSyncStats['net_total'] >= 0 ? 'text-green-700' : 'text-red-700' }} truncate">${{ number_format(abs($lastSyncStats['net_total']), 2) }}</div>
+                                <div class="text-xs text-gray-600">Net Transaction Total</div>
+                                <div class="text-xs {{ $lastSyncStats['net_total'] >= 0 ? 'text-green-700' : 'text-red-700' }}">{{ $lastSyncStats['net_total'] >= 0 ? 'Positive' : 'Negative' }}</div>
+                            </div>
                             
                             @if(isset($lastSyncStats['type_stats']) && count($lastSyncStats['type_stats']) > 0)
                                 @foreach($lastSyncStats['type_stats'] as $type => $stats)
                                 <div class="bg-white p-3 rounded-md shadow-sm border border-red-200">
                                     <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($stats['count']) }}</div>
                                     <div class="text-xs text-gray-600">{{ $type }}</div>
-                                    <div class="text-xs text-red-600">${{ number_format($stats['total_amount'], 2) }}</div>
+                                    <div class="text-xs {{ $stats['total_amount'] >= 0 ? 'text-green-600' : 'text-red-600' }}">${{ number_format(abs($stats['total_amount']), 2) }}</div>
                                 </div>
                                 @endforeach
                             @endif
