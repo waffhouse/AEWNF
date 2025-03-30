@@ -28,6 +28,7 @@ class CustomerSyncService
             'total' => 0,
             'created' => 0,
             'updated' => 0,
+            'deleted' => 0,
             'failed' => 0,
             'skipped' => 0,
             'errors' => [],
@@ -75,14 +76,35 @@ class CustomerSyncService
                 'count' => is_array($customersData) ? count($customersData) : 0
             ]);
             
-            // Process each customer
-            foreach ($customersData as $customerData) {
-                $this->syncCustomer($customerData);
-                $this->stats['total']++;
-            }
+            // Use a transaction to ensure data consistency
+            \DB::beginTransaction();
             
-            Log::info('Completed customer sync', $this->stats);
-            return $this->stats;
+            try {
+                // Track processed NetSuite IDs
+                $processedIds = [];
+                
+                // Process each customer
+                foreach ($customersData as $customerData) {
+                    $customer = $this->syncCustomer($customerData);
+                    if ($customer && $customer->netsuite_id) {
+                        $processedIds[] = $customer->netsuite_id;
+                    }
+                    $this->stats['total']++;
+                }
+                
+                // Remove customers that no longer exist in NetSuite
+                $this->removeDeletedCustomers($processedIds);
+                
+                // Commit the transaction
+                \DB::commit();
+                
+                Log::info('Completed customer sync', $this->stats);
+                return $this->stats;
+            } catch (\Exception $e) {
+                // Rollback the transaction if anything goes wrong
+                \DB::rollBack();
+                throw $e;
+            }
             
         } catch (\Exception $e) {
             Log::error('Error during customer sync', [
@@ -148,7 +170,7 @@ class CustomerSyncService
      * @param array $data Customer data from NetSuite
      * @return Customer
      */
-    protected function syncCustomer(array $data): Customer
+    protected function syncCustomer(array $data): ?Customer
     {
         if (empty($data['id']) || empty($data['entityId'])) {
             Log::warning('Skipping customer with missing ID', [
@@ -214,5 +236,28 @@ class CustomerSyncService
                 
             throw $e;
         }
+    }
+    
+    /**
+     * Remove customer records that no longer exist in NetSuite
+     *
+     * @param array $processedIds Array of NetSuite IDs that were processed
+     * @return int Number of deleted customers
+     */
+    protected function removeDeletedCustomers(array $processedIds): int
+    {
+        if (empty($processedIds)) {
+            return 0;
+        }
+        
+        // Find and delete customers that aren't in the current NetSuite data
+        $deleted = Customer::whereNotIn('netsuite_id', $processedIds)->delete();
+        $this->stats['deleted'] = $deleted;
+        
+        if ($deleted > 0) {
+            Log::info("Deleted {$deleted} customers that were no longer active in NetSuite");
+        }
+        
+        return $deleted;
     }
 }

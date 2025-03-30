@@ -113,6 +113,7 @@ class CustomerSync extends AdminComponent
                 'total' => 0,
                 'created' => 0,
                 'updated' => 0,
+                'deleted' => 0,
                 'failed' => 0,
                 'skipped' => 0
             ];
