@@ -5,8 +5,7 @@
     <title>Invoice #{{ $sale->tran_id }}</title>
     <style>
         @page {
-            margin: 48px;
-            margin-bottom: 70px; /* Extra space for footer with page numbers */
+            margin: 0.5in 0.5in 1.5in 0.5in; /* Standard margins with extra large bottom margin for footer */
         }
         
         /* Page number styling */
@@ -20,6 +19,16 @@
         .item-row {
             page-break-inside: avoid;
         }
+        
+        /* Ensure footer space on each page */
+        .footer-space {
+            height: 50px;
+            display: block;
+            margin-top: 20px;
+        }
+        
+        /* Prevent page breaks within table rows */
+        tr { page-break-inside: avoid; }
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 12px;
@@ -29,9 +38,9 @@
             padding: 0;
         }
         .header {
-            padding-bottom: 20px;
-            border-bottom: 1px solid #E5E7EB;
-            margin-bottom: 30px;
+            padding-bottom: 5px;
+            /* Removed border-bottom */
+            margin-bottom: 5px;
             overflow: hidden;
         }
         .logo-container {
@@ -79,24 +88,29 @@
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            border: 1px solid #E5E7EB; /* Light gray border around the table */
+            border-radius: 4px; /* Rounded corners to match info boxes */
         }
         .items-table th {
-            background-color: #F3F4F6;
-            color: #374151;
+            color: #111827;
             font-weight: bold;
             text-align: left;
-            padding: 10px;
-            border-bottom: 1px solid #E5E7EB;
-            font-size: 12px;
+            padding: 3px 10px; /* Slightly reduced vertical padding */
+            border-bottom: 1px solid #E5E7EB; /* Light gray bottom border */
+            font-size: 11px; /* Slightly smaller font */
+            line-height: 1.3; /* Slightly tighter line height */
         }
         .items-table td {
-            padding: 10px;
-            border-bottom: 1px solid #E5E7EB;
-            font-size: 12px;
+            padding: 3px 10px; /* Slightly reduced vertical padding */
+            font-size: 11px; /* Slightly smaller font */
+            line-height: 1.3; /* Slightly tighter line height */
+            border-bottom: 1px solid #E5E7EB; /* Light gray lines for all rows */
         }
-        .items-table tr:last-child td {
-            border-bottom: none;
+        
+        /* Add more visible striping to alternate rows */
+        .items-table tr:nth-child(even) {
+            background-color: #F3F4F6; /* Medium light gray background for better contrast */
         }
         .items-table .text-right {
             text-align: right;
@@ -107,6 +121,7 @@
         .totals-table {
             width: 300px;
             margin-left: auto;
+            margin-top: -10px; /* Move up closer to items table */
             border-collapse: collapse;
         }
         .totals-table td {
@@ -162,60 +177,57 @@
             <tr style="height: auto; max-height: 150px;">
                 <!-- Company Info Box -->
                 <td style="width: 50%; text-align: left; vertical-align: top; padding-right: 10px;">
-                    <div style="font-size: 11px; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px; border-radius: 4px;">
+                    <div style="font-size: 11px; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px; border-radius: 4px; height: 170px;">
+                        <!-- Header -->
+                        <div style="font-weight: bold; font-size: 12px; color: #111827; margin-bottom: 5px;">COMPANY INFORMATION</div>
+                        
+                        <!-- Name -->
+                        <div style="font-weight: bold; font-size: 12px; margin-bottom: 5px;">{{ env('COMPANY_NAME', 'A&E Wholesale of North Florida') }}</div>
+                        
+                        <!-- Two-column layout using a fixed table -->
                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size: 11px;">
                             <tr>
-                                <td colspan="2" style="padding-bottom: 3px;">
-                                    <div style="font-weight: bold; font-size: 12px; color: #111827;">COMPANY INFORMATION</div>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td style="width: 50%; vertical-align: top; padding-right: 5px;">
-                                    <div>{{ env('COMPANY_NAME', 'A&E Wholesale of North Florida') }}</div>
                                     <div>{{ env('COMPANY_STREET', '') }}{{ env('COMPANY_STREET_2') ? ', ' . env('COMPANY_STREET_2') : '' }}</div>
                                     <div>{{ env('COMPANY_CITY', '') }}, {{ env('COMPANY_STATE', '') }} {{ env('COMPANY_ZIP', '') }}</div>
                                 </td>
                                 <td style="width: 50%; vertical-align: top;">
                                     <div>Phone: {{ env('COMPANY_PHONE', '') }}</div>
-                                    <div>{{ env('COMPANY_EMAIL', '') }}</div>
-                                    
-                                    @if(env('COMPANY_CWD_LICENSE', ''))
-                                        <div style="font-weight: bold;">FL CWD #: {{ env('COMPANY_CWD_LICENSE', '') }}</div>
-                                    @endif
+                                    <div>Email: {{ env('COMPANY_EMAIL', '') }}</div>
                                 </td>
                             </tr>
-                            @if(env('COMPANY_TWD_LICENSE', '') || env('COMPANY_GA_LICENSE', ''))
-                            <tr>
-                                <td style="width: 50%; vertical-align: top; padding-right: 5px;">
-                                    @if(env('COMPANY_TWD_LICENSE', ''))
-                                        <div style="font-weight: bold;">FL TWD #: {{ env('COMPANY_TWD_LICENSE', '') }}</div>
-                                    @endif
-                                </td>
-                                <td style="width: 50%; vertical-align: top;">
-                                    @if(env('COMPANY_GA_LICENSE', ''))
-                                        <div style="font-weight: bold;">GA #: {{ env('COMPANY_GA_LICENSE', '') }}</div>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endif
                         </table>
+                        
+                        <!-- License information on separate lines -->
+                        <div style="margin-top: 5px;">
+                            <div style="font-weight: bold; margin-bottom: 2px;">Licenses:</div>
+                            @if(env('COMPANY_CWD_LICENSE', ''))
+                                <div style="font-weight: bold;">FL CWD #: {{ env('COMPANY_CWD_LICENSE', '') }}</div>
+                            @endif
+                            
+                            @if(env('COMPANY_TWD_LICENSE', ''))
+                                <div style="font-weight: bold;">FL TWD #: {{ env('COMPANY_TWD_LICENSE', '') }}</div>
+                            @endif
+                            
+                            @if(env('COMPANY_GA_LICENSE', ''))
+                                <div style="font-weight: bold;">GA #: {{ env('COMPANY_GA_LICENSE', '') }}</div>
+                            @endif
+                        </div>
+                        
                     </div>
                 </td>
                 
                 <!-- Customer Info Box -->
                 <td style="width: 50%; text-align: left; vertical-align: top; padding-left: 10px;">
-                    <div style="font-size: 11px; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px; border-radius: 4px;">
+                    <div style="font-size: 11px; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px; border-radius: 4px; height: 170px;">
+                        <!-- Header -->
+                        <div style="font-weight: bold; font-size: 12px; color: #111827; margin-bottom: 5px;">CUSTOMER INFORMATION</div>
+                        
+                        <!-- Name -->
+                        <div style="font-weight: bold; font-size: 12px; margin-bottom: 5px;">{{ $sale->customer_name }}</div>
+                        
+                        <!-- Two-column layout using a fixed table -->
                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size: 11px;">
-                            <tr>
-                                <td colspan="2" style="padding-bottom: 3px;">
-                                    <div style="font-weight: bold; font-size: 12px; color: #111827;">CUSTOMER INFORMATION</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="padding-bottom: 3px;">
-                                    <div style="font-weight: bold; font-size: 12px;">{{ $sale->customer_name }}</div>
-                                </td>
-                            </tr>
                             <tr>
                                 <td style="width: 50%; vertical-align: top; padding-right: 5px;">
                                     <div>ID: {{ $sale->entity_id }}</div>
@@ -234,39 +246,27 @@
                                     @endif
                                 </td>
                             </tr>
-                            <tr>
-                                <td colspan="2" style="padding-top: 2px;">
-                                    @if(isset($customer) && $customer->license_number)
-                                        <div style="font-weight: bold;">
-                                            @if($customer->license_type)
-                                                {{ $customer->license_type }} {{ $customer->license_number }}
-                                            @else
-                                                License # {{ $customer->license_number }}
-                                            @endif
-                                        </div>
-                                    @endif
-                                    
-                                    @if(isset($customer) && $customer->shipping_address)
-                                        <div>
-                                            Address: 
-                                            @php
-                                                // Ultra-compact shipping address
-                                                $addressParts = preg_split('/,\s*/', $customer->shipping_address);
-                                                if (count($addressParts) > 0) {
-                                                    // Show first part and zip code only
-                                                    echo trim($addressParts[0]);
-                                                    
-                                                    if (count($addressParts) > 1) {
-                                                        // Just add the last part (usually zip)
-                                                        echo ", " . trim(end($addressParts));
-                                                    }
-                                                }
-                                            @endphp
-                                        </div>
-                                    @endif
-                                </td>
-                            </tr>
                         </table>
+                        
+                        <!-- License and Address -->
+                        <div style="margin-top: 5px;">
+                            @if(isset($customer) && $customer->license_number)
+                                <div style="font-weight: bold;">
+                                    @if($customer->license_type)
+                                        {{ $customer->license_type }} {{ $customer->license_number }}
+                                    @else
+                                        License # {{ $customer->license_number }}
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                        
+                        @if(isset($customer) && $customer->shipping_address)
+                            <div style="margin-top: 5px;">
+                                <div style="font-weight: bold; margin-bottom: 2px;">Address:</div>
+                                <div>{{ $customer->shipping_address }}</div>
+                            </div>
+                        @endif
                     </div>
                 </td>
             </tr>
@@ -329,12 +329,17 @@
             <td class="amount">${{ number_format(abs($sale->total_amount), 2) }}</td>
         </tr>
     </table>
+    
+    <!-- Add space for footer -->
+    <div class="footer-space"></div>
 
     <script type="text/php">
         if (isset($pdf)) {
+            // We'll use a simpler approach with just the footer placement
+            
             // Single consolidated footer with dividers between elements
-            $textSize = 9;  // Consistent small size
-            $footerY = $pdf->get_height() - 25;  // Position for the footer
+            $textSize = 8;  // Smaller size to ensure it fits in printable area
+            $footerY = $pdf->get_height() - 75;  // Moved footer up higher
             
             // Thank you message - in red, bold
             $thankYouText = "Thank you for your business!";
