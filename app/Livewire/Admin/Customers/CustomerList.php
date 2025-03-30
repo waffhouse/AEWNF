@@ -232,7 +232,20 @@ class CustomerList extends AdminComponent
             ->toArray();
     }
     
-    
+    /**
+     * Show customer details in a modal
+     */
+    public function showCustomerDetails($customerId)
+    {
+        // Find the customer
+        $customer = Customer::findOrFail($customerId);
+        
+        // Dispatch event to show modal with customer details
+        $this->dispatch('show-customer-details', ['customerId' => $customerId]);
+        
+        // For debugging
+        // \Log::info("Dispatched show-customer-details with customer ID: $customerId");
+    }
     
     public function render()
     {

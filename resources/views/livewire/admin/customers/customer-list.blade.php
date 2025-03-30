@@ -1,6 +1,6 @@
 <div>
-    <div class="p-6 bg-white rounded-lg shadow">
-        <div class="flex justify-between items-center mb-6">
+    <div class="p-4 sm:p-6 bg-white rounded-lg shadow">
+        <div class="flex flex-wrap justify-between items-center mb-4 sm:mb-6 gap-2">
             <h3 class="text-lg font-medium text-gray-900">Customer List</h3>
             
             <div class="flex space-x-2">
@@ -11,13 +11,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Reset Filters
+                    <span class="hidden xs:inline">Reset Filters</span>
+                    <span class="xs:hidden">Reset</span>
                 </button>
             </div>
         </div>
         
         <!-- Filters -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="mb-6 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 md:grid-cols-3 sm:gap-4">
             <!-- Search Filter -->
             <div>
                 <x-filters.search-input
@@ -91,24 +92,61 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Terms</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Contact</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">License</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Terms</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($customers as $customer)
                             <tr wire:key="customer-{{ $customer->id }}" class="hover:bg-gray-100">
-                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{ $customer->entity_id }}
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ $customer->company_name ?? 'N/A' }}
+                                <td class="px-2 sm:px-4 py-3 sm:py-4 text-sm text-gray-600">
+                                    <div class="font-medium">
+                                        <a href="#" wire:click.prevent="showCustomerDetails({{ $customer->id }})" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                            {{ $customer->company_name ?? 'N/A' }}
+                                        </a>
+                                    </div>
+                                    
+                                    <!-- Mobile view extras -->
+                                    <div class="sm:hidden mt-1">
+                                        @if($customer->email)
+                                            <div class="text-xs text-blue-600 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                                <span class="truncate max-w-[150px]">{{ $customer->email }}</span>
+                                            </div>
+                                        @endif
+                                        @if($customer->phone)
+                                            <div class="text-xs text-gray-500 flex items-center mt-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                </svg>
+                                                <span>{{ $customer->phone }}</span>
+                                            </div>
+                                        @endif
+                                        
+                                        <!-- Mobile-only license info -->
+                                        <div class="md:hidden mt-1">
+                                            @if($customer->license_type)
+                                                <span class="text-xs font-semibold">{{ $customer->license_type }}</span>
+                                                @if($customer->license_number)
+                                                    <span class="text-xs ml-1">#{{ $customer->license_number }}</span>
+                                                @endif
+                                            @elseif($customer->license_number)
+                                                <span class="text-xs font-semibold">License</span>
+                                                <span class="text-xs ml-1">#{{ $customer->license_number }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-500">
+                                <td class="px-2 sm:px-4 py-3 sm:py-4 text-sm text-gray-500 hidden sm:table-cell">
                                     @if($customer->email)
                                         <div class="flex items-center text-blue-600">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +164,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                         {{ $customer->home_state == 'Florida' ? 'bg-blue-100 text-blue-800' : 
                                            ($customer->home_state == 'Georgia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800') }}">
@@ -136,7 +174,7 @@
                                         <div class="text-xs text-gray-500 mt-1">{{ $customer->county }}</div>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                                     @if($customer->license_type)
                                         <div class="font-medium">{{ $customer->license_type }}</div>
                                     @endif
@@ -146,7 +184,7 @@
                                         <span class="text-gray-400">No License</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                                     @if($customer->terms)
                                         <span>{{ $customer->terms }}</span>
                                     @endif
@@ -159,7 +197,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="6" class="px-2 sm:px-4 py-6 sm:py-8 text-center text-gray-500">
                                     @if($search || $stateFilter || $licenseTypeFilter)
                                         No customers found matching your filters.
                                         <button wire:click="resetFilters" class="text-blue-500 underline">Reset filters</button>
@@ -176,7 +214,7 @@
         
         <!-- Infinite Scroll Controls -->
         <div 
-            class="mt-4 text-center" 
+            class="mt-3 sm:mt-4 text-center" 
             x-data="{ 
                 observer: null,
                 init() {
@@ -207,8 +245,8 @@
             }"
         >
             <!-- Loading Indicator -->
-            <div wire:loading wire:target="loadMore, updatedSearch, updatedStateFilter, updatedLicenseTypeFilter, resetFilters" class="py-4">
-                <svg class="animate-spin h-5 w-5 text-red-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div wire:loading wire:target="loadMore, updatedSearch, updatedStateFilter, updatedLicenseTypeFilter, resetFilters" class="py-3 sm:py-4">
+                <svg class="animate-spin h-5 w-5 text-blue-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>

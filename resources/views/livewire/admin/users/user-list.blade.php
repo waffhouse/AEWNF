@@ -58,7 +58,7 @@
     
     <!-- Responsive User List -->
     <div class="rounded-lg border border-gray-200">
-        <div class="overflow-hidden">
+        <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
