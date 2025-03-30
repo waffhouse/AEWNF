@@ -51,6 +51,9 @@ class SalesInvoiceController extends Controller
             'generatedAt' => now(),
         ]);
         
+        // Enable DomPDF settings for page numbers
+        $pdf->setOption('isPhpEnabled', true);
+        
         // Stream the PDF with a dynamic filename
         return $pdf->stream("sale-{$sale->tran_id}-invoice.pdf");
     }

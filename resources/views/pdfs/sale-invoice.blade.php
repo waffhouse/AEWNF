@@ -6,6 +6,19 @@
     <style>
         @page {
             margin: 48px;
+            margin-bottom: 70px; /* Extra space for footer with page numbers */
+        }
+        
+        /* Page number styling */
+        .page-number {
+            text-align: center;
+            font-size: 10px;
+            color: #6B7280;
+        }
+        
+        /* Page break inside avoidance */
+        .item-row {
+            page-break-inside: avoid;
         }
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
@@ -133,10 +146,11 @@
     <div class="header">
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
-                <td style="text-align: left; vertical-align: top;">
-                    <img src="{{ public_path('images/AEWBlack.png') }}" alt="A&E Wholesale of North Florida" class="logo">
+                <!-- Logo and Invoice Details Row -->
+                <td style="width: 50%; text-align: left; vertical-align: top; padding-bottom: 15px;">
+                    <img src="{{ public_path(env('COMPANY_LOGO', 'images/AEWBlack.png')) }}" alt="{{ env('COMPANY_NAME', 'A&E Wholesale of North Florida') }}" class="logo">
                 </td>
-                <td style="text-align: right; vertical-align: top;">
+                <td style="width: 50%; text-align: right; vertical-align: top; padding-bottom: 15px;">
                     <div class="document-title">
                         {{ $sale->type }} #{{ $sale->tran_id }}
                     </div>
@@ -145,64 +159,121 @@
                     </div>
                 </td>
             </tr>
+            <tr style="height: auto; max-height: 150px;">
+                <!-- Company Info Box -->
+                <td style="width: 50%; text-align: left; vertical-align: top; padding-right: 10px;">
+                    <div style="font-size: 11px; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px; border-radius: 4px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size: 11px;">
+                            <tr>
+                                <td colspan="2" style="padding-bottom: 3px;">
+                                    <div style="font-weight: bold; font-size: 12px; color: #111827;">COMPANY INFORMATION</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 50%; vertical-align: top; padding-right: 5px;">
+                                    <div>{{ env('COMPANY_NAME', 'A&E Wholesale of North Florida') }}</div>
+                                    <div>{{ env('COMPANY_STREET', '') }}{{ env('COMPANY_STREET_2') ? ', ' . env('COMPANY_STREET_2') : '' }}</div>
+                                    <div>{{ env('COMPANY_CITY', '') }}, {{ env('COMPANY_STATE', '') }} {{ env('COMPANY_ZIP', '') }}</div>
+                                </td>
+                                <td style="width: 50%; vertical-align: top;">
+                                    <div>Phone: {{ env('COMPANY_PHONE', '') }}</div>
+                                    <div>{{ env('COMPANY_EMAIL', '') }}</div>
+                                    
+                                    @if(env('COMPANY_CWD_LICENSE', ''))
+                                        <div style="font-weight: bold;">FL CWD #: {{ env('COMPANY_CWD_LICENSE', '') }}</div>
+                                    @endif
+                                </td>
+                            </tr>
+                            @if(env('COMPANY_TWD_LICENSE', '') || env('COMPANY_GA_LICENSE', ''))
+                            <tr>
+                                <td style="width: 50%; vertical-align: top; padding-right: 5px;">
+                                    @if(env('COMPANY_TWD_LICENSE', ''))
+                                        <div style="font-weight: bold;">FL TWD #: {{ env('COMPANY_TWD_LICENSE', '') }}</div>
+                                    @endif
+                                </td>
+                                <td style="width: 50%; vertical-align: top;">
+                                    @if(env('COMPANY_GA_LICENSE', ''))
+                                        <div style="font-weight: bold;">GA #: {{ env('COMPANY_GA_LICENSE', '') }}</div>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endif
+                        </table>
+                    </div>
+                </td>
+                
+                <!-- Customer Info Box -->
+                <td style="width: 50%; text-align: left; vertical-align: top; padding-left: 10px;">
+                    <div style="font-size: 11px; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px; border-radius: 4px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size: 11px;">
+                            <tr>
+                                <td colspan="2" style="padding-bottom: 3px;">
+                                    <div style="font-weight: bold; font-size: 12px; color: #111827;">CUSTOMER INFORMATION</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-bottom: 3px;">
+                                    <div style="font-weight: bold; font-size: 12px;">{{ $sale->customer_name }}</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 50%; vertical-align: top; padding-right: 5px;">
+                                    <div>ID: {{ $sale->entity_id }}</div>
+                                    
+                                    @if(isset($customer) && $customer->phone)
+                                        <div>Phone: {{ $customer->phone }}</div>
+                                    @endif
+                                </td>
+                                <td style="width: 50%; vertical-align: top;">
+                                    @if(isset($customer) && $customer->county)
+                                        <div>County: {{ $customer->county }}</div>
+                                    @endif
+                                    
+                                    @if(isset($customer) && $customer->terms)
+                                        <div>Terms: {{ $customer->terms }}</div>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-top: 2px;">
+                                    @if(isset($customer) && $customer->license_number)
+                                        <div style="font-weight: bold;">
+                                            @if($customer->license_type)
+                                                {{ $customer->license_type }} {{ $customer->license_number }}
+                                            @else
+                                                License # {{ $customer->license_number }}
+                                            @endif
+                                        </div>
+                                    @endif
+                                    
+                                    @if(isset($customer) && $customer->shipping_address)
+                                        <div>
+                                            Address: 
+                                            @php
+                                                // Ultra-compact shipping address
+                                                $addressParts = preg_split('/,\s*/', $customer->shipping_address);
+                                                if (count($addressParts) > 0) {
+                                                    // Show first part and zip code only
+                                                    echo trim($addressParts[0]);
+                                                    
+                                                    if (count($addressParts) > 1) {
+                                                        // Just add the last part (usually zip)
+                                                        echo ", " . trim(end($addressParts));
+                                                    }
+                                                }
+                                            @endphp
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
         </table>
     </div>
 
-    <table width="100%" style="margin-bottom: 30px; border: 1px solid #E5E7EB;">
-        <tr>
-            <th colspan="4" style="font-size: 14px; text-align: left; background-color: #F3F4F6; border-bottom: 1px solid #E5E7EB; padding: 8px 10px; font-weight: bold;">
-                CUSTOMER INFORMATION
-            </th>
-        </tr>
-        <tr>
-            <td width="15%" style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Customer:</td>
-            <td width="85%" colspan="3" style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
-                <div style="font-weight: bold; font-size: 13px;">{{ $sale->customer_name }}</div>
-                <div>ID: {{ $sale->entity_id }}</div>
-            </td>
-        </tr>
-
-        @if(isset($customer))
-        <tr>
-            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Contact:</td>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
-                @if($customer->phone)
-                    <div>Phone: {{ $customer->phone }}</div>
-                @else
-                    <div>No phone on file</div>
-                @endif
-            </td>
-            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-left: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Terms:</td>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
-                {{ $customer->terms ?: 'N/A' }}
-            </td>
-        </tr>
-        <tr>
-            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Location:</td>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
-                <div>County: {{ $customer->county ?: 'N/A' }}</div>
-            </td>
-            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-left: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">License:</td>
-            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
-                @if($customer->license_number)
-                    @if($customer->license_type)
-                        <div>{{ $customer->license_type }} {{ $customer->license_number }}</div>
-                    @else
-                        <div>License # {{ $customer->license_number }}</div>
-                    @endif
-                @else
-                    <div>N/A</div>
-                @endif
-            </td>
-        </tr>
-        @if($customer->shipping_address)
-        <tr>
-            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; background-color: #F9FAFB;">Address:</td>
-            <td colspan="3" style="padding: 6px 10px;">{{ $customer->shipping_address }}</td>
-        </tr>
-        @endif
-        @endif
-    </table>
+    <!-- The customer info table has been moved to the header section -->
 
     <table class="items-table">
         <thead>
@@ -231,7 +302,7 @@
             @endphp
             
             @foreach($itemsByDescription as $item)
-            <tr>
+            <tr class="item-row">
                 <td class="text-center">{{ floor($item->quantity) == $item->quantity ? number_format($item->quantity, 0) : number_format($item->quantity, 2) }}</td>
                 <td>{{ $item->sku }}</td>
                 <td>{{ $item->item_description }}</td>
@@ -259,13 +330,76 @@
         </tr>
     </table>
 
-    <div class="thank-you">
-        Thank you for your business!
-    </div>
-
-    <div class="footer">
-        This document is a copy of the transaction from NetSuite.<br>
-        Generated by: {{ $generatedBy }} | {{ $generatedAt->format('m/d/Y h:i A') }} | A&E Wholesale of North Florida
-    </div>
+    <script type="text/php">
+        if (isset($pdf)) {
+            // Single consolidated footer with dividers between elements
+            $textSize = 9;  // Consistent small size
+            $footerY = $pdf->get_height() - 25;  // Position for the footer
+            
+            // Thank you message - in red, bold
+            $thankYouText = "Thank you for your business!";
+            $thankYouFont = $fontMetrics->getFont("Helvetica", "bold");
+            
+            // Page numbers
+            $pageNumText = "Page {PAGE_NUM} of {PAGE_COUNT}";
+            $regularFont = $fontMetrics->getFont("Helvetica");
+            
+            // Company info
+            $companyName = "A&E Wholesale of North Florida";  // Hardcoded to avoid HTML entity issues
+            $website = "aewnf.com";  // Hardcoded to avoid HTML entity issues
+            
+            // Create one combined string with dividers
+            $footerText = "$thankYouText  |  $pageNumText  |  $companyName  |  $website";
+            
+            // Break the footer into separate parts for clean rendering
+            $divider = "  |  ";
+            $dividerWidth = $fontMetrics->get_text_width($divider, $regularFont, $textSize);
+            
+            // Get widths of each segment - ensure we use the right placeholder for page numbers
+            $thankYouWidth = $fontMetrics->get_text_width($thankYouText, $thankYouFont, $textSize);
+            
+            // For page numbers, use a realistic width estimation since the actual numbers will vary
+            $pageNumText = "Page 1 of 1"; // Use a representative placeholder for width calculation
+            $pageNumWidth = $fontMetrics->get_text_width($pageNumText, $regularFont, $textSize);
+            $pageNumText = "Page {PAGE_NUM} of {PAGE_COUNT}"; // Restore the real text with placeholders
+            
+            $companyNameWidth = $fontMetrics->get_text_width($companyName, $regularFont, $textSize);
+            $websiteWidth = $fontMetrics->get_text_width($website, $regularFont, $textSize);
+            
+            // Calculate total width
+            $totalWidth = $thankYouWidth + $pageNumWidth + $companyNameWidth + $websiteWidth + (3 * $dividerWidth);
+            
+            // Calculate starting X position to center the entire footer
+            $startX = ($pdf->get_width() - $totalWidth) / 2;
+            
+            // Draw each part separately 
+            // 1. Thank you in red and bold
+            $pdf->page_text($startX, $footerY, $thankYouText, $thankYouFont, $textSize, array(0.94, 0.27, 0.27));
+            $currentX = $startX + $thankYouWidth;
+            
+            // 2. First divider
+            $pdf->page_text($currentX, $footerY, $divider, $regularFont, $textSize, array(0.41, 0.44, 0.50));
+            $currentX += $dividerWidth;
+            
+            // 3. Page numbers
+            $pdf->page_text($currentX, $footerY, $pageNumText, $regularFont, $textSize, array(0.41, 0.44, 0.50));
+            $currentX += $pageNumWidth;
+            
+            // 4. Second divider
+            $pdf->page_text($currentX, $footerY, $divider, $regularFont, $textSize, array(0.41, 0.44, 0.50));
+            $currentX += $dividerWidth;
+            
+            // 5. Company name
+            $pdf->page_text($currentX, $footerY, $companyName, $regularFont, $textSize, array(0.41, 0.44, 0.50));
+            $currentX += $companyNameWidth;
+            
+            // 6. Third divider
+            $pdf->page_text($currentX, $footerY, $divider, $regularFont, $textSize, array(0.41, 0.44, 0.50));
+            $currentX += $dividerWidth;
+            
+            // 7. Website
+            $pdf->page_text($currentX, $footerY, $website, $regularFont, $textSize, array(0.41, 0.44, 0.50));
+        }
+    </script>
 </body>
 </html>
