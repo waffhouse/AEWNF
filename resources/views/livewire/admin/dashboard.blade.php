@@ -15,7 +15,8 @@
             // Update hash when tab changes (but don't trigger another change)
             this.$watch('activeTab', (value) => {
                 if (window.location.hash !== `#${value}`) {
-                    window.location.hash = value;
+                    // Use history.replaceState to avoid adding a history entry
+                    history.replaceState(null, null, `#${value}`);
                 }
             });
             
@@ -70,33 +71,29 @@
             <div class="p-6 text-gray-900">
                 <!-- Flash Messages - Placed at the top level for all tabs -->
                 <div 
-                    x-data="{ show: false, message: '', type: '' }"
+                    x-data="{ 
+                        show: false, 
+                        message: '', 
+                        type: '',
+                        timeout: null,
+                        displayMessage(msg, msgType) {
+                            this.show = true;
+                            this.message = msg;
+                            this.type = msgType;
+                            clearTimeout(this.timeout);
+                            this.timeout = setTimeout(() => this.show = false, 3000);
+                        }
+                    }"
                     x-show="show"
                     x-init="
                         @if(session()->has('message'))
-                            show = true;
-                            message = '{{ session('message') }}';
-                            type = 'success';
-                            setTimeout(() => show = false, 3000);
+                            displayMessage('{{ session('message') }}', 'success');
                         @endif
                         @if(session()->has('error'))
-                            show = true;
-                            message = '{{ session('error') }}';
-                            type = 'error';
-                            setTimeout(() => show = false, 3000);
+                            displayMessage('{{ session('error') }}', 'error');
                         @endif
-                        $wire.on('message', (msg) => {
-                            show = true;
-                            message = msg;
-                            type = 'success';
-                            setTimeout(() => show = false, 3000);
-                        });
-                        $wire.on('error', (msg) => {
-                            show = true;
-                            message = msg;
-                            type = 'error';
-                            setTimeout(() => show = false, 3000);
-                        });
+                        $wire.on('message', (msg) => displayMessage(msg, 'success'));
+                        $wire.on('error', (msg) => displayMessage(msg, 'error'));
                     "
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 transform -translate-y-2"
@@ -127,7 +124,7 @@
                         @if($canManageUsers)
                         <x-admin.tab-content id="users">
                             <div id="users-tab-wrapper">
-                                @livewire('admin.users.user-management', [], key('users-management-'.time()))
+                                @livewire('admin.users.user-management', [], key('users-management'))
                             </div>
                         </x-admin.tab-content>
                         @endif
@@ -138,7 +135,7 @@
                         @if($canManageRoles)
                         <x-admin.tab-content id="roles">
                             <div id="roles-tab-wrapper">
-                                @livewire('admin.roles.role-management', [], key('roles-management-'.time()))
+                                @livewire('admin.roles.role-management', [], key('roles-management'))
                             </div>
                         </x-admin.tab-content>
                         @endif
@@ -149,7 +146,7 @@
                         @if($canManagePermissions)
                         <x-admin.tab-content id="permissions">
                             <div id="permissions-tab-wrapper">
-                                @livewire('admin.permissions.permission-management', [], key('permissions-management-'.time()))
+                                @livewire('admin.permissions.permission-management', [], key('permissions-management'))
                             </div>
                         </x-admin.tab-content>
                         @endif
@@ -160,7 +157,7 @@
                         @if($canSyncInventory)
                         <x-admin.tab-content id="inventory-sync">
                             <div id="inventory-sync-tab-wrapper">
-                                @livewire('admin.inventory.inventory-sync', [], key('inventory-sync-'.time()))
+                                @livewire('admin.inventory.inventory-sync', [], key('inventory-sync'))
                             </div>
                         </x-admin.tab-content>
                         @endif
@@ -171,7 +168,7 @@
                         @if($canManageOrders)
                         <x-admin.tab-content id="orders">
                             <div id="orders-tab-wrapper">
-                                @livewire('admin.orders.order-management', [], key('orders-management-'.time()))
+                                @livewire('admin.orders.order-management', [], key('orders-management'))
                             </div>
                         </x-admin.tab-content>
                         @endif
@@ -182,7 +179,7 @@
                         @if($canManageSales)
                         <x-admin.tab-content id="sales">
                             <div id="sales-tab-wrapper">
-                                @livewire('admin.sales.sales-dashboard', [], key('sales-dashboard-'.time()))
+                                @livewire('admin.sales.sales-dashboard', [], key('sales-dashboard'))
                             </div>
                         </x-admin.tab-content>
                         @endif
@@ -193,7 +190,7 @@
                         @if($canManageFeaturedBrands)
                         <x-admin.tab-content id="featured-brands">
                             <div id="featured-brands-tab-wrapper">
-                                @livewire('admin.featured-brands.featured-brand-management', [], key('featured-brands-management-'.time()))
+                                @livewire('admin.featured-brands.featured-brand-management', [], key('featured-brands-management'))
                             </div>
                         </x-admin.tab-content>
                         @endif

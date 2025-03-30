@@ -21,7 +21,9 @@
     $description = $isArray ? $product['description'] : $product->description;
     $sku = $isArray ? ($product['sku'] ?? '') : ($product->sku ?? '');
     $brand = $isArray ? ($product['brand'] ?? '') : ($product->brand ?? '');
-    $quantity = $isArray ? ($product['quantity'] ?? 0) : ($product->quantity ?? 0);
+    // Handle NULL quantities properly by treating them as zero
+    $rawQuantity = $isArray ? ($product['quantity'] ?? null) : ($product->quantity ?? null);
+    $quantity = is_null($rawQuantity) ? 0 : $rawQuantity;
     
     // Price calculation
     $primaryPrice = null;

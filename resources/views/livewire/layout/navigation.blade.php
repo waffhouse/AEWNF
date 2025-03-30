@@ -52,6 +52,12 @@ new class extends Component
                     </x-nav-link>
                     @endif
                     
+                    @can('sync netsuite sales data')
+                    <x-nav-link :href="route('sales.analytics')" :active="request()->routeIs('sales.analytics')" wire:navigate>
+                        {{ __('Sales Analytics') }}
+                    </x-nav-link>
+                    @endcan
+                    
                     @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate>
                         {{ __('Order Management') }}
@@ -107,6 +113,12 @@ new class extends Component
                             {{ __('Sales History') }}
                         </x-dropdown-link>
                         @endif
+                        
+                        @can('sync netsuite sales data')
+                        <x-dropdown-link :href="route('sales.analytics')" wire:navigate>
+                            {{ __('Sales Analytics') }}
+                        </x-dropdown-link>
+                        @endcan
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
@@ -178,6 +190,12 @@ new class extends Component
             </x-responsive-nav-link>
             @endif
             
+            @can('sync netsuite sales data')
+            <x-responsive-nav-link :href="route('sales.analytics')" :active="request()->routeIs('sales.analytics')" wire:navigate @click="open = false">
+                {{ __('Sales Analytics') }}
+            </x-responsive-nav-link>
+            @endcan
+            
             @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" wire:navigate @click="open = false">
                 {{ __('Order Management') }}
@@ -224,6 +242,12 @@ new class extends Component
                     {{ __('Sales History') }}
                 </x-responsive-nav-link>
                 @endif
+                
+                @can('sync netsuite sales data')
+                <x-responsive-nav-link :href="route('sales.analytics')" wire:navigate @click="open = false">
+                    {{ __('Sales Analytics') }}
+                </x-responsive-nav-link>
+                @endcan
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start" @click="open = false">

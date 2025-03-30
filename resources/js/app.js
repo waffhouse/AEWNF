@@ -1,6 +1,12 @@
 import './bootstrap';
 
-// Chart.js removed as it's no longer needed
+// Import Tippy.js for tooltips
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light-border.css';
+
+// Make tippy available globally
+window.tippy = tippy;
 
 // Fix for Alpine.js components during navigation
 document.addEventListener('livewire:navigating', () => {
@@ -13,24 +19,14 @@ document.addEventListener('livewire:navigating', () => {
 
 // Ensure Alpine.js components are properly initialized after navigation
 document.addEventListener('livewire:navigated', () => {
-    // Force reinitialize any Alpine components that might not be properly initialized
+    // Force reinitialize Alpine components only once with a small delay
     if (window.Alpine) {
-        // Immediate notification for fast components
-        window.dispatchEvent(new CustomEvent('alpine-reinit'));
-        
-        // Multiple timed notifications for components that might load later
-        // This handles race conditions with different loading times
-        [50, 100, 300].forEach(delay => {
-            setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('alpine-reinit'));
-                
-                // Force browser to recalculate layout
-                document.body.classList.add('alpine-reinit-trigger');
-                setTimeout(() => {
-                    document.body.classList.remove('alpine-reinit-trigger');
-                }, 10);
-            }, delay);
-        });
+        // Single delayed initialization is more stable than multiple attempts
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('alpine-reinit'));
+            
+            // Removed forced layout recalculation that can cause glitches
+        }, 100);
     }
 });
 

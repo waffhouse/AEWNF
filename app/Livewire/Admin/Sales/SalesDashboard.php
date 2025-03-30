@@ -10,12 +10,12 @@ class SalesDashboard extends Component
     use AdminAuthorization;
     
     protected $listeners = [
-        'refreshSalesList' => '$refresh'
+        'salesSyncCompleted' => '$refresh'
     ];
     
     public function mount()
     {
-        $this->authorize('view netsuite sales data');
+        $this->authorize('sync netsuite sales data');
     }
     
     public function render()

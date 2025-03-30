@@ -10,6 +10,7 @@
                 </h3>
                 <p class="mt-1 text-sm text-gray-500">
                     Sync sales transaction data from NetSuite. This will fetch the most recent invoices and credit memos.
+                    <a href="{{ route('sales.analytics') }}" class="text-red-600 hover:text-red-800 font-medium ml-1">View Sales Analytics →</a>
                 </p>
             </div>
             

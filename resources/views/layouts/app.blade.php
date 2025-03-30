@@ -14,11 +14,8 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Load CSS normally -->
-        <link rel="stylesheet" href="{{ asset('build/assets/app-CVMN1sKz.css') }}">
-        
-        <!-- Load JS synchronously (without defer/async) -->
-        <script src="{{ asset('build/assets/app-BaN6vmzo.js') }}"></script>
+        <!-- Scripts and Styles -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
         
         <!-- Application specific styles -->
         <style>

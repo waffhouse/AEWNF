@@ -67,12 +67,40 @@ Route::get('dashboard', function() {
         // For each brand, get a few products
         $brandProducts = [];
         foreach ($featuredBrandNames as $brand) {
-            $products = \App\Models\Inventory::where('brand', $brand)
-                ->where('quantity', '>', 0)
-                ->when($stateCondition, $stateCondition)
-                ->orderBy('description')
-                ->take(3)
-                ->get();
+            // Get products for this brand - show all products when expanded
+            $initialVisible = 3; // Show this many in collapsed view
+            
+            // Build query for this brand
+            $query = \App\Models\Inventory::where('brand', $brand)
+                ->where(function($q) {
+                    // Handle NULL quantities properly
+                    $q->where('quantity', '>', 0)
+                      ->orWhereNull('quantity'); // Include items with NULL quantity
+                })
+                ->orderBy('description');
+            
+            // Apply state filter based on user permissions
+            if ($user->canViewFloridaItems() && !$user->canViewGeorgiaItems()) {
+                $query->where(function($q) {
+                    $q->where('state', '')
+                      ->orWhereNull('state')
+                      ->orWhere('state', 'Florida');
+                });
+            } elseif ($user->canViewGeorgiaItems() && !$user->canViewFloridaItems()) {
+                $query->where(function($q) {
+                    $q->where('state', '')
+                      ->orWhereNull('state')
+                      ->orWhere('state', 'Georgia');
+                });
+            }
+            
+            // Get all products for this brand without limit
+            $products = $query->get();
+                
+            // Add a flag for initial visibility
+            $products->each(function($product, $index) use ($initialVisible) {
+                $product->initially_visible = ($index < $initialVisible);
+            });
                 
             if ($products->count() > 0) {
                 $brandProducts[$brand] = $products;
@@ -190,5 +218,10 @@ Route::get('/catalog', \App\Livewire\Inventory\Catalog::class)
 Route::get('/sales', \App\Livewire\Sales\SalesDashboard::class)
     ->middleware(['auth', 'permission:view netsuite sales data|view own orders'])
     ->name('sales');
+    
+// Sales Analytics Dashboard - accessible to users with sync permission
+Route::get('/sales/analytics', \App\Livewire\Sales\SalesAnalyticsDashboard::class)
+    ->middleware(['auth', 'permission:sync netsuite sales data'])
+    ->name('sales.analytics');
 
 require __DIR__.'/auth.php';

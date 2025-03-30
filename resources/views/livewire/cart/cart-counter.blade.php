@@ -1,11 +1,11 @@
-<div wire:poll.10s class="cart-counter {{ $count > 0 ? '' : 'hidden' }}">
+<div wire:poll.30s class="cart-counter {{ $count > 0 ? '' : 'hidden' }}">
     @if($location == 'mobile-icon')
         <!-- Special styling for mobile icon in header -->
         <div class="flex flex-col items-end">
             <!-- Count Badge -->
             <span 
                 class="{{ $count > 0 ? 'bg-red-600' : 'bg-gray-200' }} absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-medium rounded-full text-white"
-                wire:key="cart-count-{{ $location }}-{{ time() }}"
+                wire:key="cart-count-{{ $location }}"
                 x-init="$nextTick(() => { $dispatch('cart-counter-updated', { count: {{ $count }}, total: {{ $total }} }) })"
             >
                 <span class="count">{{ $count }}</span>
@@ -23,7 +23,7 @@
         <div class="flex items-center ml-1.5">
             <span 
                 class="{{ $count > 0 ? 'bg-red-600' : 'bg-gray-200' }} px-1.5 py-0.5 text-xs font-medium rounded-full text-white"
-                wire:key="cart-count-{{ $location }}-{{ time() }}"
+                wire:key="cart-count-{{ $location }}-2"
                 x-init="$nextTick(() => { $dispatch('cart-counter-updated', { count: {{ $count }}, total: {{ $total }} }) })"
             >
                 <span class="count">{{ $count }}</span>
@@ -36,7 +36,7 @@
         <!-- Regular styling for desktop and mobile navigation (count only) -->
         <span 
             class="{{ $count > 0 ? 'bg-red-600' : 'bg-gray-200' }} ml-1.5 px-1.5 py-0.5 text-xs font-medium rounded-full text-white"
-            wire:key="cart-count-{{ $location }}-{{ time() }}"
+            wire:key="cart-count-{{ $location }}-3"
             x-init="$nextTick(() => { $dispatch('cart-counter-updated', { count: {{ $count }}, total: {{ $total }} }) })"
         >
             <span class="count">{{ $count }}</span>

@@ -130,6 +130,11 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                         </svg>
                                         <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">{{ $brand }}</h4>
+                                        @if($products->count() > 3)
+                                        <span class="ml-2 text-xs text-gray-500">
+                                            ({{ $products->count() }} products)
+                                        </span>
+                                        @endif
                                     </div>
                                     <a href="{{ route('inventory.catalog') }}?search={{ urlencode($brand) }}" 
                                        class="text-xs text-red-600 hover:text-red-800"
@@ -151,8 +156,8 @@
                                     style="display: none;"
                                 >
                                     <ul class="divide-y divide-gray-100">
-                                        @foreach($products as $product)
-                                        <li class="py-2 px-3">
+                                        @foreach($products as $index => $product)
+                                        <li class="py-2 px-3 {{ $product->initially_visible ? '' : 'border-t border-gray-200' }}">
                                             <x-product-item 
                                                 :product="$product" 
                                                 variant="compact" 
@@ -161,6 +166,11 @@
                                         </li>
                                         @endforeach
                                     </ul>
+                                    @if($products->count() > 3)
+                                    <div class="px-3 py-2 text-center text-sm text-gray-500 bg-gray-50 rounded-b">
+                                        Showing all {{ $products->count() }} {{ $brand }} products
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                             @endforeach

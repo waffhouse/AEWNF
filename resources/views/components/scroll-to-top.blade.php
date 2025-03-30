@@ -1,9 +1,16 @@
 <button
     x-data="{
         show: false,
+        scrollDebounce: null,
         init() {
+            // Debounced scroll handler to improve performance
             window.addEventListener('scroll', () => {
-                this.show = window.scrollY > 500;
+                if (this.scrollDebounce) {
+                    clearTimeout(this.scrollDebounce);
+                }
+                this.scrollDebounce = setTimeout(() => {
+                    this.show = window.scrollY > 500;
+                }, 100);
             });
         }
     }"

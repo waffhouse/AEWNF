@@ -59,9 +59,9 @@ class Dashboard extends Component
             'countModel' => \App\Models\Order::class
         ],
         'sales' => [
-            'name' => 'Sales',
-            'permissions' => ['view netsuite sales data', 'sync netsuite sales data'],
-            'icon' => 'chart-bar',
+            'name' => 'Sales Sync',
+            'permissions' => ['sync netsuite sales data'],
+            'icon' => 'refresh',
             'color' => 'teal',
             'countModel' => null
         ],
@@ -185,7 +185,7 @@ class Dashboard extends Component
             'canManagePermissions' => auth()->user()->hasPermissionTo('manage permissions'),
             'canSyncInventory' => auth()->user()->hasPermissionTo('sync inventory'),
             'canManageOrders' => auth()->user()->hasPermissionTo('manage orders') || auth()->user()->hasPermissionTo('view all orders'),
-            'canManageSales' => auth()->user()->hasPermissionTo('view netsuite sales data') || auth()->user()->hasPermissionTo('sync netsuite sales data'),
+            'canManageSales' => auth()->user()->hasPermissionTo('sync netsuite sales data'),
             'canManageFeaturedBrands' => auth()->user()->hasPermissionTo('access admin dashboard'),
         ])->layout('layouts.app');
     }
