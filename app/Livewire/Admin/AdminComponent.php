@@ -25,6 +25,54 @@ abstract class AdminComponent extends Component
     }
     
     /**
+     * Check if the current user can access data for a specific customer
+     * Used for customer-specific data filtering
+     * 
+     * @param string $customerEntityId The customer ID to check against
+     * @return bool
+     */
+    protected function userCanAccessCustomerData(string $customerEntityId): bool
+    {
+        $user = auth()->user();
+        
+        // Admin/staff with permission to view all customer data
+        if ($user->hasPermissionTo('view netsuite sales data')) {
+            return true;
+        }
+        
+        // Check if the user's customer_number matches the requested entity ID
+        return $user->customer_number && $user->customer_number === $customerEntityId;
+    }
+    
+    /**
+     * Apply customer restrictions to a database query based on user permissions
+     * This ensures customer users only see their own data
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $customerIdColumn The column name that contains the customer ID
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function applyCustomerRestrictions($query, string $customerIdColumn = 'entity_id')
+    {
+        $user = auth()->user();
+        
+        // Skip restrictions for admin/staff with appropriate permissions
+        if ($user->hasPermissionTo('view netsuite sales data')) {
+            return $query;
+        }
+        
+        // If user has a customer number, restrict to only that customer's data
+        if ($user->customer_number) {
+            return $query->where($customerIdColumn, $user->customer_number);
+        }
+        
+        // If user doesn't have a customer number, return no results
+        // This is safer than returning all data if a user somehow has 
+        // customer permissions but no assigned customer
+        return $query->whereRaw('1 = 0'); // This ensures no results are returned
+    }
+    
+    /**
      * Check if the user has at least one of the required permissions for this component
      */
     protected function checkRequiredPermissions(): void

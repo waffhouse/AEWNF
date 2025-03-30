@@ -196,7 +196,7 @@ Route::get('/orders/{id}/pick-ticket', [\App\Http\Controllers\OrderPickTicketCon
     
 // Sales Invoice generation - allows both admin and customer access
 Route::get('/sales/{id}/invoice', [\App\Http\Controllers\SalesInvoiceController::class, 'generateInvoice'])
-    ->middleware(['auth', 'permission:view netsuite sales data|view own orders'])
+    ->middleware(['auth', 'permission:view netsuite sales data|view own orders', 'verify.customer'])
     ->name('sales.invoice');
 
 // Age verification routes

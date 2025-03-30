@@ -148,31 +148,60 @@
         </table>
     </div>
 
-    <table width="100%" style="margin-bottom: 30px;">
+    <table width="100%" style="margin-bottom: 30px; border: 1px solid #E5E7EB;">
         <tr>
-            <td width="50%" style="vertical-align: top; padding-right: 20px;">
-                <div class="section-title">Bill To</div>
-                <div style="font-weight: bold; margin-bottom: 5px;">{{ $sale->customer_name }}</div>
-                <div>Customer ID: {{ $sale->entity_id }}</div>
-            </td>
-            <td width="50%" style="vertical-align: top; padding-left: 20px;">
-                <div class="section-title">Transaction Details</div>
-                <table>
-                    <tr>
-                        <td style="padding: 3px 0; color: #6B7280;">Transaction Type:</td>
-                        <td style="padding: 3px 0; padding-left: 10px;">{{ $sale->type }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 3px 0; color: #6B7280;">Transaction ID:</td>
-                        <td style="padding: 3px 0; padding-left: 10px;">{{ $sale->tran_id }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 3px 0; color: #6B7280;">Date:</td>
-                        <td style="padding: 3px 0; padding-left: 10px;">{{ $sale->date->format('m/d/Y') }}</td>
-                    </tr>
-                </table>
+            <th colspan="4" style="font-size: 14px; text-align: left; background-color: #F3F4F6; border-bottom: 1px solid #E5E7EB; padding: 8px 10px; font-weight: bold;">
+                CUSTOMER INFORMATION
+            </th>
+        </tr>
+        <tr>
+            <td width="15%" style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Customer:</td>
+            <td width="85%" colspan="3" style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
+                <div style="font-weight: bold; font-size: 13px;">{{ $sale->customer_name }}</div>
+                <div>ID: {{ $sale->entity_id }}</div>
             </td>
         </tr>
+
+        @if(isset($customer))
+        <tr>
+            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Contact:</td>
+            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
+                @if($customer->phone)
+                    <div>Phone: {{ $customer->phone }}</div>
+                @else
+                    <div>No phone on file</div>
+                @endif
+            </td>
+            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-left: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Terms:</td>
+            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
+                {{ $customer->terms ?: 'N/A' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">Location:</td>
+            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
+                <div>County: {{ $customer->county ?: 'N/A' }}</div>
+            </td>
+            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-left: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; background-color: #F9FAFB;">License:</td>
+            <td style="padding: 6px 10px; border-bottom: 1px solid #E5E7EB;">
+                @if($customer->license_number)
+                    @if($customer->license_type)
+                        <div>{{ $customer->license_type }} {{ $customer->license_number }}</div>
+                    @else
+                        <div>License # {{ $customer->license_number }}</div>
+                    @endif
+                @else
+                    <div>N/A</div>
+                @endif
+            </td>
+        </tr>
+        @if($customer->shipping_address)
+        <tr>
+            <td style="padding: 6px 10px; font-weight: bold; color: #6B7280; vertical-align: top; border-right: 1px solid #E5E7EB; background-color: #F9FAFB;">Address:</td>
+            <td colspan="3" style="padding: 6px 10px;">{{ $customer->shipping_address }}</td>
+        </tr>
+        @endif
+        @endif
     </table>
 
     <table class="items-table">
@@ -186,9 +215,24 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($sale->items as $item)
+            @php
+                // Group items by description
+                $itemsByDescription = [];
+                
+                // First pass: collect non-zero amount items
+                foreach ($sale->items as $item) {
+                    $description = $item->item_description;
+                    $amount = (float)$item->amount;
+                    
+                    if ($amount != 0 || !isset($itemsByDescription[$description])) {
+                        $itemsByDescription[$description] = $item;
+                    }
+                }
+            @endphp
+            
+            @foreach($itemsByDescription as $item)
             <tr>
-                <td class="text-center">{{ number_format($item->quantity, 2) }}</td>
+                <td class="text-center">{{ floor($item->quantity) == $item->quantity ? number_format($item->quantity, 0) : number_format($item->quantity, 2) }}</td>
                 <td>{{ $item->sku }}</td>
                 <td>{{ $item->item_description }}</td>
                 <td class="text-right">

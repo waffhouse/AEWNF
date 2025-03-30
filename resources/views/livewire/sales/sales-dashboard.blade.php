@@ -323,8 +323,12 @@
                                     ${{ number_format($sale->total_amount, 2) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button wire:click="viewSaleDetails({{ $sale->id }})" class="text-red-600 hover:text-red-900 mr-4">Details</button>
-                                    <a href="{{ route('sales.invoice', $sale->id) }}" target="_blank" class="text-gray-600 hover:text-gray-900">Invoice</a>
+                                    <a href="{{ route('sales.invoice', $sale->id) }}" target="_blank" class="text-red-600 hover:text-red-900 inline-flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        <span class="ml-1">PDF</span>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -386,11 +390,11 @@
                         <div class="text-gray-900 font-semibold">${{ number_format($sale->total_amount, 2) }}</div>
                     </div>
                 </div>
-                <div class="border-t border-gray-200 px-4 py-3 flex justify-between">
-                    <button wire:click="viewSaleDetails({{ $sale->id }})" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        Details
-                    </button>
-                    <a href="{{ route('sales.invoice', $sale->id) }}" target="_blank" class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                <div class="border-t border-gray-200 px-4 py-3 flex justify-center">
+                    <a href="{{ route('sales.invoice', $sale->id) }}" target="_blank" class="inline-flex items-center px-3 py-1 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
                         Invoice
                     </a>
                 </div>

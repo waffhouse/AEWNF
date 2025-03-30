@@ -312,15 +312,7 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-right">
-                                        <div class="flex justify-end space-x-2">
-                                            <button 
-                                                wire:click="viewSaleDetails({{ $sale->id }})"
-                                                class="text-blue-600 hover:text-blue-900">
-                                                View Details
-                                            </button>
-                                            
-                                            <span class="text-gray-400">|</span>
-                                            
+                                        <div class="flex justify-end">
                                             <a 
                                                 href="{{ route('sales.invoice', $sale->id) }}"
                                                 target="_blank"

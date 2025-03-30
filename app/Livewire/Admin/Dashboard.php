@@ -30,6 +30,13 @@ class Dashboard extends Component
             'color' => 'blue',
             'countModel' => \App\Models\User::class
         ],
+        'customers' => [
+            'name' => 'Customers',
+            'permissions' => ['view customers'],
+            'icon' => 'office-building',
+            'color' => 'cyan',
+            'countModel' => \App\Models\Customer::class
+        ],
         'roles' => [
             'name' => 'Roles',
             'permissions' => ['manage roles'],
@@ -91,7 +98,7 @@ class Dashboard extends Component
         $user = auth()->user();
         
         // Priority order for tabs
-        $priorities = ['orders', 'sales', 'users', 'inventory-sync', 'roles', 'permissions'];
+        $priorities = ['orders', 'sales', 'customers', 'users', 'inventory-sync', 'roles', 'permissions'];
         
         foreach ($priorities as $tabId) {
             if ($this->userCanAccessTab($tabId)) {
@@ -181,6 +188,7 @@ class Dashboard extends Component
             'totalPermissions' => Permission::count(),
             'totalOrders' => Order::count(),
             'canManageUsers' => auth()->user()->hasPermissionTo('access admin dashboard'),
+            'canManageCustomers' => auth()->user()->hasPermissionTo('view customers'),
             'canManageRoles' => auth()->user()->hasPermissionTo('manage roles'),
             'canManagePermissions' => auth()->user()->hasPermissionTo('manage permissions'),
             'canSyncInventory' => auth()->user()->hasPermissionTo('sync inventory'),

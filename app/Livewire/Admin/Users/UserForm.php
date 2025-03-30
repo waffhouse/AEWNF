@@ -18,9 +18,15 @@ class UserForm extends AdminComponent
     public $password;
     public $userRole;
     public $customer_number;
+    public $selected_customer_id;
+    public $customer_search = '';
+    public $customer_state_filter = '';
     
     // UserService instance
     protected UserService $userService;
+    
+    // Cache for customers data
+    protected $cachedCustomers = null;
     
     /**
      * Define the permissions required for this component
@@ -55,12 +61,73 @@ class UserForm extends AdminComponent
     }
     
     /**
+     * Get customers for customer selector
+     */
+    protected function getCustomers()
+    {
+        if ($this->cachedCustomers === null) {
+            $this->cachedCustomers = \App\Models\Customer::orderBy('company_name')
+                ->select('id', 'entity_id', 'company_name', 'home_state')
+                ->get()
+                ->map(function($customer) {
+                    $companyName = $customer->company_name ?: 'Unknown';
+                    $state = $customer->home_state ?: '';
+                    return [
+                        'id' => $customer->id,
+                        'entity_id' => $customer->entity_id,
+                        'company_name' => $companyName,
+                        'home_state' => $state,
+                        'display_name' => "{$customer->entity_id} - {$companyName}" . ($state ? " ({$state})" : '')
+                    ];
+                });
+        }
+        
+        // Apply filters to the customers list
+        $filteredCustomers = collect($this->cachedCustomers);
+        
+        if (!empty($this->customer_search)) {
+            $search = strtolower($this->customer_search);
+            $filteredCustomers = $filteredCustomers->filter(function($customer) use ($search) {
+                return str_contains(strtolower($customer['entity_id']), $search) || 
+                       str_contains(strtolower($customer['company_name']), $search);
+            });
+        }
+        
+        if (!empty($this->customer_state_filter)) {
+            $filteredCustomers = $filteredCustomers->filter(function($customer) {
+                return $customer['home_state'] == $this->customer_state_filter;
+            });
+        }
+        
+        return $filteredCustomers;
+    }
+    
+    /**
+     * Get unique states for filtering
+     */
+    public function getCustomerStates()
+    {
+        if ($this->cachedCustomers === null) {
+            $this->getCustomers(); // Ensure customers are loaded
+        }
+        
+        return collect($this->cachedCustomers)
+            ->pluck('home_state')
+            ->filter() // Remove empty values
+            ->unique()
+            ->sort()
+            ->values();
+    }
+    
+    /**
      * Render the component
      */
     public function render()
     {
         return view('livewire.admin.users.user-form', [
             'roles' => $this->getRoles(),
+            'customers' => $this->getCustomers(),
+            'states' => $this->getCustomerStates(),
         ]);
     }
     
@@ -82,12 +149,13 @@ class UserForm extends AdminComponent
     protected function createRules(): array
     {
         $customerNumberRule = auth()->user()->hasPermissionTo('create users') 
-            ? 'nullable|string|max:10|regex:/^\d{4}$/|unique:users,customer_number'
+            ? 'nullable|string|max:10|unique:users,customer_number'
             : 'prohibited';
             
         return [
             'password' => 'required|min:8',
             'customer_number' => $customerNumberRule,
+            'selected_customer_id' => 'nullable',
         ];
     }
     
@@ -97,12 +165,13 @@ class UserForm extends AdminComponent
     protected function updateRules(): array
     {
         $customerNumberRule = auth()->user()->hasPermissionTo('edit users')
-            ? 'nullable|string|max:10|regex:/^\d{4}$/|unique:users,customer_number,' . ($this->editId ?? '')
+            ? 'nullable|string|max:10|unique:users,customer_number,' . ($this->editId ?? '')
             : 'prohibited';
             
         return [
             'password' => 'nullable|min:8',
             'customer_number' => $customerNumberRule,
+            'selected_customer_id' => 'nullable',
         ];
     }
     
@@ -218,6 +287,14 @@ class UserForm extends AdminComponent
         $this->password = '';
         $this->customer_number = $user->customer_number;
         $this->userRole = $user->roles->first() ? $user->roles->first()->name : '';
+        
+        // If user has customer_number, find the associated customer
+        if ($user->customer_number) {
+            $customer = \App\Models\Customer::where('entity_id', $user->customer_number)->first();
+            if ($customer) {
+                $this->selected_customer_id = $customer->id;
+            }
+        }
     }
     
     /**
@@ -278,7 +355,64 @@ class UserForm extends AdminComponent
      */
     public function resetForm(): void
     {
-        $this->reset(['name', 'email', 'password', 'userRole', 'customer_number']);
+        $this->reset(['name', 'email', 'password', 'userRole', 'customer_number', 'selected_customer_id', 'customer_search', 'customer_state_filter']);
         $this->formErrors = []; // Reset form errors directly
+    }
+    
+    /**
+     * When a customer is selected, set the customer_number field and update role
+     */
+    public function updatedSelectedCustomerId($value)
+    {
+        if (empty($value)) {
+            $this->customer_number = null;
+            return;
+        }
+        
+        $customer = $this->getCustomers()->firstWhere('id', $value);
+        if ($customer) {
+            // Set the customer number
+            $this->customer_number = $customer['entity_id'];
+            
+            // Set appropriate role based on customer state
+            if (strtolower($customer['home_state']) === 'florida') {
+                $this->userRole = 'florida customer';
+            } elseif (strtolower($customer['home_state']) === 'georgia') {
+                $this->userRole = 'georgia customer';
+            } else {
+                // For customers with other or no state, use generic customer role
+                $this->userRole = 'customer';
+            }
+        }
+    }
+    
+    /**
+     * When a role is selected, clear customer if state doesn't match
+     */
+    public function updatedUserRole($value)
+    {
+        if (!$this->selected_customer_id) {
+            return;
+        }
+        
+        // Get the selected customer info
+        $customer = $this->getCustomers()->firstWhere('id', $this->selected_customer_id);
+        if (!$customer) {
+            return;
+        }
+        
+        // Check if we need to clear the customer selection
+        $state = strtolower($customer['home_state'] ?? '');
+        $role = strtolower($value);
+        
+        if (
+            ($role === 'florida customer' && $state !== 'florida') ||
+            ($role === 'georgia customer' && $state !== 'georgia') ||
+            (!in_array($role, ['customer', 'florida customer', 'georgia customer']))
+        ) {
+            // Clear customer info if it doesn't match the role
+            $this->selected_customer_id = null;
+            $this->customer_number = null;
+        }
     }
 }

@@ -130,6 +130,17 @@
                         @endif
                     </div>
                     
+                    <!-- Customers Tab Panel -->
+                    <div wire:key="customers-tab-panel-container">
+                        @if($canManageCustomers)
+                        <x-admin.tab-content id="customers">
+                            <div id="customers-tab-wrapper">
+                                @livewire('admin.customers.customer-management', [], key('customers-management'))
+                            </div>
+                        </x-admin.tab-content>
+                        @endif
+                    </div>
+                    
                     <!-- Roles Tab Panel -->
                     <div wire:key="roles-tab-panel-container">
                         @if($canManageRoles)

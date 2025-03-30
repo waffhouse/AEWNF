@@ -195,61 +195,90 @@
     </style>
 </head>
 <body>
-    <div class="header clearfix">
-        <div class="logo-container">
-            <img src="{{ public_path('images/logo.png') }}" alt="A&E Wholesale" class="logo">
-            <span style="vertical-align: middle; font-size: 16px; font-weight: bold; margin-left: 10px;">A&E Wholesale of North Florida</span>
-        </div>
-        <div class="title-container">
-            <h1>Pick Ticket - Website Order #{{ $order->id }}</h1>
-        </div>
-    </div>
-    
-    <div class="info-section">
-        <table class="order-info-table">
+    <div style="margin-bottom: 15px; padding-bottom: 10px;">
+        <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 0;">
             <tr>
-                <th colspan="6">ORDER INFORMATION</th>
-            </tr>
-            <tr>
-                <td class="order-info-label" width="15%">Order #:</td>
-                <td width="18%">{{ $order->id }}</td>
-                <td class="order-info-label" width="15%">Status:</td>
-                <td width="18%">
-                    @if($order->status === \App\Models\Order::STATUS_PENDING)
-                        Pending
-                    @elseif($order->status === \App\Models\Order::STATUS_COMPLETED)
-                        Completed
-                    @elseif($order->status === \App\Models\Order::STATUS_CANCELLED)
-                        Cancelled
-                    @endif
+                <td style="vertical-align: middle; width: 60%; border: none; padding: 0;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="{{ public_path('images/logo.png') }}" alt="A&E Wholesale" style="max-height: 40px; vertical-align: middle;">
+                        <span style="vertical-align: middle; font-size: 16px; font-weight: bold; margin-left: 10px;">A&E Wholesale of North Florida</span>
+                    </div>
                 </td>
-                <td class="order-info-label" width="15%">Customer:</td>
-                <td width="19%">{{ $order->user->name }}</td>
-            </tr>
-            <tr>
-                <td class="order-info-label">Date:</td>
-                <td>{{ $order->created_at->format('m/d/Y') }}</td>
-                <td class="order-info-label">Type:</td>
-                <td>
-                    @if($order->delivery_type === \App\Models\Order::DELIVERY_TYPE_PICKUP)
-                        Pickup
-                    @elseif($order->delivery_type === \App\Models\Order::DELIVERY_TYPE_DELIVERY)
-                        Delivery
-                    @endif
-                </td>
-                <td class="order-info-label">
-                    @if($order->user->customer_number)
-                    Customer #:
-                    @endif
-                </td>
-                <td>
-                    @if($order->user->customer_number)
-                        {{ $order->user->customer_number }}
-                    @endif
+                <td style="vertical-align: middle; text-align: right; width: 40%; border: none; padding: 0;">
+                    <div style="font-size: 16px; font-weight: bold; color: #111827;">
+                        Pick Ticket - Website Order #{{ $order->id }}
+                    </div>
+                    <div style="font-size: 12px; color: #4B5563; margin-top: 2px;">
+                        Date: {{ $order->created_at->format('m/d/Y') }} | 
+                        @if($order->delivery_type === \App\Models\Order::DELIVERY_TYPE_PICKUP)
+                            Pickup
+                        @elseif($order->delivery_type === \App\Models\Order::DELIVERY_TYPE_DELIVERY)
+                            Delivery
+                        @endif
+                    </div>
                 </td>
             </tr>
         </table>
     </div>
+    
+    <!-- Customer Information Section -->
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 10px;">
+        <tr>
+            <th colspan="4" style="font-size: 11px; text-align: left; background-color: #e5e7eb; border-bottom: 1px solid #000; padding: 3px 5px; font-weight: bold;">
+                CUSTOMER INFORMATION
+            </th>
+        </tr>
+        <tr>
+            <td width="15%" style="padding: 4px; font-weight: bold; font-size: 10px;">Customer:</td>
+            <td width="35%" style="padding: 4px; font-size: 10px;">
+                @if($order->user->customer && $order->user->customer->company_name)
+                    {{ $order->user->customer->company_name }}
+                @else
+                    {{ $order->user->name }}
+                @endif
+            </td>
+            <td width="15%" style="padding: 4px; font-weight: bold; font-size: 10px;">Customer #:</td>
+            <td width="35%" style="padding: 4px; font-size: 10px;">{{ $order->user->customer_number ?: 'N/A' }}</td>
+        </tr>
+        
+        @if($order->user->customer)
+        <tr>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">Phone:</td>
+            <td style="padding: 4px; font-size: 10px;">{{ $order->user->customer->phone ?: 'N/A' }}</td>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">Terms:</td>
+            <td style="padding: 4px; font-size: 10px;">{{ $order->user->customer->terms ?: 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">State:</td>
+            <td style="padding: 4px; font-size: 10px;">{{ $order->user->customer->home_state ?: 'N/A' }}</td>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">County:</td>
+            <td style="padding: 4px; font-size: 10px;">{{ $order->user->customer->county ?: 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">License:</td>
+            <td style="padding: 4px; font-size: 10px;">
+                @if($order->user->customer->license_number)
+                    @if($order->user->customer->license_type)
+                        {{ $order->user->customer->license_type }}
+                    @else
+                        License #
+                    @endif
+                @else
+                    N/A
+                @endif
+            </td>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">License #:</td>
+            <td style="padding: 4px; font-size: 10px;">{{ $order->user->customer->license_number ?: 'N/A' }}</td>
+        </tr>
+        
+        @if($order->user->customer->shipping_address)
+        <tr>
+            <td style="padding: 4px; font-weight: bold; font-size: 10px;">Address:</td>
+            <td colspan="3" style="padding: 4px; font-size: 10px;">{{ $order->user->customer->shipping_address }}</td>
+        </tr>
+        @endif
+        @endif
+    </table>
     
     @if($order->notes)
     <div class="info-section">
@@ -280,7 +309,7 @@
                     <td style="text-align: center; font-family: Arial, sans-serif;">
                         <div class="check-box"></div>
                     </td>
-                    <td class="quantity">{{ $item->quantity }}</td>
+                    <td class="quantity">{{ floor($item->quantity) == $item->quantity ? number_format($item->quantity, 0) : number_format($item->quantity, 2) }}</td>
                     <td>{{ $item->product_sku }}</td>
                     <td>{{ $item->product_name }}</td>
                     <td style="text-align: center; font-family: Arial, sans-serif; font-size: 10px;">
@@ -351,17 +380,9 @@
         </table>
     </div>
     
-    <div class="signature-section">
-        <table style="border: 1px solid #000; width: 100%;">
-            <tr>
-                <td style="width: 50%; border-left: none; border-top: none; border-bottom: none; padding: 6px 8px; height: 60px; vertical-align: top;">
-                    <div style="font-weight: bold; margin-bottom: 35px;">Picked By:</div>
-                </td>
-                <td style="width: 50%; border-right: none; border-top: none; border-bottom: none; padding: 6px 8px; height: 60px; vertical-align: top;">
-                    <div style="font-weight: bold; margin-bottom: 35px;">Date:</div>
-                </td>
-            </tr>
-        </table>
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <div style="font-weight: bold; margin-bottom: 5px;">Picked By:</div>
+        <div style="border-bottom: 1px solid #000; width: 100%; height: 30px;"></div>
     </div>
     
     <div class="footer">

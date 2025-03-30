@@ -15,7 +15,7 @@ class CatalogViewModel
      * 
      * @var string
      */
-    public const DEFAULT_CATEGORY = 'Beverages';
+    public const DEFAULT_CATEGORY = '';
     /**
      * Get distinct brand options for filters
      * 

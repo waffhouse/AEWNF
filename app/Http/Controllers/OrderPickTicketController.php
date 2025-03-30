@@ -19,8 +19,14 @@ class OrderPickTicketController extends Controller
      */
     public function generatePickTicket($id)
     {
-        // Get the order with all its items and the user
-        $order = Order::with(['items.inventory', 'user'])->findOrFail($id);
+        // Get the order with all its items, the user, and the customer
+        $order = Order::with(['items.inventory', 'user.customer'])->findOrFail($id);
+        
+        // Security check: Ensure the user has permission to manage orders
+        // This check is redundant with the middleware but adds an extra layer of security
+        if (!Auth::user()->hasPermissionTo('manage orders')) {
+            abort(403, 'You are not authorized to generate pick tickets');
+        }
         
         // Create the PDF
         $pdf = Pdf::loadView('pdfs.pick-ticket', [

@@ -36,6 +36,10 @@ class RolesAndPermissionsSeeder extends Seeder
             // Inventory management
             'sync inventory',
             
+            // Customer management permissions
+            'view customers',
+            'sync customers',
+            
             // Catalog and sales permissions
             'view catalog',
             'view sales history',

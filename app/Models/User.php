@@ -101,6 +101,14 @@ class User extends Authenticatable
     }
     
     /**
+     * Get the customer associated with the user.
+     */
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_number', 'entity_id');
+    }
+    
+    /**
      * Get the active cart for the user or create one if it doesn't exist.
      */
     public function getOrCreateCart()

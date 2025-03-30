@@ -48,8 +48,13 @@ class NetSuiteService
             throw new \Exception('NetSuite script ID or deploy ID not configured');
         }
 
-        // Use a specific URL for the sales RESTlet
-        $customBaseUrl = ($scriptId === '1270') ? $this->config['sales_restlet_url'] : null;
+        // Use a specific URL for the sales or customer RESTlet
+        $customBaseUrl = null;
+        if ($scriptId === '1270') {
+            $customBaseUrl = $this->config['sales_restlet_url'];
+        } elseif ($scriptId === $this->config['customer_script_id'] && isset($this->config['customer_restlet_url'])) {
+            $customBaseUrl = $this->config['customer_restlet_url'];
+        }
         $url = $this->buildRestletUrl($scriptId, $deployId, $customBaseUrl);
         $headers = $this->generateAuthorizationHeaders($url, $method);
 
@@ -81,11 +86,17 @@ class NetSuiteService
             // Try to decode as JSON, but return raw content if not valid JSON
             $decoded = json_decode($content, true);
             if (json_last_error() === JSON_ERROR_NONE) {
+                Log::info('Successfully decoded JSON response', [
+                    'type' => gettype($decoded),
+                    'is_array' => is_array($decoded),
+                    'count' => is_array($decoded) ? count($decoded) : 'N/A',
+                    'sample' => is_array($decoded) && count($decoded) > 0 ? json_encode(reset($decoded)) : 'Empty or not an array'
+                ]);
                 return $decoded;
             } else {
-                Log::warning('NetSuite response is not valid JSON', [
+                Log::error('NetSuite response is not valid JSON', [
                     'json_error' => json_last_error_msg(),
-                    'content_preview' => substr($content, 0, 200)
+                    'content_preview' => substr($content, 0, 500)
                 ]);
                 return $content;
             }
@@ -133,6 +144,42 @@ class NetSuiteService
         
         return $result;
     }
+    
+    /**
+     * Get customer data from NetSuite
+     * 
+     * @param array $params Optional parameters to pass to the RESTlet
+     * @return mixed Customer data (array or string)
+     * @throws \Exception
+     */
+    public function getCustomers(array $params = []): mixed
+    {
+        // Extract timeout if it's in the params
+        $timeout = null;
+        if (isset($params['timeout'])) {
+            $timeout = $params['timeout'];
+            unset($params['timeout']);
+        }
+        
+        // Use the script ID and deploy ID for the customer RESTlet
+        $scriptId = $this->config['customer_script_id'] ?? '1271';
+        $deployId = $this->config['customer_deploy_id'] ?? '1';
+        
+        $result = $this->callRestlet('GET', $params, $scriptId, $deployId, $timeout);
+        
+        // Log what we got back for debugging
+        Log::debug('NetSuite customer response', ['type' => gettype($result), 'data' => $result]);
+        
+        // If we got a string but it looks like JSON, try to decode it
+        if (is_string($result) && (str_starts_with(trim($result), '{') || str_starts_with(trim($result), '['))) {
+            $decoded = json_decode($result, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
+        }
+        
+        return $result;
+    }
 
     /**
      * Build the complete URL for the RESTlet
@@ -151,6 +198,11 @@ class NetSuiteService
         if ($scriptId === '1270' && isset($this->config['sales_restlet_url'])) {
             $baseUrl = $this->config['sales_restlet_url'];
             Log::info('Using sales-specific RESTlet URL');
+        }
+        // For customer data, use the dedicated URL if available
+        elseif ($scriptId === $this->config['customer_script_id'] && isset($this->config['customer_restlet_url'])) {
+            $baseUrl = $this->config['customer_restlet_url'];
+            Log::info('Using customer-specific RESTlet URL');
         }
         
         // Parse the base URL to ensure we don't duplicate query parameters

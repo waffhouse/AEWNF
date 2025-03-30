@@ -46,11 +46,7 @@ new class extends Component
                     </x-nav-link>
                     @endcan
                     
-                    @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
-                    <x-nav-link :href="route('sales')" :active="request()->routeIs('sales')" wire:navigate>
-                        {{ __('Sales History') }}
-                    </x-nav-link>
-                    @endif
+                    <!-- Sales History moved to dropdown menu only -->
                     
                     @can('sync netsuite sales data')
                     <x-nav-link :href="route('sales.analytics')" :active="request()->routeIs('sales.analytics')" wire:navigate>
@@ -104,7 +100,7 @@ new class extends Component
                         
                         @can('view own orders')
                         <x-dropdown-link :href="route('customer.orders')" wire:navigate>
-                            {{ __('My Orders') }}
+                            {{ __('My Web Orders') }}
                         </x-dropdown-link>
                         @endcan
                         
@@ -184,11 +180,7 @@ new class extends Component
             </x-responsive-nav-link>
             @endcan
             
-            @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
-            <x-responsive-nav-link :href="route('sales')" :active="request()->routeIs('sales')" wire:navigate @click="open = false">
-                {{ __('Sales History') }}
-            </x-responsive-nav-link>
-            @endif
+            <!-- Sales History moved to user profile dropdown only -->
             
             @can('sync netsuite sales data')
             <x-responsive-nav-link :href="route('sales.analytics')" :active="request()->routeIs('sales.analytics')" wire:navigate @click="open = false">
@@ -233,7 +225,7 @@ new class extends Component
                 
                 @can('view own orders')
                 <x-responsive-nav-link :href="route('customer.orders')" wire:navigate @click="open = false">
-                    {{ __('My Orders') }}
+                    {{ __('My Web Orders') }}
                 </x-responsive-nav-link>
                 @endcan
                 

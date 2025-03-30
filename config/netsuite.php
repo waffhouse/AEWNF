@@ -21,8 +21,13 @@ return [
     'sales_script_id' => env('NETSUITE_SALES_DATA_SCRIPT_ID', '1270'),
     'sales_deploy_id' => env('NETSUITE_SALES_DATA_DEPLOY_ID', '2'),
     
-    // Dedicated URL for the sales RESTlet 
+    // Customer data script and deploy IDs
+    'customer_script_id' => env('NETSUITE_CUSTOMER_SCRIPT_ID'),
+    'customer_deploy_id' => env('NETSUITE_CUSTOMER_DEPLOY_ID'),
+    
+    // Dedicated URLs for RESTlets
     'sales_restlet_url' => env('NETSUITE_SALES_RESTLET_URL', 'https://3984077.restlets.api.netsuite.com/app/site/hosting/restlet.nl'),
+    'customer_restlet_url' => env('NETSUITE_CUSTOMER_RESTLET_URL', 'https://3984077.restlets.api.netsuite.com/app/site/hosting/restlet.nl'),
     
     // Request settings with sensible defaults
     'timeout' => env('NETSUITE_TIMEOUT', 300), // Increased from 30s to 300s (5 minutes) for large syncs
