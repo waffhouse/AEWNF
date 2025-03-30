@@ -18,71 +18,31 @@
         </div>
         
         <!-- Filters -->
-        <div class="mb-6 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 md:grid-cols-3 sm:gap-4">
+        <div class="mb-6">
             <!-- Search Filter -->
             <div>
+                <label for="customer-search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                 <x-filters.search-input
+                    id="customer-search"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search by ID, Name, or Email..."
-                />
-            </div>
-            
-            <!-- State Filter -->
-            <div>
-                <x-filters.dropdown-filter
-                    wire:model.live="stateFilter"
-                    :options="[''=>'All States'] + array_combine($states, $states)"
-                    placeholder="Filter by State"
-                />
-            </div>
-            
-            <!-- License Type Filter -->
-            <div>
-                <x-filters.dropdown-filter
-                    wire:model.live="licenseTypeFilter"
-                    :options="[''=>'All License Types'] + array_combine($licenseTypes, $licenseTypes)"
-                    placeholder="Filter by License Type"
+                    placeholder="Search by ID, Name, Email, County, or State..."
                 />
             </div>
         </div>
         
         <!-- Active Filters -->
-        @if($search || $stateFilter || $licenseTypeFilter)
+        @if($search)
             <div class="mb-4">
                 <x-filters.filter-badges>
-                    @if($search)
-                        <x-slot:badges>
-                            <span wire:click="$set('search', '')" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer">
-                                Search: {{ $search }}
-                                <svg class="ml-1.5 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </span>
-                        </x-slot:badges>
-                    @endif
-                    
-                    @if($stateFilter)
-                        <x-slot:badges>
-                            <span wire:click="$set('stateFilter', '')" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 cursor-pointer">
-                                State: {{ $stateFilter }}
-                                <svg class="ml-1.5 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </span>
-                        </x-slot:badges>
-                    @endif
-                    
-                    @if($licenseTypeFilter)
-                        <x-slot:badges>
-                            <span wire:click="$set('licenseTypeFilter', '')" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 cursor-pointer">
-                                License Type: {{ $licenseTypeFilter }}
-                                <svg class="ml-1.5 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </span>
-                        </x-slot:badges>
-                    @endif
-                </x-components.filters.filter-badges>
+                    <x-slot:badges>
+                        <span wire:click="$set('search', '')" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer">
+                            Search: {{ $search }}
+                            <svg class="ml-1.5 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </span>
+                    </x-slot:badges>
+                </x-filters.filter-badges>
             </div>
         @endif
         
@@ -198,9 +158,9 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-2 sm:px-4 py-6 sm:py-8 text-center text-gray-500">
-                                    @if($search || $stateFilter || $licenseTypeFilter)
-                                        No customers found matching your filters.
-                                        <button wire:click="resetFilters" class="text-blue-500 underline">Reset filters</button>
+                                    @if($search)
+                                        No customers found matching your search.
+                                        <button wire:click="resetFilters" class="text-blue-500 underline">Clear search</button>
                                     @else
                                         No customers found. Sync customer data from NetSuite to view customers.
                                     @endif

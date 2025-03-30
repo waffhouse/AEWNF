@@ -13,8 +13,6 @@ class CustomerList extends AdminComponent
     use Filterable, InfiniteScrollable;
     
     public $search = '';
-    public $stateFilter = '';
-    public $licenseTypeFilter = '';
     public int $perPage = 25;
     
     /**
@@ -42,18 +40,10 @@ class CustomerList extends AdminComponent
                     $q->where('entity_id', 'like', "%{$value}%")
                       ->orWhere('company_name', 'like', "%{$value}%")
                       ->orWhere('email', 'like', "%{$value}%")
-                      ->orWhere('license_number', 'like', "%{$value}%");
+                      ->orWhere('license_number', 'like', "%{$value}%")
+                      ->orWhere('county', 'like', "%{$value}%")
+                      ->orWhere('home_state', 'like', "%{$value}%");
                 });
-            },
-            'stateFilter' => function ($query, $value) {
-                if (!empty($value)) {
-                    $query->where('home_state', $value);
-                }
-            },
-            'licenseTypeFilter' => function ($query, $value) {
-                if (!empty($value)) {
-                    $query->where('license_type', $value);
-                }
             }
         ];
     }
@@ -67,25 +57,9 @@ class CustomerList extends AdminComponent
     }
     
     /**
-     * Reset items when changing filters
+     * Reset items when changing search
      */
     public function updatedSearch()
-    {
-        $this->resetItems();
-    }
-    
-    /**
-     * Reset items when changing filters
-     */
-    public function updatedStateFilter()
-    {
-        $this->resetItems();
-    }
-    
-    /**
-     * Reset items when changing filters
-     */
-    public function updatedLicenseTypeFilter()
     {
         $this->resetItems();
     }
@@ -96,8 +70,6 @@ class CustomerList extends AdminComponent
     public function resetFilters()
     {
         $this->search = '';
-        $this->stateFilter = '';
-        $this->licenseTypeFilter = '';
         $this->resetItems();
     }
     
@@ -187,50 +159,22 @@ class CustomerList extends AdminComponent
     {
         $query = Customer::query()->orderBy('company_name');
         
-        // Apply filters
+        // Apply search filter
         if (!empty($this->search)) {
             $query->where(function ($q) {
                 $q->where('entity_id', 'like', "%{$this->search}%")
                   ->orWhere('company_name', 'like', "%{$this->search}%")
                   ->orWhere('email', 'like', "%{$this->search}%")
-                  ->orWhere('license_number', 'like', "%{$this->search}%");
+                  ->orWhere('license_number', 'like', "%{$this->search}%")
+                  ->orWhere('county', 'like', "%{$this->search}%")
+                  ->orWhere('home_state', 'like', "%{$this->search}%");
             });
-        }
-        
-        if (!empty($this->stateFilter)) {
-            $query->where('home_state', $this->stateFilter);
-        }
-        
-        if (!empty($this->licenseTypeFilter)) {
-            $query->where('license_type', $this->licenseTypeFilter);
         }
         
         return $query;
     }
     
-    /**
-     * Get all available states for filtering
-     */
-    public function getStatesProperty()
-    {
-        return Customer::whereNotNull('home_state')
-            ->distinct()
-            ->pluck('home_state')
-            ->sort()
-            ->toArray();
-    }
-    
-    /**
-     * Get all available license types for filtering
-     */
-    public function getLicenseTypesProperty()
-    {
-        return Customer::whereNotNull('license_type')
-            ->distinct()
-            ->pluck('license_type')
-            ->sort()
-            ->toArray();
-    }
+    // States and license types properties have been removed as they are no longer needed
     
     /**
      * Show customer details in a modal
@@ -251,8 +195,6 @@ class CustomerList extends AdminComponent
     {
         return view('livewire.admin.customers.customer-list', [
             'customers' => $this->items,
-            'states' => $this->states,
-            'licenseTypes' => $this->licenseTypes,
             'hasMorePages' => $this->hasMorePages,
             'totalCount' => $this->totalCount,
             'loadedCount' => $this->loadedCount

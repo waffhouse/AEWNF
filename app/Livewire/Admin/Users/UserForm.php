@@ -360,6 +360,16 @@ class UserForm extends AdminComponent
     }
     
     /**
+     * Handle form cancellation
+     * Accept arbitrary number of arguments to handle any way the event might be called
+     */
+    #[On('user-form-cancelled')]
+    public function handleFormCancellation()
+    {
+        $this->resetForm();
+    }
+    
+    /**
      * When a customer is selected, set the customer_number field and update role
      */
     public function updatedSelectedCustomerId($value)

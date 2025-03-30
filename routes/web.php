@@ -219,9 +219,14 @@ Route::get('/sales', \App\Livewire\Sales\SalesDashboard::class)
     ->middleware(['auth', 'permission:view netsuite sales data|view own orders'])
     ->name('sales');
     
-// Sales Analytics Dashboard - accessible to users with sync permission
+// Sales Analytics Dashboard - accessible to users with order management permission
 Route::get('/sales/analytics', \App\Livewire\Sales\SalesAnalyticsDashboard::class)
-    ->middleware(['auth', 'permission:sync netsuite sales data'])
+    ->middleware(['auth', 'permission:manage orders'])
     ->name('sales.analytics');
+
+// Customers Without Sales Report - requires order management permission
+Route::get('/sales/customers-without-sales', \App\Livewire\Admin\Sales\CustomersWithoutSales::class)
+    ->middleware(['auth', 'permission:manage orders'])
+    ->name('sales.customers-without-sales');
 
 require __DIR__.'/auth.php';

@@ -25,7 +25,7 @@ $maxWidth = [
     '7xl' => 'sm:max-w-7xl',
 ][$maxWidth];
 
-$submitWireMethod = $attributes->wire('submit')->value() ?? $submitMethod;
+$submitWireMethod = $attributes->has('wire:submit') ? $attributes->wire('submit')->value() : $submitMethod;
 @endphp
 
 <div
@@ -146,7 +146,7 @@ $submitWireMethod = $attributes->wire('submit')->value() ?? $submitMethod;
                     <button
                         type="button"
                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                        x-on:click="$dispatch('close-modal', '{{ $name }}')"
+                        x-on:click="$dispatch('close-modal', '{{ $name }}'); if (typeof $wire !== 'undefined') $wire.$dispatch('user-form-cancelled');"
                         @if($loading)
                             wire:loading.attr="disabled"
                         @endif
@@ -194,7 +194,7 @@ $submitWireMethod = $attributes->wire('submit')->value() ?? $submitMethod;
                     <button
                         type="button"
                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                        x-on:click="$dispatch('close-modal', '{{ $name }}')"
+                        x-on:click="$dispatch('close-modal', '{{ $name }}'); if (typeof $wire !== 'undefined') $wire.$dispatch('user-form-cancelled');"
                         @if($loading)
                             wire:loading.attr="disabled"
                         @endif

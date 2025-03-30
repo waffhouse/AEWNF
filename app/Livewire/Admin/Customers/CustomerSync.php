@@ -46,11 +46,13 @@ class CustomerSync extends AdminComponent
             $floridaCustomers = Customer::where('home_state', 'Florida')->count() ?: 0;
             $georgiaCustomers = Customer::where('home_state', 'Georgia')->count() ?: 0;
             
-            // Get license type distribution
-            $licenseTypes = Customer::selectRaw('license_type, COUNT(*) as count')
-                ->whereNotNull('license_type')
-                ->groupBy('license_type')
-                ->pluck('count', 'license_type')
+            // Get top counties by customer count
+            $topCounties = Customer::selectRaw('county, COUNT(*) as count')
+                ->whereNotNull('county')
+                ->groupBy('county')
+                ->orderBy('count', 'desc')
+                ->limit(6)  // Get top 6 counties
+                ->pluck('count', 'county')
                 ->toArray();
             
             // Compile all stats
@@ -58,7 +60,7 @@ class CustomerSync extends AdminComponent
                 'total' => $totalCustomers,
                 'florida_customers' => $floridaCustomers,
                 'georgia_customers' => $georgiaCustomers,
-                'license_types' => $licenseTypes,
+                'top_counties' => $topCounties,
                 'time_since_sync' => $timeSinceSync
             ];
         } else {

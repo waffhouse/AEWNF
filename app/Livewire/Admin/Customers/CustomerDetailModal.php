@@ -76,7 +76,7 @@ class CustomerDetailModal extends AdminComponent
      * Listen for the close-modal event to close the modal
      */
     #[On('close-modal')]
-    public function handleCloseModal($modalName)
+    public function handleCloseModal($modalName = null)
     {
         if ($modalName === 'customer-detail-modal') {
             $this->closeModal();

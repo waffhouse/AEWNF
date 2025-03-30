@@ -4,6 +4,7 @@
             <h1 class="text-2xl font-semibold text-gray-900">Sales Analytics</h1>
             <p class="mt-2 text-sm text-gray-600">
                 Analyze sales performance by product class and brand. View key metrics and identify trends.
+                <a href="{{ route('sales.customers-without-sales') }}" class="text-red-600 hover:text-red-800 font-medium ml-3">View Customers Without Sales →</a>
             </p>
         </div>
         

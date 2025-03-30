@@ -1,6 +1,5 @@
 @props([
     'placeholder' => 'Search...',
-    'model' => null,
     'debounce' => '300ms',
     'submit' => false,
     'id' => null,
@@ -10,11 +9,6 @@
     // Set default id if not provided
     $id = $id ?? 'search-input-' . Str::random(6);
     
-    // Set appropriate wire:model directive based on submit preference
-    $wireModel = $submit 
-        ? "wire:model=\"{$model}\""
-        : "wire:model.live.debounce.{$debounce}=\"{$model}\"";
-    
     // Compute final classes with any additional classes passed via attributes
     $baseClass = 'w-full rounded-md focus:ring-blue-500 focus:border-blue-500';
     $rightButtonClass = $submit ? 'pl-3 pr-10' : 'pl-8 pr-3';
@@ -22,7 +16,7 @@
     $inputClass = $submit ? $rightButtonClass : $leftButtonClass;
 @endphp
 
-<div {{ $attributes->merge(['class' => 'relative w-full']) }}>
+<div {{ $attributes->except('wire:model')->merge(['class' => 'relative w-full']) }}>
     @if(!$submit)
         {{-- Left-aligned search icon (for non-submit version) --}}
         <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
@@ -39,7 +33,7 @@
     <input 
         id="{{ $id }}"
         type="search" 
-        {!! $wireModel !!}
+        {{ $attributes->whereStartsWith('wire:model') }}
         placeholder="{{ $placeholder }}"
         class="{{ $baseClass }} {{ $inputClass }} border-gray-300 py-2 text-sm"
     >

@@ -135,6 +135,8 @@ trait FormValidatable
     public function resetForm(): void
     {
         $this->formErrors = [];
+        $this->isEditMode = false;
+        $this->editId = null;
     }
     
     /**

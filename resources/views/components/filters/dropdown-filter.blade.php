@@ -1,19 +1,11 @@
 @props([
-    'model' => null,
-    'label' => null,
     'placeholder' => 'Select an option',
     'options' => [],
     'emptyOption' => true,
     'emptyOptionLabel' => 'All',
     'live' => true,
+    'label' => null,
 ])
-
-@php
-    // Set appropriate wire:model directive based on live preference
-    $wireModel = $live 
-        ? "wire:model.live=\"{$model}\""
-        : "wire:model=\"{$model}\"";
-@endphp
 
 <div {{ $attributes->merge(['class' => 'w-full']) }}>
     @if($label)
@@ -22,8 +14,8 @@
     
     <div class="relative">
         <select 
-            {!! $wireModel !!}
-            class="border-gray-300 focus:ring-blue-500 focus:border-blue-500 block w-full py-2 px-3 text-sm rounded-md appearance-none"
+            {{ $attributes->whereStartsWith('wire:model') }}
+            class="border-gray-300 focus:ring-blue-500 focus:border-blue-500 block w-full py-2 px-3 pr-10 text-sm rounded-md appearance-none"
         >
             @if($emptyOption)
                 <option value="">{{ $emptyOptionLabel }}</option>

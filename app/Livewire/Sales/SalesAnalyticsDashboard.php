@@ -23,7 +23,7 @@ class SalesAnalyticsDashboard extends Component
     public function mount()
     {
         // Check if user has permission to view this component
-        if (!auth()->user()->hasPermissionTo('sync netsuite sales data')) {
+        if (!auth()->user()->hasPermissionTo('manage orders')) {
             abort(403, 'You do not have permission to access this page.');
         }
         
