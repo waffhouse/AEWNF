@@ -2,13 +2,22 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <!-- Hero Banner with Red Gradient Background -->
+            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-t-lg shadow-md">
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Dashboard</h2>
+                        <p class="text-sm text-red-100 mt-1">Welcome, {{ Auth::user()->name }}. Access key features and information below.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-b-lg">
                 <div class="p-6 text-gray-900">
                     <div class="mb-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                             <div>
-                                <h2 class="text-xl font-semibold">Welcome, {{ Auth::user()->name }}</h2>
-                                <p class="text-sm text-gray-600 mt-1">Access key features and information below.</p>
+                                <h2 class="text-xl font-semibold">Your Account Overview</h2>
                             </div>
                         </div>
                     </div>

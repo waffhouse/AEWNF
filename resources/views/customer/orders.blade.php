@@ -1,15 +1,19 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Your Web Orders') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <!-- Hero Banner with Red Gradient Background -->
+            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-t-lg shadow-md">
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Your Web Orders</h2>
+                        <p class="text-sm text-red-100 mt-1">View and manage your online ordering history.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-b-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Web Order History</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Order History</h3>
                     
                     <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 text-blue-700 rounded">
                         <div class="flex">

@@ -1,336 +1,80 @@
 <div>
     <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="mb-6">
-            <h1 class="text-2xl font-semibold text-gray-900">Sales Analytics</h1>
-            <p class="mt-2 text-sm text-gray-600">
-                Analyze sales performance by product class and brand. View key metrics and identify trends.
-                <a href="{{ route('sales.customers-without-sales') }}" class="text-red-600 hover:text-red-800 font-medium ml-3">View Customers Without Sales →</a>
-            </p>
-        </div>
-        
-        <!-- Filters Section -->
-        <div class="bg-white shadow-sm rounded-lg mb-6 p-4 border border-gray-200">
-            <div class="mb-2">
-                <h3 class="text-lg font-semibold text-gray-700">Filters</h3>
-                <p class="text-sm text-gray-500">Refine analytics data by date range and grouping method</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Date Range Picker -->
+        <!-- Hero Banner with Red Gradient Background -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-lg shadow-md mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
-                    <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" 
-                        id="startDate" 
-                        wire:model.live="startDate"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="endDate" class="block text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" 
-                        id="endDate" 
-                        wire:model.live="endDate"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
-                </div>
-                <!-- Group By Filter -->
-                <div>
-                    <label for="groupBy" class="block text-sm font-medium text-gray-700">Group By</label>
-                    <select id="groupBy" 
-                        wire:model.live="groupBy"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
-                        <option value="class">Class</option>
-                        <option value="brand">Brand</option>
-                    </select>
+                    <h2 class="text-2xl font-bold">Sales Analytics</h2>
+                    <p class="text-sm text-red-100 mt-1">Access advanced analytics and reports for sales performance.</p>
                 </div>
             </div>
         </div>
-        
-        <!-- Sales Trend Chart removed -->
-        
-        
-        <!-- Top Sales Data with Pie Chart -->
-        <div class="bg-white shadow-sm rounded-lg mb-6 border border-gray-200">
-            <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">
-                    Top 10 {{ $groupBy === 'class' ? 'Classes' : 'Brands' }} by Sales Volume ({{ $dateRangeTitle }})
-                </h3>
-                <p class="text-sm text-gray-500">
-                    Highest performing product {{ $groupBy }}es by total sales amount
-                </p>
-            </div>
-            
-            <!-- Grid layout for Pie Chart and Table -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <!-- Pie Chart -->
-                <div class="p-4">
-                    <h4 class="text-sm font-medium text-gray-700 mb-2">Distribution by {{ ucfirst($groupBy) }}</h4>
-                    
-                    <!-- SVG Pie Chart -->
-                    <div class="h-[300px] relative">
-                        @php
-                            $totalSalesAmount = $topSales->sum('total_amount');
-                            $totalSalesQuantity = $topSales->sum('total_quantity');
-                            
-                            // Prepare data for pie chart
-                            $pieData = [];
-                            $centerX = 150;
-                            $centerY = 150;
-                            $radius = 120;
-                            $startAngle = 0;
-                            
-                            // Define colors for pie slices
-                            $colors = [
-                                '#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d', 
-                                '#16a34a', '#0891b2', '#2563eb', '#7c3aed', '#c026d3'
-                            ];
-                            
-                            // Calculate percentages and angles
-                            foreach ($topSales as $index => $item) {
-                                if ($totalSalesAmount != 0) {
-                                    $percentage = ($item->total_amount / $totalSalesAmount) * 100;
-                                    $angle = ($percentage / 100) * 360;
-                                    
-                                    $pieData[] = [
-                                        'name' => $item->{$groupBy},
-                                        'value' => abs($item->total_amount),
-                                        'percentage' => $percentage,
-                                        'startAngle' => $startAngle,
-                                        'endAngle' => $startAngle + $angle,
-                                        'color' => $colors[$index % count($colors)]
-                                    ];
-                                    
-                                    $startAngle += $angle;
-                                }
-                            }
-                            
-                            // Function to calculate SVG arc path
-                            function calculateArc($centerX, $centerY, $radius, $startAngle, $endAngle) {
-                                $startAngleRad = deg2rad($startAngle);
-                                $endAngleRad = deg2rad($endAngle);
-                                
-                                $startX = $centerX + $radius * cos($startAngleRad);
-                                $startY = $centerY + $radius * sin($startAngleRad);
-                                $endX = $centerX + $radius * cos($endAngleRad);
-                                $endY = $centerY + $radius * sin($endAngleRad);
-                                
-                                // Check if the angle is almost a full circle
-                                $largeArcFlag = ($endAngle - $startAngle <= 180) ? 0 : 1;
-                                
-                                return "M {$centerX} {$centerY} L {$startX} {$startY} A {$radius} {$radius} 0 {$largeArcFlag} 1 {$endX} {$endY} Z";
-                            }
-                        @endphp
-                        
-                        <svg viewBox="0 0 300 300" class="w-full h-full">
-                            <!-- Render pie slices -->
-                            @forelse ($pieData as $slice)
-                                @php 
-                                    $path = calculateArc($centerX, $centerY, $radius, $slice['startAngle'], $slice['endAngle']);
-                                    
-                                    // Calculate position for label
-                                    $midAngle = ($slice['startAngle'] + $slice['endAngle']) / 2;
-                                    $midAngleRad = deg2rad($midAngle);
-                                    
-                                    // Position the label outside the pie
-                                    $labelRadius = $radius * 0.85;
-                                    $labelX = $centerX + $labelRadius * cos($midAngleRad);
-                                    $labelY = $centerY + $labelRadius * sin($midAngleRad);
-                                    
-                                    // Only show labels for slices with percentage >= 5%
-                                    $showLabel = $slice['percentage'] >= 5;
-                                @endphp
-                                
-                                <g class="pie-slice" data-name="{{ $slice['name'] }}" data-value="{{ $slice['value'] }}" data-percentage="{{ round($slice['percentage'], 1) }}%">
-                                    <path d="{{ $path }}" fill="{{ $slice['color'] }}" stroke="white" stroke-width="1"
-                                          class="cursor-pointer hover:opacity-90 transition-opacity"
-                                          data-tippy-content="{{ $slice['name'] }}: ${{ number_format($slice['value'], 2) }} ({{ round($slice['percentage'], 1) }}%)" />
-                                          
-                                    @if ($showLabel)
-                                        <text x="{{ $labelX }}" y="{{ $labelY }}" 
-                                              text-anchor="middle" dominant-baseline="middle"
-                                              fill="white" font-size="10" font-weight="bold">
-                                            {{ round($slice['percentage']) }}%
-                                        </text>
-                                    @endif
-                                </g>
-                            @empty
-                                <text x="150" y="150" text-anchor="middle" class="text-gray-400">No data available</text>
-                            @endforelse
+
+        <!-- Analytics Dashboard Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Sales History Card -->
+            <a href="{{ route('sales') }}" class="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md">
+                <div class="p-4 border-b border-blue-100">
+                    <h3 class="text-base font-semibold text-blue-900">Sales History</h3>
+                </div>
+                <div class="p-5 flex items-start">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                     </div>
-                    
-                    <!-- Legend removed as table now serves as legend -->
+                    <div>
+                        <p class="text-gray-600">
+                            View your complete transaction history with detailed information on invoices and credit memos.
+                        </p>
+                    </div>
                 </div>
-                
-                <!-- Data Table -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ ucfirst($groupBy) }}</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Qty</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% of Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($topSales as $item)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div class="flex items-center">
-                                            <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: {{ $colors[$loop->index % count($colors)] }}"></span>
-                                            {{ $item->{$groupBy} }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                                        ${{ number_format(abs($item->total_amount), 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                                        {{ number_format(abs($item->total_quantity)) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                                        @if($totalSalesAmount != 0)
-                                            {{ round(($item->total_amount / $totalSalesAmount) * 100, 2) }}%
-                                        @else
-                                            0%
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
-                                        No data available for this time period.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            </a>
+            
+            <!-- Customers Without Sales Card -->
+            <a href="{{ route('sales.customers-without-sales') }}" class="bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md">
+                <div class="p-4 border-b border-purple-100">
+                    <h3 class="text-base font-semibold text-purple-900">Customers Without Sales</h3>
                 </div>
-            </div>
+                <div class="p-5 flex items-start">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-md p-2 mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">
+                            Identify customers who haven't made any purchases to target for marketing and outreach.
+                        </p>
+                    </div>
+                </div>
+            </a>
         </div>
         
-        <!-- Detailed Breakdown -->
+        <!-- Future Reports Placeholder -->
         <div class="bg-white shadow-sm rounded-lg mb-6 border border-gray-200">
-            <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">
-                    Detailed Breakdown by {{ $groupBy === 'class' ? 'Class' : 'Brand' }}
-                </h3>
-                <p class="text-sm text-gray-500">
-                    Complete breakdown showing invoice amounts, credit amounts, and quantities
-                </p>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ ucfirst($groupBy) }}</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Amount</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Credit Amount</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Net Amount</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Qty</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Credit Qty</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Net Qty</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Transactions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($salesData as $item)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $item->{$groupBy} }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600">
-                                    ${{ number_format(abs($item->invoice_amount), 2) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-red-600">
-                                    ${{ number_format(abs($item->credit_amount), 2) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right {{ $item->total_amount >= 0 ? 'text-green-600' : 'text-red-600' }} font-medium">
-                                    ${{ number_format(abs($item->total_amount), 2) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600">
-                                    {{ number_format(abs($item->invoice_quantity)) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-red-600">
-                                    {{ number_format(abs($item->credit_quantity)) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right {{ $item->total_quantity >= 0 ? 'text-green-600' : 'text-red-600' }} font-medium">
-                                    {{ number_format(abs($item->total_quantity)) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                                    {{ number_format($item->transaction_count) }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
-                                    No data available for this time period.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Top 10 by Quantity -->
-        <div class="bg-white shadow-sm rounded-lg mb-6 border border-gray-200">
-            <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">
-                    Top 10 {{ $groupBy === 'class' ? 'Classes' : 'Brands' }} by Quantity Sold ({{ $dateRangeTitle }})
-                </h3>
-                <p class="text-sm text-gray-500">
-                    Highest performing product {{ $groupBy }}es by total quantity
-                </p>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ ucfirst($groupBy) }}</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($topQuantities as $item)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $item->{$groupBy} }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                                    {{ number_format(abs($item->total_quantity)) }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
-                                    No data available for this time period.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Info Box -->
-        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div class="p-6 text-center">
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">About This Report</h3>
-                    <div class="mt-2 text-sm text-blue-700">
-                        <p>This report provides insights into sales performance by item class and brand. You can:</p>
-                        <ul class="list-disc pl-5 space-y-1 mt-2">
-                            <li>Select custom date ranges using the date pickers to analyze specific time periods</li>
-                            <li>Switch between class and brand grouping to analyze performance from different angles</li>
-                            <li>View detailed tables showing top performers and key metrics</li>
-                            <li>Identify top performing classes and brands to inform inventory and marketing decisions</li>
-                            <li>View the breakdown of invoices vs. credit memos to understand net sales impact</li>
-                        </ul>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">More Analytics Coming Soon</h3>
+                <p class="text-gray-600 max-w-lg mx-auto">
+                    We're currently developing advanced analytics components including:
+                </p>
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto text-left">
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <span class="text-sm font-medium text-gray-700">Sales by Category Analysis</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <a href="{{ route('sales.top-brands') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">Brand Performance Metrics</a>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <span class="text-sm font-medium text-gray-700">Seasonal Trend Reports</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <span class="text-sm font-medium text-gray-700">Customer Segment Analysis</span>
                     </div>
                 </div>
             </div>

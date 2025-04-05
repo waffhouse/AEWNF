@@ -33,34 +33,35 @@
     }" 
     class="py-6">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Compact Header with Stats -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
-            <div class="p-6 text-gray-900">
-                <div class="mb-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <div>
-                            <h2 class="text-xl font-semibold">
-                                @if(auth()->user()->hasPermissionTo('access admin dashboard'))
-                                    Management Dashboard
-                                @else
-                                    Order Management
-                                @endif
-                            </h2>
-                            <p class="text-sm text-gray-600 mt-1">
-                                @if(auth()->user()->hasPermissionTo('access admin dashboard'))
-                                    Manage users, roles, permissions, inventory synchronization, sales data, and orders.
-                                @elseif(auth()->user()->hasPermissionTo('manage orders') || auth()->user()->hasPermissionTo('view all orders'))
-                                    Manage customer orders and track order history.
-                                @elseif(auth()->user()->hasPermissionTo('view netsuite sales data'))
-                                    View and manage sales transaction data.
-                                @else
-                                    Access admin features based on your permissions.
-                                @endif
-                            </p>
-                        </div>
-                    </div>
+        <!-- Hero Banner with Red Gradient Background -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-t-lg shadow-md">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold">
+                        @if(auth()->user()->hasPermissionTo('access admin dashboard'))
+                            Management Dashboard
+                        @else
+                            Order Management
+                        @endif
+                    </h2>
+                    <p class="text-sm text-red-100 mt-1">
+                        @if(auth()->user()->hasPermissionTo('access admin dashboard'))
+                            Manage users, roles, permissions, inventory synchronization, sales data, and orders.
+                        @elseif(auth()->user()->hasPermissionTo('manage orders') || auth()->user()->hasPermissionTo('view all orders'))
+                            Manage customer orders and track order history.
+                        @elseif(auth()->user()->hasPermissionTo('view netsuite sales data'))
+                            View and manage sales transaction data.
+                        @else
+                            Access admin features based on your permissions.
+                        @endif
+                    </p>
                 </div>
-                
+            </div>
+        </div>
+        
+        <!-- Tab Navigation with white background -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-b-lg mb-4">
+            <div class="p-4 text-gray-900">
                 <!-- Tab Navigation -->
                 <x-admin.tab-navigation :tabs="$accessibleTabs" :counts="$tabCounts" />
             </div>

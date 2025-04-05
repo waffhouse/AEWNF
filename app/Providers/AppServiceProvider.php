@@ -44,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('admin.inventory.inventory-sync', \App\Livewire\Admin\Inventory\InventorySync::class);
         \Livewire\Livewire::component('admin.orders.order-management', \App\Livewire\Admin\Orders\OrderManagement::class);
         
+        // Sales dashboard components
+        \Livewire\Livewire::component('sales.top-brands-dashboard', \App\Livewire\Sales\TopBrandsDashboard::class);
+        
         // Cart components
         \Livewire\Livewire::component('cart.add-to-cart', \App\Livewire\Cart\AddToCart::class);
         \Livewire\Livewire::component('cart.cart-page', \App\Livewire\Cart\CartPage::class);

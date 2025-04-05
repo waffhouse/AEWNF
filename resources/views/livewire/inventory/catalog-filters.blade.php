@@ -1,6 +1,6 @@
 <div>
     <!-- Main Filter Section (visible on medium and larger screens) -->
-    <div class="mb-6 border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
+    <div class="mb-6 border border-red-200 rounded-lg p-4 bg-gradient-to-r from-red-50 to-white shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Search -->
             <div>

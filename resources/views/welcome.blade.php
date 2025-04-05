@@ -3,9 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="A&E Wholesale of North Florida - Your trusted supplier of wholesale products.">
+        <meta name="description" content="{{ env('COMPANY_NAME') }} - Your trusted supplier of wholesale products.">
 
-        <title>{{ config('app.name', 'A&E Wholesale') }}</title>
+        <title>{{ env('COMPANY_NAME', config('app.name')) }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -32,29 +32,27 @@
             <!-- Hero Section -->
             <div class="relative py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-red-50 to-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col lg:flex-row items-center gap-8 mb-8">
+                    <div class="flex flex-col items-center mb-8">
                         <img class="w-auto h-24 md:h-32 object-contain" src="{{ asset('images/logo.png') }}" alt="A&E Wholesale Logo">
-                        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl text-center lg:text-left">
-                            <span class="block">A&E Wholesale</span>
-                            <span class="block text-red-600">of North Florida</span>
+                        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl text-center mt-6">
+                            <span class="block">{{ env('COMPANY_NAME_SHORT') }} Wholesale</span>
+                            <span class="block text-red-600">{{ str_replace(env('COMPANY_NAME_SHORT') . ' Wholesale of ', '', env('COMPANY_NAME')) }}</span>
                         </h1>
                     </div>
                     
-                    <div class="lg:grid lg:grid-cols-12 lg:gap-8">
-                        <div class="lg:col-span-8">
-                            <p class="mt-6 text-lg text-gray-600">
-                                Your trusted supplier of quality wholesale products. Browse our extensive catalog and place orders online.
-                            </p>
-                            <div class="mt-10 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-                                <a href="{{ route('inventory.catalog') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
-                                    View Catalog
-                                </a>
-                                @guest
-                                <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
-                                    Customer Login
-                                </a>
-                                @endguest
-                            </div>
+                    <div class="text-center">
+                        <p class="mx-auto max-w-2xl text-lg text-gray-600">
+                            Your trusted supplier of quality wholesale products in north Florida and south Georgia. Browse our extensive catalog and place orders online.
+                        </p>
+                        <div class="mt-10 flex flex-col sm:flex-row justify-center sm:space-x-4 space-y-4 sm:space-y-0">
+                            <a href="{{ route('inventory.catalog') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+                                View Catalog
+                            </a>
+                            @guest
+                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+                                Customer Login
+                            </a>
+                            @endguest
                         </div>
                     </div>
                 </div>
@@ -160,15 +158,45 @@
             <!-- Footer -->
             <footer class="bg-white">
                 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                    <div class="md:flex md:items-center md:justify-between">
-                        <div class="flex justify-center md:justify-start">
-                            <img class="h-10" src="{{ asset('images/AEWBlack.png') }}" alt="A&E Wholesale Logo">
+                    <!-- Divider line -->
+                    <div class="border-t border-gray-200 mb-8"></div>
+                    
+                    <div class="flex flex-col md:flex-row justify-between">
+                        <!-- Left column - Company info -->
+                        <div class="flex flex-col items-center md:items-start">
+                            <img class="h-10 mb-6" src="{{ asset('images/AEWBlack.png') }}" alt="{{ env('COMPANY_NAME') }} Logo">
+                            
+                            <div class="text-center md:text-left text-sm text-gray-600">
+                                <p class="font-medium">{{ env('COMPANY_NAME') }}</p>
+                                <p class="mt-1">
+                                    {{ env('COMPANY_STREET') }}, {{ env('COMPANY_STREET_2') }}<br>
+                                    {{ env('COMPANY_CITY') }}, {{ env('COMPANY_STATE') }} {{ env('COMPANY_ZIP') }}
+                                </p>
+                            </div>
                         </div>
-                        <div class="mt-8 md:mt-0">
-                            <p class="text-center text-base text-gray-400 md:text-right">
-                                &copy; {{ date('Y') }} A&E Wholesale of North Florida. All rights reserved.
-                            </p>
+                        
+                        <!-- Right column - Contact and license info -->
+                        <div class="flex flex-col text-center md:text-right mt-8 md:mt-0">
+                            <div class="text-sm text-gray-600">
+                                <p>Phone: <a href="tel:{{ preg_replace('/[^0-9]/', '', env('COMPANY_PHONE')) }}" class="hover:text-red-600">{{ env('COMPANY_PHONE') }}</a></p>
+                                <p>Email: <a href="mailto:{{ env('COMPANY_EMAIL') }}" class="hover:text-red-600">{{ env('COMPANY_EMAIL') }}</a></p>
+                                <p class="mt-1">
+                                    <a href="{{ env('COMPANY_WEBSITE_URL1') }}" target="_blank" class="hover:text-red-600 transition-colors">{{ str_replace(['https://', 'http://'], '', env('COMPANY_WEBSITE_URL1')) }}</a>
+                                </p>
+                            </div>
+                            
+                            <div class="mt-6 text-xs text-gray-500">
+                                <p>Licensed in Florida: WDE{{ env('COMPANY_CWD_LICENSE') }}, WDE{{ env('COMPANY_TWD_LICENSE') }}</p>
+                                <p>Georgia: {{ env('COMPANY_GA_LICENSE') }}</p>
+                            </div>
                         </div>
+                    </div>
+                    
+                    <!-- Copyright -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <p class="text-center text-xs text-gray-500">
+                            &copy; {{ date('Y') }} {{ env('COMPANY_NAME') }}. All rights reserved.
+                        </p>
                     </div>
                 </div>
             </footer>

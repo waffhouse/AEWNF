@@ -223,6 +223,11 @@ Route::get('/sales', \App\Livewire\Sales\SalesDashboard::class)
 Route::get('/sales/analytics', \App\Livewire\Sales\SalesAnalyticsDashboard::class)
     ->middleware(['auth', 'permission:manage orders'])
     ->name('sales.analytics');
+    
+// Top Brands Dashboard - accessible to users with order management permission
+Route::get('/sales/top-brands', \App\Livewire\Sales\TopBrandsDashboard::class)
+    ->middleware(['auth', 'permission:manage orders'])
+    ->name('sales.top-brands');
 
 // Customers Without Sales Report - requires order management permission
 Route::get('/sales/customers-without-sales', \App\Livewire\Admin\Sales\CustomersWithoutSales::class)

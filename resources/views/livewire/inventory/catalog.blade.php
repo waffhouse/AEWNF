@@ -105,17 +105,26 @@
     
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-                <div class="mb-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <div>
-                            <h2 class="text-xl font-semibold">Product Catalog</h2>
-                            <p class="text-sm text-gray-600 mt-1">Browse our inventory with real-time pricing and availability information.</p>
-                        </div>
-                    </div>
+        <!-- Hero Banner with Red Gradient Background -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-t-lg shadow-md">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold">Product Catalog</h2>
+                    <p class="text-sm text-red-100 mt-1">Browse our inventory with real-time pricing and availability information.</p>
                 </div>
-                
+                <div class="mt-4 sm:mt-0">
+                    <a href="{{ route('customer.cart') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        View Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-b-lg">
+            <div class="p-6 text-gray-900">
                 <!-- Main Filters Section (hidden on small screens) -->
                 <div class="hidden md:block">
                     @include('livewire.inventory.catalog-filters')
@@ -139,7 +148,7 @@
     <div 
         x-show="showStickyFilter" 
         x-cloak
-        class="fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 shadow-lg"
+        class="fixed bottom-0 inset-x-0 z-30 bg-gradient-to-r from-red-50 to-white border-t border-red-200 shadow-lg"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 transform translate-y-full"
         x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -148,14 +157,14 @@
         x-transition:leave-end="opacity-0 transform translate-y-full"
     >
         <!-- Filter toggle bar - Always visible -->
-        <div class="w-full bg-gray-50 border-b border-gray-200 px-4 py-2">
+        <div class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white border-b border-red-800 px-4 py-2">
             <!-- Top row with label and toggle button -->
             <div class="flex justify-between items-center">
                 <div class="flex items-center flex-grow">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
-                    <span class="text-sm font-medium">Product Filters</span>
+                    <span class="text-sm font-medium text-white">Product Filters</span>
                     
                     @php
                         $activeFilterCount = 0;
@@ -165,7 +174,7 @@
                     @endphp
                     
                     @if($activeFilterCount > 0)
-                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-white text-red-800">
                             {{ $activeFilterCount }}
                         </span>
                     @endif
@@ -173,20 +182,20 @@
                     <!-- Loading Indicators integrated into filter header -->
                     <!-- For initial product loading or filter changes -->
                     <div wire:loading.flex wire:target="loadProducts, resetProducts" class="hidden items-center ml-3">
-                        <svg class="animate-spin h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span class="ml-2 text-xs font-medium text-red-600">Loading products...</span>
+                        <span class="ml-2 text-xs font-medium text-white">Loading products...</span>
                     </div>
                     
                     <!-- For infinite scroll loading -->
                     <div wire:loading.flex wire:target="loadMore" class="hidden items-center ml-3">
-                        <svg class="animate-spin h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span class="ml-2 text-xs font-medium text-red-600">Loading more...</span>
+                        <span class="ml-2 text-xs font-medium text-white">Loading more...</span>
                     </div>
                 </div>
                 
@@ -198,10 +207,10 @@
                                 <button
                                     wire:click="clearCart"
                                     wire:confirm="Are you sure you want to clear your cart? This will remove all items."
-                                    class="flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md transition-colors focus:outline-none"
+                                    class="flex items-center px-2 py-1 text-xs font-medium text-red-800 bg-white hover:bg-red-50 border border-red-200 rounded-md transition-colors focus:outline-none shadow-sm"
                                     aria-label="Clear shopping cart"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                     Clear Cart
@@ -222,11 +231,11 @@
                         }"
                         x-show="show"
                         @click="window.scrollTo({top: 0, behavior: 'smooth'})"
-                        class="flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors focus:outline-none"
+                        class="flex items-center px-2 py-1 text-xs font-medium text-red-800 bg-white hover:bg-red-50 rounded-md transition-colors focus:outline-none shadow-sm border border-red-200"
                         aria-label="Return to top"
                     >
                         <span class="mr-1">Top</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                         </svg>
                     </button>
@@ -234,14 +243,14 @@
                     <!-- Expand/collapse button with text label for clarity -->
                     <button 
                         @click="toggleExpand()" 
-                        class="flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors focus:outline-none"
+                        class="flex items-center px-2 py-1 text-xs font-medium text-red-800 bg-white hover:bg-red-50 rounded-md transition-colors focus:outline-none shadow-sm border border-red-200"
                         aria-label="Toggle filter panel"
                     >
                         <span x-text="isExpanded ? 'Hide Filters' : 'Show Filters'" class="mr-1"></span>
                         <svg 
                             x-show="!isExpanded" 
                             xmlns="http://www.w3.org/2000/svg" 
-                            class="h-3 w-3 text-gray-500" 
+                            class="h-3 w-3 text-red-600" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             stroke="currentColor"
@@ -251,7 +260,7 @@
                         <svg 
                             x-show="isExpanded" 
                             xmlns="http://www.w3.org/2000/svg" 
-                            class="h-3 w-3 text-gray-500" 
+                            class="h-3 w-3 text-red-600" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             stroke="currentColor"
@@ -269,15 +278,15 @@
                         type="search" 
                         wire:model="search" 
                         placeholder="Quick search..." 
-                        class="w-full h-9 pl-8 pr-10 py-2 text-sm border-gray-300 rounded-md focus:ring-0 focus:border-gray-400"
+                        class="w-full h-9 pl-8 pr-10 py-2 text-sm border-red-300 rounded-md focus:ring-red-300 focus:border-red-400 bg-white shadow-sm"
                         aria-label="Quick search products"
                     >
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <svg class="w-4 h-4 text-red-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                         </svg>
                     </div>
-                    <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500 hover:text-red-600">
+                    <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-600 hover:text-red-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
