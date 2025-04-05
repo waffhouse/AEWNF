@@ -137,7 +137,7 @@ class UserForm extends AdminComponent
     protected function baseRules(): array
     {
         return [
-            'name' => 'required|min:3',
+            'name' => 'required|min:2',
             'email' => 'required|email|unique:users,email,' . ($this->editId ?? ''),
             'userRole' => 'required',
         ];
@@ -152,10 +152,15 @@ class UserForm extends AdminComponent
             ? 'nullable|string|max:10|unique:users,customer_number'
             : 'prohibited';
             
+        // Only require customer selection for customer roles
+        $selectedCustomerRule = in_array(strtolower($this->userRole), ['customer', 'florida customer', 'georgia customer']) 
+            ? 'required'  // Customer role requires customer selection
+            : 'nullable'; // Non-customer roles don't need customer
+            
         return [
             'password' => 'required|min:8',
             'customer_number' => $customerNumberRule,
-            'selected_customer_id' => 'nullable',
+            'selected_customer_id' => $selectedCustomerRule,
         ];
     }
     
@@ -168,10 +173,15 @@ class UserForm extends AdminComponent
             ? 'nullable|string|max:10|unique:users,customer_number,' . ($this->editId ?? '')
             : 'prohibited';
             
+        // Only require customer selection for customer roles
+        $selectedCustomerRule = in_array(strtolower($this->userRole), ['customer', 'florida customer', 'georgia customer']) 
+            ? 'required'  // Customer role requires customer selection
+            : 'nullable'; // Non-customer roles don't need customer
+            
         return [
             'password' => 'nullable|min:8',
             'customer_number' => $customerNumberRule,
-            'selected_customer_id' => 'nullable',
+            'selected_customer_id' => $selectedCustomerRule,
         ];
     }
     
@@ -181,8 +191,11 @@ class UserForm extends AdminComponent
     protected function customMessages(): array
     {
         return [
+            'name.required' => 'Please enter a name for the user.',
+            'name.min' => 'The name must be at least 2 characters long.',
             'customer_number.regex' => 'The customer number must be a 4-digit number.',
-            'customer_number.unique' => 'This customer number is already in use. Please assign a different number.'
+            'customer_number.unique' => 'This customer number is already in use. Please assign a different number.',
+            'selected_customer_id.required' => 'A customer must be selected for customer roles.'
         ];
     }
     
@@ -397,10 +410,23 @@ class UserForm extends AdminComponent
     }
     
     /**
-     * When a role is selected, clear customer if state doesn't match
+     * When a role is selected, clear customer if not a customer role
      */
     public function updatedUserRole($value)
     {
+        $role = strtolower($value);
+        
+        // Dispatch event to Alpine.js to update UI
+        $this->dispatch('role-updated', $value ? (string) $value : '');
+        
+        // If not a customer role, clear customer selection
+        if (!in_array($role, ['customer', 'florida customer', 'georgia customer'])) {
+            $this->selected_customer_id = null;
+            $this->customer_number = null;
+            return;
+        }
+        
+        // For customer roles, check if state matches when a customer is selected
         if (!$this->selected_customer_id) {
             return;
         }
@@ -413,12 +439,10 @@ class UserForm extends AdminComponent
         
         // Check if we need to clear the customer selection
         $state = strtolower($customer['home_state'] ?? '');
-        $role = strtolower($value);
         
         if (
             ($role === 'florida customer' && $state !== 'florida') ||
-            ($role === 'georgia customer' && $state !== 'georgia') ||
-            (!in_array($role, ['customer', 'florida customer', 'georgia customer']))
+            ($role === 'georgia customer' && $state !== 'georgia')
         ) {
             // Clear customer info if it doesn't match the role
             $this->selected_customer_id = null;

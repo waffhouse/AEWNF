@@ -9,38 +9,26 @@
         initializeEvents() {
             // Handle responsive behavior based on screen size - throttled with requestAnimationFrame
             const handleScreenSize = () => {
-                // Only control sticky filter visibility on desktop
-                if (window.matchMedia('(min-width: 768px)').matches) {
-                    // On desktop: Show sticky filter only when scrolled past main filters
-                    this.showStickyFilter = window.scrollY > 300;
-                } else {
-                    // On mobile: Always show sticky filter
-                    this.showStickyFilter = true;
-                }
+                // Always show sticky filter regardless of screen size or scroll position
+                this.showStickyFilter = true;
                 
                 this.ticking = false;
             };
             
-            const requestTick = () => {
-                if (!this.ticking) {
-                    window.requestAnimationFrame(handleScreenSize);
-                    this.ticking = true;
-                }
-            };
-            
-            // Initial check
+            // Do initial check only once since we always show the filter
             handleScreenSize();
             
             // Clean up any existing listeners 
             this.cleanupListeners();
             
-            // Add throttled event listeners
-            window.addEventListener('scroll', requestTick);
-            window.addEventListener('resize', requestTick);
+            // We only need resize listener, no scroll listener needed
+            const handleResize = () => {
+                handleScreenSize();
+            };
+            window.addEventListener('resize', handleResize);
             
-            // Store references for cleanup
-            this.scrollListeners.push(requestTick);
-            this.resizeListeners.push(requestTick);
+            // Store reference for cleanup (only resize now)
+            this.resizeListeners.push(handleResize);
             
             // Mobile filter modal has been removed - no need for these event listeners
             

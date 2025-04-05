@@ -1,4 +1,30 @@
-<div>
+<div x-data="{ 
+        isCustomerRole: false,
+        isNonCustomerRole: true,
+        
+        init() {
+            // Use a proper string value for the initial role
+            const initialRole = '{{ $userRole ?? "" }}';
+            this.checkRole(initialRole);
+            
+            Livewire.on('role-updated', role => {
+                this.checkRole(role);
+            });
+        },
+        
+        checkRole(role) {
+            const customerRoles = ['customer', 'florida customer', 'georgia customer'];
+            let roleStr = '';
+            
+            // Make sure role is a string before calling toLowerCase()
+            if (role !== null && role !== undefined) {
+                roleStr = String(role).toLowerCase();
+            }
+            
+            this.isCustomerRole = customerRoles.includes(roleStr);
+            this.isNonCustomerRole = !this.isCustomerRole;
+        }
+     }">
     <!-- User Form Modal -->
     <x-modals.form-modal
         name="user-form-modal"
@@ -61,11 +87,11 @@
                 @error('password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
             
-            <!-- Customer selection comes first -->
-            <div class="border rounded-lg p-5 bg-gray-50">
+            <!-- Customer selection section - only shown for customer roles -->
+            <div class="border rounded-lg p-5 bg-gray-50" x-show="isCustomerRole">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-base font-medium text-gray-800">Select Customer</h3>
-                    <span class="text-xs text-gray-600">(Will auto-assign the correct role)</span>
+                    <span class="text-xs text-gray-600">(Required for customer roles)</span>
                 </div>
                 
                 <!-- Search and filter tools -->
@@ -184,12 +210,22 @@
                 @endif
             </div>
             
-            <!-- Role selection moved after customer selection -->
+            <!-- Message shown when non-customer role is selected -->
+            <div class="border rounded-lg p-5 bg-gray-100" x-show="isNonCustomerRole">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm text-gray-700">
+                        Non-customer roles do not require a customer to be selected. Customer selection is disabled for this role.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Role selection - always visible and editable -->
             <div>
                 <label for="userRole" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select wire:model.live="userRole" id="userRole" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    @if($selected_customer_id) disabled @endif
-                >
+                <select wire:model.live="userRole" id="userRole" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     <option value="">Select a role</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}">{{ ucfirst($role->name) }}</option>
@@ -200,7 +236,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Role auto-assigned based on customer's state
+                        Role auto-assigned based on selected customer. Changing to a non-customer role will clear the customer selection.
                     </div>
                 @endif
                 @error('userRole') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror

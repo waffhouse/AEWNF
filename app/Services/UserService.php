@@ -172,9 +172,17 @@ class UserService
         }
         
         // Handle customer number for customer roles
-        if (isset($userData['customer_number']) && isset($role)) {
-            if (strpos($role, 'customer') === false) {
+        if (isset($role)) {
+            // Always clear customer_number for non-customer roles
+            if (strpos(strtolower($role), 'customer') === false) {
                 $userData['customer_number'] = null; // Remove customer number for non-customer roles
+            } elseif (empty($userData['customer_number'])) {
+                // For customer roles, ensure customer_number is required
+                throw new ValidationException(
+                    new \Illuminate\Support\MessageBag([
+                        'customer_number' => ['A customer number is required for customer roles.']
+                    ])
+                );
             }
         }
         
@@ -222,8 +230,16 @@ class UserService
         
         // Handle customer number for customer roles
         if (isset($role)) {
-            if (strpos($role, 'customer') === false) {
+            // Always clear customer_number for non-customer roles
+            if (strpos(strtolower($role), 'customer') === false) {
                 $userData['customer_number'] = null; // Remove customer number for non-customer roles
+            } elseif (empty($userData['customer_number'])) {
+                // For customer roles, ensure customer_number is required
+                throw new ValidationException(
+                    new \Illuminate\Support\MessageBag([
+                        'customer_number' => ['A customer number is required for customer roles.']
+                    ])
+                );
             }
         }
         
@@ -330,7 +346,7 @@ class UserService
     public function getCreateRules(): array
     {
         return [
-            'name' => 'required|min:3',
+            'name' => 'required|min:2',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
             'role' => 'required|exists:roles,name',

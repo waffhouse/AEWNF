@@ -5,14 +5,14 @@ use App\Http\Controllers\AdminController;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\UserManagement;
 
-// Redirect root to appropriate dashboard for authenticated users or catalog for guests
+// Show welcome page for guests, redirect authenticated users to their dashboard
 Route::get('/', function () {
     if (auth()->check()) {
         return app(App\Http\Controllers\AdminController::class)->redirectToDashboard();
     }
     
-    // Show unified catalog for guests rather than login page
-    return redirect()->route('inventory.catalog');
+    // Show welcome page for guests
+    return view('welcome');
 })->middleware('verify.age');
 
 // Dashboard route with controller

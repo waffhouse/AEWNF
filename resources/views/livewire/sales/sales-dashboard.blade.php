@@ -90,16 +90,18 @@
                 
                 <!-- Date Range Filter -->
                 <div class="w-full md:w-1/3">
-                    <label for="date_range" class="block text-sm font-medium text-gray-700">Date Range</label>
+                    <label class="block text-sm font-medium text-gray-700">Date Range</label>
                     <div class="flex space-x-2 mt-1">
                         <input 
                             type="date" 
+                            id="date_range_start"
                             wire:model.live="filters.date_range.start" 
                             class="block w-full border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md"
                         >
                         <span class="self-center">to</span>
                         <input 
                             type="date" 
+                            id="date_range_end"
                             wire:model.live="filters.date_range.end" 
                             class="block w-full border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md"
                         >
@@ -662,7 +664,7 @@
                 
                 <!-- Mobile Date Range Filter -->
                 <div>
-                    <label for="date_range_mobile" class="block text-sm font-medium text-gray-700">Date Range</label>
+                    <label class="block text-sm font-medium text-gray-700">Date Range</label>
                     <div class="grid grid-cols-2 gap-2 mt-1">
                         <div>
                             <label for="date_start_mobile" class="block text-xs text-gray-500">Start Date</label>
