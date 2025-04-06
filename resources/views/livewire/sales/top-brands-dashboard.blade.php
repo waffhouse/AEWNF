@@ -152,9 +152,21 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Categories (Optional)</label>
                             
                             <!-- Class Search Input -->
-                            <div x-data="{ classSearch: '', showDropdown: false, classes: {{ json_encode($availableClasses) }} }" x-init="console.log('Available classes:', classes)">
-                                <!-- Debug info - remove after fixing -->
-                                <div class="text-xs text-gray-500 mb-2">Available Classes: {{ count($availableClasses) }}</div>
+                            <div x-data="{ 
+                                classSearch: '', 
+                                showDropdown: false, 
+                                classes: {{ json_encode($availableClasses) }},
+                                init() {
+                                    console.log('Alpine initialized for classes', this.classes);
+                                    
+                                    // Fix any null values in the classes array to prevent errors
+                                    if (this.classes) {
+                                        this.classes = this.classes.filter(c => c != null);
+                                    }
+                                }
+                            }">
+                                <!-- Debug info - will be removed later -->
+                                <div class="mb-2 text-xs text-gray-500">{{ count($availableClasses) }} categories found</div>
                                 
                                 <div class="relative">
                                     <input
@@ -219,6 +231,13 @@
             <div class="bg-white shadow sm:rounded-lg overflow-hidden">
                 <div class="p-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">{{ $viewMode === 'brands' ? 'Brand' : 'Category' }} Sales Over Time</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        @if($isAllTime)
+                            All Time
+                        @else
+                            {{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}
+                        @endif
+                    </p>
                 </div>
                 <div class="p-4">
                     <div class="h-80">
@@ -240,6 +259,13 @@
             <div class="bg-white shadow sm:rounded-lg overflow-hidden">
                 <div class="p-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">{{ $viewMode === 'brands' ? 'Brand' : 'Category' }} Comparison</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        @if($isAllTime)
+                            All Time
+                        @else
+                            {{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}
+                        @endif
+                    </p>
                 </div>
                 <div class="p-4">
                     <div class="h-80">

@@ -153,20 +153,16 @@ class TopBrandsDashboard extends Component
     
     public function loadAvailableClasses()
     {
-        // Get all classes to populate filter - using the raw query to debug
-        $classesQuery = SaleItem::select('inventories.class')
+        // Get all classes to populate filter
+        $this->availableClasses = SaleItem::select('inventories.class')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->join('inventories', 'sale_items.sku', '=', 'inventories.sku')
             ->whereNotNull('inventories.class')
             ->where('inventories.class', '!=', '')
             ->groupBy('inventories.class')
-            ->orderByRaw('SUM(ABS(sale_items.amount)) DESC');
-            
-        // Log the generated SQL for debugging
-        \Log::info('Classes query: ' . $classesQuery->toSql());
-        
-        // Get the actual values
-        $this->availableClasses = $classesQuery->pluck('class')->toArray();
+            ->orderByRaw('SUM(ABS(sale_items.amount)) DESC')
+            ->pluck('class')
+            ->toArray();
         
         // If we couldn't find any classes via sales, try getting them directly from inventory
         if (empty($this->availableClasses)) {
@@ -177,9 +173,6 @@ class TopBrandsDashboard extends Component
                 ->pluck('class')
                 ->toArray();
         }
-        
-        // Log the results
-        \Log::info('Found ' . count($this->availableClasses) . ' classes');
     }
     
     public function refreshData()

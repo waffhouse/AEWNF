@@ -30,7 +30,7 @@ new class extends Component
                         </div>
                         <div class="ml-3 pl-3 border-l border-red-400 hidden sm:block">
                             <div class="text-sm font-semibold text-white">A&E Wholesale of North Florida</div>
-                            <div class="text-xs text-red-100">Customer Dashboard</div>
+                            <div class="text-xs text-red-100">Business Portal</div>
                         </div>
                     </a>
                 </div>

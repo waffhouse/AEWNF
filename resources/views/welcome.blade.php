@@ -36,7 +36,8 @@
                         <img class="w-auto h-24 md:h-32 object-contain" src="{{ asset('images/logo.png') }}" alt="A&E Wholesale Logo">
                         <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl text-center mt-6">
                             <span class="block">{{ env('COMPANY_NAME_SHORT') }} Wholesale</span>
-                            <span class="block text-red-600">{{ str_replace(env('COMPANY_NAME_SHORT') . ' Wholesale of ', '', env('COMPANY_NAME')) }}</span>
+                            <span class="block">of</span>
+                            <span class="block text-red-600">North Florida</span>
                         </h1>
                     </div>
                     
