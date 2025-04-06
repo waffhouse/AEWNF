@@ -4,8 +4,8 @@
         <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
-                    <h2 class="text-2xl font-bold">Top Brands Analytics</h2>
-                    <p class="text-sm text-red-100 mt-1">Interactive dashboard showing brand performance over time.</p>
+                    <h2 class="text-2xl font-bold">{{ $viewMode === 'brands' ? 'Brand' : 'Category' }} Analytics</h2>
+                    <p class="text-sm text-red-100 mt-1">Interactive dashboard showing {{ $viewMode === 'brands' ? 'brand' : 'category' }} performance over time.</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
                     <a href="{{ route('sales.analytics') }}" class="inline-flex items-center px-4 py-2 bg-white text-red-600 border border-transparent rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -22,6 +22,31 @@
         <div class="bg-white shadow sm:rounded-lg mb-6">
             <div class="px-4 py-5 sm:p-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- View Mode Switch -->
+                    <div class="md:col-span-3 mb-4">
+                        <div class="flex items-center justify-center">
+                            <span class="mr-3 text-sm font-medium text-gray-700">View Mode:</span>
+                            <div class="flex justify-center">
+                                <div class="inline-flex rounded-md shadow-sm" role="group">
+                                    <button
+                                        type="button"
+                                        wire:click="$set('viewMode', 'brands')"
+                                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-l-lg {{ $viewMode === 'brands' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
+                                    >
+                                        Brands
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="$set('viewMode', 'classes')"
+                                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-r-lg {{ $viewMode === 'classes' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
+                                    >
+                                        Categories
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Date Range Filter -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
@@ -65,76 +90,135 @@
                         </div>
                     </div>
 
-                    <!-- Brand Selection with Interactive Tags -->
+                    <!-- Brands or Classes Selection with Interactive Tags -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Brands (Optional)</label>
-                        
-                        <!-- Brand Search Input -->
-                        <div x-data="{ brandSearch: '', showDropdown: false, brands: {{ json_encode($availableBrands) }} }">
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    x-model="brandSearch"
-                                    @focus="showDropdown = true"
-                                    @click.away="showDropdown = false"
-                                    placeholder="Search for brands..."
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-                                >
+                        @if($viewMode === 'brands')
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Brands (Optional)</label>
+                            
+                            <!-- Brand Search Input -->
+                            <div x-data="{ brandSearch: '', showDropdown: false, brands: {{ json_encode($availableBrands) }} }">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="brandSearch"
+                                        @focus="showDropdown = true"
+                                        @click.away="showDropdown = false"
+                                        placeholder="Search for brands..."
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+                                    >
+                                    
+                                    <!-- Dropdown for Brand Selection -->
+                                    <div 
+                                        x-show="showDropdown" 
+                                        x-transition
+                                        class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-y-auto"
+                                    >
+                                        <ul class="py-1">
+                                            <template x-for="brand in brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))" :key="brand">
+                                                <li 
+                                                    x-text="brand"
+                                                    @click="$wire.addBrand(brand); showDropdown = false; brandSearch = '';"
+                                                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                ></li>
+                                            </template>
+                                            <li x-show="brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase())).length === 0" class="px-4 py-2 text-gray-500">
+                                                No matching brands
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                                 
-                                <!-- Dropdown for Brand Selection -->
-                                <div 
-                                    x-show="showDropdown" 
-                                    x-transition
-                                    class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-y-auto"
-                                >
-                                    <ul class="py-1">
-                                        <template x-for="brand in brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))" :key="brand">
-                                            <li 
-                                                x-text="brand"
-                                                @click="$wire.addBrand(brand); showDropdown = false; brandSearch = '';"
-                                                class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                            ></li>
-                                        </template>
-                                        <li x-show="brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase())).length === 0" class="px-4 py-2 text-gray-500">
-                                            No matching brands
-                                        </li>
-                                    </ul>
+                                <!-- Selected Brand Tags -->
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach($selectedBrands as $index => $brand)
+                                        <div class="inline-flex items-center px-2 py-1 rounded-md text-sm" 
+                                             style="background-color: hsla({{ ($index * 137) % 360 }}, 70%, 50%, 0.1); 
+                                                    color: hsl({{ ($index * 137) % 360 }}, 70%, 35%);
+                                                    border: 1px solid hsl({{ ($index * 137) % 360 }}, 70%, 50%);">
+                                            {{ $brand }}
+                                            <button type="button" wire:click="removeBrand('{{ $brand }}')" class="ml-1 hover:opacity-80">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                    @if(empty($selectedBrands))
+                                        <div class="text-sm text-gray-500">No brands selected (showing top {{ $displayLimit }})</div>
+                                    @endif
                                 </div>
                             </div>
+                        @else
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Categories (Optional)</label>
                             
-                            <!-- Selected Brand Tags -->
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                @foreach($selectedBrands as $index => $brand)
-                                    <div class="inline-flex items-center px-2 py-1 rounded-md text-sm" 
-                                         style="background-color: hsla({{ ($index * 137) % 360 }}, 70%, 50%, 0.1); 
-                                                color: hsl({{ ($index * 137) % 360 }}, 70%, 35%);
-                                                border: 1px solid hsl({{ ($index * 137) % 360 }}, 70%, 50%);">
-                                        {{ $brand }}
-                                        <button type="button" wire:click="removeBrand('{{ $brand }}')" class="ml-1 hover:opacity-80">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
+                            <!-- Class Search Input -->
+                            <div x-data="{ classSearch: '', showDropdown: false, classes: {{ json_encode($availableClasses) }} }" x-init="console.log('Available classes:', classes)">
+                                <!-- Debug info - remove after fixing -->
+                                <div class="text-xs text-gray-500 mb-2">Available Classes: {{ count($availableClasses) }}</div>
+                                
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="classSearch"
+                                        @focus="showDropdown = true"
+                                        @click.away="showDropdown = false"
+                                        placeholder="Search for categories..."
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+                                    >
+                                    
+                                    <!-- Dropdown for Class Selection -->
+                                    <div 
+                                        x-show="showDropdown" 
+                                        x-transition
+                                        class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-y-auto"
+                                    >
+                                        <ul class="py-1">
+                                            <template x-for="className in classes.filter(c => c.toLowerCase().includes(classSearch.toLowerCase()))" :key="className">
+                                                <li 
+                                                    x-text="className"
+                                                    @click="$wire.addClass(className); showDropdown = false; classSearch = '';"
+                                                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                ></li>
+                                            </template>
+                                            <li x-show="classes.filter(c => c.toLowerCase().includes(classSearch.toLowerCase())).length === 0" class="px-4 py-2 text-gray-500">
+                                                No matching categories
+                                            </li>
+                                        </ul>
                                     </div>
-                                @endforeach
-                                @if(empty($selectedBrands))
-                                    <div class="text-sm text-gray-500">No brands selected (showing top {{ $brandLimit }})</div>
-                                @endif
+                                </div>
+                                
+                                <!-- Selected Class Tags -->
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach($selectedClasses as $index => $class)
+                                        <div class="inline-flex items-center px-2 py-1 rounded-md text-sm" 
+                                             style="background-color: hsla({{ ($index * 137) % 360 }}, 70%, 50%, 0.1); 
+                                                    color: hsl({{ ($index * 137) % 360 }}, 70%, 35%);
+                                                    border: 1px solid hsl({{ ($index * 137) % 360 }}, 70%, 50%);">
+                                            {{ $class }}
+                                            <button type="button" wire:click="removeClass('{{ $class }}')" class="ml-1 hover:opacity-80">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                    @if(empty($selectedClasses))
+                                        <div class="text-sm text-gray-500">No categories selected (showing top {{ $displayLimit }})</div>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
-
-                    <!-- We're fixing the brand limit at 10, so this filter is removed -->
                 </div>
             </div>
         </div>
 
         <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Brand Performance Over Time Chart -->
+            <!-- Performance Over Time Chart -->
             <div class="bg-white shadow sm:rounded-lg overflow-hidden">
                 <div class="p-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Top Brands Sales Over Time</h3>
+                    <h3 class="text-lg font-medium text-gray-900">{{ $viewMode === 'brands' ? 'Brand' : 'Category' }} Sales Over Time</h3>
                 </div>
                 <div class="p-4">
                     <div class="h-80">
@@ -142,15 +226,20 @@
                     </div>
                     <!-- Hidden data elements for chart -->
                     <div class="hidden">
-                        <div id="top-brands-over-time-data">{{ json_encode($chartData['topBrandsOverTime'] ?? []) }}</div>
+                        <div id="top-brands-over-time-data">
+                            {{ $viewMode === 'brands' 
+                                ? json_encode($chartData['brands']['timeSeriesData'] ?? []) 
+                                : json_encode($chartData['classes']['timeSeriesData'] ?? []) 
+                            }}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Brand Comparison Chart -->
+            <!-- Comparison Chart -->
             <div class="bg-white shadow sm:rounded-lg overflow-hidden">
                 <div class="p-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Brand Comparison</h3>
+                    <h3 class="text-lg font-medium text-gray-900">{{ $viewMode === 'brands' ? 'Brand' : 'Category' }} Comparison</h3>
                 </div>
                 <div class="p-4">
                     <div class="h-80">
@@ -158,7 +247,12 @@
                     </div>
                     <!-- Hidden data elements for chart -->
                     <div class="hidden">
-                        <div id="brand-comparison-data">{{ json_encode($chartData['brandComparison'] ?? []) }}</div>
+                        <div id="brand-comparison-data">
+                            {{ $viewMode === 'brands' 
+                                ? json_encode($chartData['brands']['comparisonData'] ?? []) 
+                                : json_encode($chartData['classes']['comparisonData'] ?? []) 
+                            }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -188,8 +282,13 @@
         // Listen for our custom event using Livewire event system
         document.addEventListener('DOMContentLoaded', function() {
             if (window.Livewire) {
-                window.Livewire.on('brandDataUpdated', function() {
-                    console.log('Brand data updated Livewire event received');
+                window.Livewire.on('brandClassDataUpdated', function() {
+                    console.log('Brand/Class data updated Livewire event received');
+                    setTimeout(() => window.initBrandCharts(), 10);
+                });
+                
+                window.Livewire.on('viewModeChanged', function(data) {
+                    console.log('View mode changed to:', data.mode);
                     setTimeout(() => window.initBrandCharts(), 10);
                 });
             }
