@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="ml-3 text-gray-700">
                                     <p class="text-sm font-medium">Business Hours</p>
-                                    <p class="mt-1">Monday - Friday: 8:00 AM - 5:00 PM<br>Saturday - Sunday: Closed</p>
+                                    <p class="mt-1">Monday - Friday: 8:00 AM - 4:00 PM<br>Saturday - Sunday: Closed</p>
                                 </div>
                             </div>
                         </div>
