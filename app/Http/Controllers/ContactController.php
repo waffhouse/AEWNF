@@ -30,7 +30,6 @@ class ContactController extends Controller
                 'phone' => $validated['phone'] ?? 'Not provided',
                 'userMessage' => $validated['message'],
             ], function ($message) use ($validated) {
-                $message->from($validated['email'], $validated['name']);
                 $message->to(env('COMPANY_EMAIL'));
                 $message->subject('New Contact Form Submission from ' . $validated['name']);
             });
