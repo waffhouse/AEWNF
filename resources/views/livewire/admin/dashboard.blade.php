@@ -28,10 +28,8 @@
                     this.activeTab = hashValue;
                     $wire.setActiveTab(hashValue);
                     
-                    // Force Livewire to recognize component in DOM after tab switch
-                    setTimeout(() => {
-                        window.Livewire.rescan();
-                    }, 100);
+                    // Force Livewire to refresh after tab switch
+                    $wire.$refresh();
                 }
             });
         }
