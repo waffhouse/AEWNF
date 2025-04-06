@@ -125,10 +125,7 @@
         
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-b-lg">
             <div class="p-6 text-gray-900">
-                <!-- Main Filters Section (hidden on small screens) -->
-                <div class="hidden md:block">
-                    @include('livewire.inventory.catalog-filters')
-                </div>
+                <!-- Main filters are now handled by the sticky filter bar at the bottom -->
                 
                 <!-- Product Grid Section -->
                 <div wire:key="product-grid" wire:loading.class="opacity-50">
@@ -148,7 +145,7 @@
     <div 
         x-show="showStickyFilter" 
         x-cloak
-        class="fixed bottom-0 inset-x-0 z-30 bg-gradient-to-r from-red-50 to-white border-t border-red-200 shadow-lg"
+        class="fixed bottom-0 inset-x-0 z-30 bg-gradient-to-r from-gray-900 to-black border-t border-red-600 shadow-lg"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 transform translate-y-full"
         x-transition:enter-end="opacity-100 transform translate-y-0"
