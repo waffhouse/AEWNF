@@ -38,11 +38,26 @@ class FeaturedBrandManagement extends AdminComponent
         // This prevents serialization issues with the Eloquent model
         $this->currentBrand = null;
     }
+    
+    // Handle modal close events (from ESC key or other global close events)
+    public function handleModalClose()
+    {
+        if ($this->showDeleteModal) {
+            $this->cancelDelete();
+        } else if ($this->showEditBrandModal) {
+            $this->cancelEdit();
+        } else if ($this->showAddBrandModal) {
+            $this->cancelAdd();
+        }
+    }
 
     // Use the searchQuery from parent class
     public $availableBrands = [];
 
-    protected $listeners = ['refreshBrands' => '$refresh'];
+    protected $listeners = [
+        'refreshBrands' => '$refresh',
+        'close-this-modal' => 'handleModalClose'
+    ];
 
     protected $rules = [
         'brandToAdd' => 'required|string|max:255',
