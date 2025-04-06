@@ -220,6 +220,12 @@ class FeaturedBrandManagement extends AdminComponent
         $this->currentBrand = FeaturedBrand::findOrFail($id);
         $this->showDeleteModal = true;
     }
+    
+    public function cancelDelete()
+    {
+        $this->showDeleteModal = false;
+        $this->reset(['brandId', 'currentBrand']);
+    }
 
     public function deleteBrand()
     {

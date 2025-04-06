@@ -293,14 +293,15 @@
             <p class="mb-4 text-sm text-gray-600">
                 Are you sure you want to delete this featured brand? This action cannot be undone.
                 <br><br>
-                <strong>Brand:</strong> {{ $currentBrand ? $currentBrand->brand : '' }}
+                <strong>Brand:</strong> {{ isset($currentBrand) && $currentBrand ? $currentBrand->brand : '' }}
             </p>
             
             <div class="mt-6 flex justify-end space-x-3">
                 <button
                     type="button"
+                    wire:click="cancelDelete"
                     x-data
-                    @click="$dispatch('close-modal', 'delete-brand-modal'); $wire.set('showDeleteModal', false)"
+                    @click="$dispatch('close-modal', 'delete-brand-modal')"
                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
                     Cancel
