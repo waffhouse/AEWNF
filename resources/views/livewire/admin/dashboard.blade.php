@@ -27,6 +27,11 @@
                 if (hashValue && Object.keys($wire.accessibleTabs).includes(hashValue)) {
                     this.activeTab = hashValue;
                     $wire.setActiveTab(hashValue);
+                    
+                    // Force Livewire to recognize component in DOM after tab switch
+                    setTimeout(() => {
+                        window.Livewire.rescan();
+                    }, 100);
                 }
             });
         }

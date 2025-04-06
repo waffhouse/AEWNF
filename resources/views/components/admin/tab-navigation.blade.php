@@ -34,7 +34,7 @@
             @endphp
             
             <button 
-                @click="activeTab = '{{ $id }}'; $wire.setActiveTab('{{ $id }}')"
+                @click="activeTab = '{{ $id }}'; $wire.setActiveTab('{{ $id }}'); setTimeout(() => window.Livewire.rescan(), 100);"
                 :class="{ '{{ $colorClass }}': activeTab === '{{ $id }}', '{{ $inactiveClass }}': activeTab !== '{{ $id }}' }"
                 class="py-2 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center"
             >

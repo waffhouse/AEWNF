@@ -7,6 +7,7 @@
     x-transition:enter-end="opacity-100"
     {{ $attributes }} 
     style="display: none;"
+    wire:key="{{ $id }}-tab-panel"
 >
     {{ $slot }}
 </div>
