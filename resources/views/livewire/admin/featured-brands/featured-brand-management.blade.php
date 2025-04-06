@@ -216,8 +216,9 @@
             <div class="mt-6 flex justify-end space-x-3">
                 <button
                     type="button"
+                    wire:click="cancelAdd"
                     x-data
-                    @click="$dispatch('close-modal', 'add-brand-modal'); $wire.set('showAddBrandModal', false)"
+                    @click="$dispatch('close-modal', 'add-brand-modal')"
                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
                     Cancel
@@ -268,8 +269,9 @@
             <div class="mt-6 flex justify-end space-x-3">
                 <button
                     type="button"
+                    wire:click="cancelEdit"
                     x-data
-                    @click="$dispatch('close-modal', 'edit-brand-modal'); $wire.set('showEditBrandModal', false)"
+                    @click="$dispatch('close-modal', 'edit-brand-modal')"
                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
                     Cancel

@@ -65,7 +65,7 @@ class FeaturedBrandManagement extends AdminComponent
     public function openAddModal()
     {
         $this->resetValidation();
-        $this->reset(['brandToAdd', 'displayOrder']);
+        $this->reset(['brandToAdd', 'displayOrder', 'currentBrand', 'brandId']);
 
         // Count total brands and set the new one to be the next in sequence
         $count = FeaturedBrand::count();
@@ -75,6 +75,12 @@ class FeaturedBrandManagement extends AdminComponent
         $this->loadAvailableBrands();
 
         $this->showAddBrandModal = true;
+    }
+    
+    public function cancelAdd()
+    {
+        $this->showAddBrandModal = false;
+        $this->reset(['brandToAdd', 'displayOrder', 'currentBrand', 'brandId']);
     }
 
     /**
@@ -129,6 +135,12 @@ class FeaturedBrandManagement extends AdminComponent
 
         $this->showEditBrandModal = true;
     }
+    
+    public function cancelEdit()
+    {
+        $this->showEditBrandModal = false;
+        $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+    }
 
     /**
      * Load available brands for edit modal dropdown
@@ -159,7 +171,15 @@ class FeaturedBrandManagement extends AdminComponent
     {
         $this->validate();
 
-        if ($this->currentBrand) {
+        if (!$this->brandId || !$this->currentBrand) {
+            $this->showEditBrandModal = false;
+            $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+            $this->dispatch('close-modal', 'edit-brand-modal');
+            session()->flash('error', 'Error updating brand: brand not found.');
+            return;
+        }
+
+        try {
             $oldOrder = $this->currentBrand->display_order;
             $newOrder = $this->displayOrder;
 
@@ -199,8 +219,11 @@ class FeaturedBrandManagement extends AdminComponent
 
             $this->dispatch('close-modal', 'edit-brand-modal');
             session()->flash('message', 'Featured brand updated successfully.');
-        } else {
-            session()->flash('error', 'Error updating brand: brand not found.');
+        } catch (\Exception $e) {
+            $this->showEditBrandModal = false;
+            $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+            $this->dispatch('close-modal', 'edit-brand-modal');
+            session()->flash('error', 'Error updating brand: ' . $e->getMessage());
         }
     }
 
@@ -229,11 +252,26 @@ class FeaturedBrandManagement extends AdminComponent
 
     public function deleteBrand()
     {
-        if ($this->brandId) {
+        if (!$this->brandId) {
+            $this->showDeleteModal = false;
+            $this->reset(['brandId', 'currentBrand']);
+            $this->dispatch('close-modal', 'delete-brand-modal');
+            session()->flash('error', 'No brand selected for deletion.');
+            return;
+        }
+        
+        try {
             // Get the display order of the brand to be deleted
-            $brandToDelete = FeaturedBrand::findOrFail($this->brandId);
-            $deletedOrder = $brandToDelete->display_order;
-
+            $brandToDelete = FeaturedBrand::find($this->brandId);
+            
+            if (!$brandToDelete) {
+                $this->showDeleteModal = false;
+                $this->reset(['brandId', 'currentBrand']);
+                $this->dispatch('close-modal', 'delete-brand-modal');
+                session()->flash('error', 'Featured brand not found.');
+                return;
+            }
+            
             // Delete the brand
             FeaturedBrand::destroy($this->brandId);
 
@@ -245,6 +283,11 @@ class FeaturedBrandManagement extends AdminComponent
 
             $this->dispatch('close-modal', 'delete-brand-modal');
             session()->flash('message', 'Featured brand removed successfully.');
+        } catch (\Exception $e) {
+            $this->showDeleteModal = false;
+            $this->reset(['brandId', 'currentBrand']);
+            $this->dispatch('close-modal', 'delete-brand-modal');
+            session()->flash('error', 'Error deleting brand: ' . $e->getMessage());
         }
     }
 
