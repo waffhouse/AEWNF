@@ -18,11 +18,11 @@ return new class extends Migration
             $table->integer('quantity')->default(1);
             $table->decimal('price', 10, 2);
             $table->timestamps();
-            
+
             // Indexes for faster lookups
             $table->index('cart_id');
             $table->index('inventory_id');
-            
+
             // Ensure unique inventory items per cart
             $table->unique(['cart_id', 'inventory_id']);
         });

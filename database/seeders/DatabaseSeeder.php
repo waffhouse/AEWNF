@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Only seed roles and permissions
         $this->call(RolesAndPermissionsSeeder::class);
-        
+
         // Comment out user creation for now
         /*
         // Skip creating test users in production
@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             ]);
             $admin->save();
             $admin->assignRole('admin');
-            
+
             $staff = new User([
                 'name' => 'Staff User',
                 'email' => 'staff@example.com',
@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             ]);
             $staff->save();
             $staff->assignRole('staff');
-            
+
             $customer = new User([
                 'name' => 'Customer User',
                 'email' => 'customer@example.com',

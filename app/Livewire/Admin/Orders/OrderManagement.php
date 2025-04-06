@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Admin\Orders;
 
 use App\Models\Order;
@@ -14,19 +15,21 @@ class OrderManagement extends Component
 {
     use AdminAuthorization;
     use InfiniteScrollable;
-    
+
     // For searching
     public $search = '';
-    
+
     public $selectedOrder = null;
+
     public $viewingOrderDetails = false;
-    
+
     // For infinite scroll pagination
     public int $perPage = 10;
+
     public array $orders = [];
-    
+
     protected OrderService $orderService;
-    
+
     /**
      * Listen for events to refresh orders
      */
@@ -35,22 +38,24 @@ class OrderManagement extends Component
     {
         $this->resetItems($this->getFilteredQuery(), 'orders');
         $this->dispatch('resetOrders');
-        
+
         // Convert to array but include relationships properly
-        $orders = collect($this->orders)->map(function($order) {
+        $orders = collect($this->orders)->map(function ($order) {
             if (is_object($order)) {
                 $data = $order->toArray();
                 if ($order->relationLoaded('user')) {
                     $data['user'] = $order->user->toArray();
                 }
+
                 return $data;
             }
+
             return $order;
         })->toArray();
-        
+
         $this->dispatch('ordersUpdated', $orders);
     }
-    
+
     /**
      * Handle load more for infinite scrolling
      * Called by the OrderList component
@@ -58,30 +63,32 @@ class OrderManagement extends Component
     #[On('loadMore')]
     public function loadMore()
     {
-        if ($this->hasMorePages && !$this->isLoading) {
+        if ($this->hasMorePages && ! $this->isLoading) {
             $this->loadItems($this->getFilteredQuery(), 'orders');
-            
+
             // Convert to array but include relationships properly
-            $orders = collect($this->orders)->map(function($order) {
+            $orders = collect($this->orders)->map(function ($order) {
                 if (is_object($order)) {
                     $data = $order->toArray();
                     if ($order->relationLoaded('user')) {
                         $data['user'] = $order->user->toArray();
                     }
+
                     return $data;
                 }
+
                 return $order;
             })->toArray();
-            
+
             $this->dispatch('ordersUpdated', $orders);
         }
     }
-    
+
     /**
      * Flag to prevent race conditions
      */
     public $isProcessingStatusUpdate = false;
-    
+
     /**
      * Listen for event to update order status
      */
@@ -92,14 +99,14 @@ class OrderManagement extends Component
         if ($this->isProcessingStatusUpdate) {
             return;
         }
-        
+
         $this->isProcessingStatusUpdate = true;
-        
+
         // Handle different parameter formats:
         // 1. Directly passed orderId and status
         // 2. Array format with indices [0, 1]
         // 3. Array/object with named keys 'orderId' and 'status'
-        
+
         if ($orderId !== null && $status !== null) {
             // Parameters already provided directly
         } elseif ($data !== null) {
@@ -113,7 +120,7 @@ class OrderManagement extends Component
                 $orderId = $data['orderId'] ?? null;
                 $status = $data['status'] ?? null;
             }
-        } elseif (is_array($orderId) && !$status) {
+        } elseif (is_array($orderId) && ! $status) {
             // First parameter is the data array
             if (isset($orderId[0]) && isset($orderId[1])) {
                 // It's the array format
@@ -125,50 +132,53 @@ class OrderManagement extends Component
                 $orderId = $orderId['orderId'] ?? null;
             }
         }
-        
-        if (!$orderId || !$status) {
+
+        if (! $orderId || ! $status) {
             // Notification removed
             $this->isProcessingStatusUpdate = false;
+
             return;
         }
-        
+
         $success = $this->updateStatus($orderId, $status);
-        
+
         // Reset processing flag after operation completes
         $this->isProcessingStatusUpdate = false;
-        
+
         if ($success) {
             // Force a refresh of the orders to reflect the change immediately
             $this->resetItems($this->getFilteredQuery(), 'orders');
-            
+
             // Convert to array but include relationships properly
-            $orders = collect($this->orders)->map(function($order) {
+            $orders = collect($this->orders)->map(function ($order) {
                 if (is_object($order)) {
                     $data = $order->toArray();
                     if ($order->relationLoaded('user')) {
                         $data['user'] = $order->user->toArray();
                     }
+
                     return $data;
                 }
+
                 return $order;
             })->toArray();
-            
+
             // Update any component that displays orders
             $this->dispatch('ordersUpdated', $orders);
-            
+
             // Trigger events to reset expanded accordion in all possible ways
             $this->dispatch('order-status-updated');
-            
+
             // Also update order statistics in UI
             $orderStats = $this->orderService->getOrderStats();
             $this->dispatch('orderStatsUpdated', [
                 'pending' => $orderStats['pending'],
                 'completed' => $orderStats['completed'],
-                'cancelled' => $orderStats['cancelled']
+                'cancelled' => $orderStats['cancelled'],
             ]);
         }
     }
-    
+
     /**
      * Component initialization
      */
@@ -176,37 +186,39 @@ class OrderManagement extends Component
     {
         $this->orderService = $orderService;
     }
-    
+
     /**
      * Load component and check permissions
      */
     public function mount()
     {
         // Only users with 'view all orders' or 'manage orders' permission can access this component
-        if (!Auth::user()->hasAnyPermission(['view all orders', 'manage orders'])) {
+        if (! Auth::user()->hasAnyPermission(['view all orders', 'manage orders'])) {
             $this->dispatch('error', 'You do not have permission to manage orders');
             $this->redirect(route('dashboard'));
         }
-        
+
         // Load initial orders
         $this->resetItems($this->getFilteredQuery(), 'orders');
-        
+
         // Dispatch to ensure the OrderList component has the latest data
         // Convert to array but include relationships properly
-        $orders = collect($this->orders)->map(function($order) {
+        $orders = collect($this->orders)->map(function ($order) {
             if (is_object($order)) {
                 $data = $order->toArray();
                 if ($order->relationLoaded('user')) {
                     $data['user'] = $order->user->toArray();
                 }
+
                 return $data;
             }
+
             return $order;
         })->toArray();
-        
+
         $this->dispatch('ordersUpdated', $orders);
     }
-    
+
     /**
      * Reset orders when search is updated
      */
@@ -214,31 +226,33 @@ class OrderManagement extends Component
     {
         $this->resetItems($this->getFilteredQuery(), 'orders');
         $this->dispatch('resetOrders');
-        
+
         // Convert to array but include relationships properly
-        $orders = collect($this->orders)->map(function($order) {
+        $orders = collect($this->orders)->map(function ($order) {
             if (is_object($order)) {
                 $data = $order->toArray();
                 if ($order->relationLoaded('user')) {
                     $data['user'] = $order->user->toArray();
                 }
+
                 return $data;
             }
+
             return $order;
         })->toArray();
-        
+
         $this->dispatch('ordersUpdated', $orders);
     }
-    
+
     /**
      * Flag to prevent race conditions with modal
      */
     public $isProcessingViewDetails = false;
-    
+
     /**
      * View order details
-     * 
-     * @param int $orderId The ID of the order to view
+     *
+     * @param  int  $orderId  The ID of the order to view
      */
     #[On('viewOrderDetails')]
     public function viewOrderDetails($orderId)
@@ -247,12 +261,12 @@ class OrderManagement extends Component
         if ($this->isProcessingViewDetails) {
             return;
         }
-        
+
         $this->isProcessingViewDetails = true;
-        
+
         $this->selectedOrder = $this->orderService->getOrderById($orderId, ['items.inventory', 'user']);
         $this->viewingOrderDetails = true;
-        
+
         // Reset the processing flag after a short delay using JavaScript
         // This allows time for the DOM to update before accepting new actions
         $this->js('setTimeout(function() { 
@@ -260,12 +274,12 @@ class OrderManagement extends Component
             $wire.set("isProcessingViewDetails", false);
         }, 500)');
     }
-    
+
     /**
      * Flag to prevent race conditions with modal closing
      */
     public $isProcessingCloseDetails = false;
-    
+
     /**
      * Close order details modal
      */
@@ -276,76 +290,76 @@ class OrderManagement extends Component
         if ($this->isProcessingCloseDetails) {
             return;
         }
-        
+
         $this->isProcessingCloseDetails = true;
-        
+
         // Remove the body lock through inline JavaScript for immediate effect
         $this->js('document.body.classList.remove("overflow-hidden")');
-        
+
         $this->viewingOrderDetails = false;
         $this->selectedOrder = null;
-        
+
         // Reset the processing flag after a short delay
         $this->js('setTimeout(function() {
             // Use proper Livewire 3 syntax for setting properties
             $wire.set("isProcessingCloseDetails", false);
         }, 500)');
     }
-    
+
     /**
      * Update order status
-     * 
-     * @param int $orderId The ID of the order to update
-     * @param string $status The new status
+     *
+     * @param  int  $orderId  The ID of the order to update
+     * @param  string  $status  The new status
      * @return bool Success indicator
      */
     public function updateStatus($orderId, $status)
     {
         // Check if user has permission to manage orders
-        if (!Auth::user()->can('manage orders')) {
+        if (! Auth::user()->can('manage orders')) {
             // Notification removed
             return false;
         }
-        
+
         $success = $this->orderService->updateOrderStatus($orderId, $status, Auth::user());
-        
+
         if ($success) {
             // Notification removed
-            
+
             // Refresh the selected order if we're viewing details
             if ($this->selectedOrder && $this->selectedOrder->id === $orderId) {
                 $this->selectedOrder = $this->orderService->getOrderById($orderId, ['items.inventory', 'user']);
             }
-            
+
             // Dispatch event to refresh orders
             $this->dispatch('order-status-updated');
         } else {
             // Notification removed
         }
-        
+
         return $success;
     }
-    
+
     /**
      * Get filtered query for orders
      */
     protected function getFilteredQuery()
     {
         $filters = [];
-        
+
         // Add search filter if provided
-        if (!empty($this->search)) {
+        if (! empty($this->search)) {
             $filters['search'] = $this->search;
         }
-        
+
         // Always include options to load relationships needed by the view
         $options = [
-            'with' => ['user', 'items.inventory']
+            'with' => ['user', 'items.inventory'],
         ];
-        
+
         return $this->orderService->getOrdersQuery($filters, $options);
     }
-    
+
     /**
      * Render the component
      */
@@ -353,13 +367,13 @@ class OrderManagement extends Component
     {
         // Get order statistics
         $orderStats = $this->orderService->getOrderStats();
-        
+
         // Load orders directly here instead of using OrderList component
         // Only load if orders array is empty (first load)
         if (empty($this->orders)) {
             $this->loadItems($this->getFilteredQuery(), 'orders');
         }
-        
+
         return view('livewire.admin.orders.order-management', [
             'pendingCount' => $orderStats['pending'],
             'completedCount' => $orderStats['completed'],

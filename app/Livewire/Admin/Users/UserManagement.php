@@ -13,7 +13,7 @@ class UserManagement extends AdminComponent
     {
         return ['access admin dashboard', 'view users'];
     }
-    
+
     /**
      * Render the component
      */

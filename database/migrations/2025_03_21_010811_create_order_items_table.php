@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('product_name')->nullable();
             $table->string('product_sku')->nullable();
             $table->timestamps();
-            
+
             // Indexes for faster lookups
             $table->index('order_id');
             $table->index('inventory_id');

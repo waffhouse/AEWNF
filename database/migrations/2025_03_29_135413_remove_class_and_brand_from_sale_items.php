@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::table('sale_items', function (Blueprint $table) {
             $table->string('class')->nullable()->comment('Item class from NetSuite');
             $table->string('brand')->nullable()->comment('Item brand from NetSuite (custitem_brand)');
-            
+
             $table->index('class');
             $table->index('brand');
         });

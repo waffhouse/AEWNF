@@ -29,19 +29,20 @@ class SyncCarts extends Command
     public function handle()
     {
         $this->info('Starting cart synchronization...');
-        
+
         try {
             $userId = $this->option('user');
-            
+
             if ($userId) {
                 // Sync a specific user's cart
                 $user = User::find($userId);
-                
-                if (!$user) {
+
+                if (! $user) {
                     $this->error("User with ID {$userId} not found.");
+
                     return Command::FAILURE;
                 }
-                
+
                 $this->syncUserCart($user);
                 $this->info("Successfully synced cart for user ID {$userId}.");
             } else {
@@ -50,13 +51,13 @@ class SyncCarts extends Command
                     ->orderBy('last_login_at', 'desc')
                     ->take(100)
                     ->get();
-                
+
                 $total = $users->count();
                 $synced = 0;
                 $errors = 0;
-                
+
                 $this->output->progressStart($total);
-                
+
                 foreach ($users as $user) {
                     try {
                         $this->syncUserCart($user);
@@ -65,37 +66,36 @@ class SyncCarts extends Command
                         $errors++;
                         Log::error("Failed to sync cart for user {$user->id}", [
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
-                    
+
                     $this->output->progressAdvance();
                 }
-                
+
                 $this->output->progressFinish();
-                
+
                 $this->table(
                     ['Total Users', 'Successfully Synced', 'Errors'],
                     [[$total, $synced, $errors]]
                 );
             }
-            
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('Error: ' . $e->getMessage());
+            $this->error('Error: '.$e->getMessage());
             Log::error('Cart sync command failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return Command::FAILURE;
         }
     }
-    
+
     /**
      * Sync a specific user's cart
      *
-     * @param User $user
      * @return void
      */
     protected function syncUserCart(User $user)

@@ -26,11 +26,11 @@ return new class extends Migration
             $table->json('raw_data')->nullable()->comment('Full JSON data from NetSuite');
             $table->timestamp('last_synced_at')->nullable();
             $table->timestamps();
-            
+
             // Indexes for faster searching
             $table->index('sku');
             $table->index('brand');
-            $table->index('class'); 
+            $table->index('class');
             $table->index('state');
         });
     }

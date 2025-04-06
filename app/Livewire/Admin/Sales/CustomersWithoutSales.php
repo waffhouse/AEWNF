@@ -13,17 +13,18 @@ use Livewire\Component;
 class CustomersWithoutSales extends Component
 {
     use AdminAuthorization, Filterable, InfiniteScrollable;
-    
+
     public $search = '';
+
     public $filters = [
         'county' => '',
         'home_state' => '',
         'date_range' => [
             'start' => '',
-            'end' => ''
+            'end' => '',
         ],
     ];
-    
+
     protected $queryString = [
         'search' => ['except' => ''],
         'sortField' => ['except' => 'company_name'],
@@ -33,31 +34,31 @@ class CustomersWithoutSales extends Component
             'home_state' => '',
             'date_range' => [
                 'start' => '',
-                'end' => ''
+                'end' => '',
             ],
         ]],
     ];
-    
+
     public function mount()
     {
         $this->authorize('manage orders');
-        
+
         // Set default sort field and direction
         $this->sortField = 'company_name';
         $this->sortDirection = 'asc';
-        
+
         // Initialize items array
         $this->items = [];
         $this->itemsPerPage = 20;
-        
+
         // Load initial items
         $this->loadMore($this->getBaseQuery());
     }
-    
+
     public function render()
     {
         $this->totalCount = $this->getTotal();
-        
+
         return view('livewire.admin.sales.customers-without-sales', [
             'customers' => $this->items,
             'counties' => $this->getCounties(),
@@ -65,7 +66,7 @@ class CustomersWithoutSales extends Component
             'summary' => $this->getSummaryData(),
         ])->layout('layouts.app');
     }
-    
+
     /**
      * Get the base query for customers without sales with all filters applied
      */
@@ -99,7 +100,7 @@ class CustomersWithoutSales extends Component
             })
             ->orderBy($this->sortField, $this->sortDirection);
     }
-    
+
     /**
      * Load more customers when scrolling
      */
@@ -107,23 +108,23 @@ class CustomersWithoutSales extends Component
     {
         $this->loadMore($this->getBaseQuery());
     }
-    
+
     // Add explicit watchers to handle filter changes
     public function updatedSearch()
     {
         $this->resetItems();
     }
-    
+
     public function updatedFilters()
     {
         $this->resetItems();
     }
-    
+
     public function getTotal()
     {
         return $this->getBaseQuery()->count();
     }
-    
+
     public function getCounties()
     {
         return Customer::select('county')
@@ -135,7 +136,7 @@ class CustomersWithoutSales extends Component
             ->pluck('county')
             ->toArray();
     }
-    
+
     public function getStates()
     {
         return Customer::select('home_state')
@@ -147,13 +148,13 @@ class CustomersWithoutSales extends Component
             ->pluck('home_state')
             ->toArray();
     }
-    
+
     public function resetFilters()
     {
         $this->reset('filters', 'search');
         // Will trigger resetItems through Livewire's updated hooks
     }
-    
+
     /**
      * Implement the resetItems method required by the Filterable trait
      */
@@ -162,14 +163,14 @@ class CustomersWithoutSales extends Component
         $this->items = [];
         $this->loadedCount = 0;
         $this->hasMorePages = true;
-        
+
         // Immediately load fresh data with the current filters
         $this->loadMore($this->getBaseQuery());
-        
+
         // Optionally dispatch an event for Alpine to react to
         $this->dispatch('refresh-data');
     }
-    
+
     /**
      * Handles updating the sort field and resetting items
      */
@@ -177,7 +178,7 @@ class CustomersWithoutSales extends Component
     {
         $this->resetItems();
     }
-    
+
     /**
      * Toggle the sort direction and reset items
      */
@@ -186,7 +187,7 @@ class CustomersWithoutSales extends Component
         $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         $this->resetItems();
     }
-    
+
     /**
      * Legacy method for compatibility
      */
@@ -198,10 +199,10 @@ class CustomersWithoutSales extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
-        
+
         $this->resetItems();
     }
-    
+
     /**
      * Get summary data for display at the top of the report
      */
@@ -209,24 +210,24 @@ class CustomersWithoutSales extends Component
     {
         // Get the total number of customers
         $totalCustomers = Customer::count();
-        
+
         // Get the number of customers without sales (from our filter)
         $customersWithoutSales = $this->getBaseQuery()->count();
-        
+
         // Get the number of customers with sales
         $customersWithSales = $totalCustomers - $customersWithoutSales;
-        
+
         // Get total sales data
         $totalSalesCount = \App\Models\Sale::count();
-        
+
         // Return the summary data
         return [
             'total_customers' => $totalCustomers,
             'customers_without_sales' => $customersWithoutSales,
             'customers_with_sales' => $customersWithSales,
             'total_sales_count' => $totalSalesCount,
-            'percentage_without_sales' => $totalCustomers > 0 
-                ? round(($customersWithoutSales / $totalCustomers) * 100, 1) 
+            'percentage_without_sales' => $totalCustomers > 0
+                ? round(($customersWithoutSales / $totalCustomers) * 100, 1)
                 : 0,
         ];
     }

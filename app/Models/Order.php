@@ -37,13 +37,16 @@ class Order extends Model
      * Possible order statuses
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
-    
+
     /**
      * Delivery types
      */
     const DELIVERY_TYPE_PICKUP = 'pickup';
+
     const DELIVERY_TYPE_DELIVERY = 'delivery';
 
     /**
@@ -69,14 +72,14 @@ class Order extends Model
     {
         return $this->items->sum('quantity');
     }
-    
+
     /**
      * Get items grouped by category/class
      */
     public function getItemsByCategory(): array
     {
         $categorized = [];
-        
+
         foreach ($this->items as $item) {
             // Get inventory item and its class/category
             if ($item->inventory_id) {
@@ -85,18 +88,18 @@ class Order extends Model
             } else {
                 $category = 'Other';
             }
-            
-            if (!isset($categorized[$category])) {
+
+            if (! isset($categorized[$category])) {
                 $categorized[$category] = [
                     'items' => [],
-                    'total_quantity' => 0
+                    'total_quantity' => 0,
                 ];
             }
-            
+
             $categorized[$category]['items'][] = $item;
             $categorized[$category]['total_quantity'] += $item->quantity;
         }
-        
+
         return $categorized;
     }
 
@@ -113,11 +116,12 @@ class Order extends Model
      */
     public function cancel(): bool
     {
-        if (!$this->canBeCancelled()) {
+        if (! $this->canBeCancelled()) {
             return false;
         }
 
         $this->status = self::STATUS_CANCELLED;
+
         return $this->save();
     }
 
@@ -131,6 +135,7 @@ class Order extends Model
         }
 
         $this->status = self::STATUS_COMPLETED;
+
         return $this->save();
     }
 }

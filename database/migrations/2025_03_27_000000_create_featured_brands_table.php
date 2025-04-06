@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->comment('Whether this brand is active');
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();
-            
+
             // Indexes
             $table->index('display_order');
             $table->index('is_active');

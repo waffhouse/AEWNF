@@ -1,4 +1,5 @@
 <?php
+
 // Create an admin user
 require 'vendor/autoload.php';
 
@@ -26,11 +27,11 @@ $admin = new \App\Models\User([
 
 // Save the user
 $result = $admin->save();
-echo "User created: " . ($result ? "Yes" : "No") . "\n";
+echo 'User created: '.($result ? 'Yes' : 'No')."\n";
 
 // Check if the admin role exists
 $adminRole = \Spatie\Permission\Models\Role::where('name', 'admin')->first();
-echo "Admin role exists: " . ($adminRole ? "Yes (ID: {$adminRole->id})" : "No") . "\n";
+echo 'Admin role exists: '.($adminRole ? "Yes (ID: {$adminRole->id})" : 'No')."\n";
 
 // List all roles
 $roles = \Spatie\Permission\Models\Role::all();
@@ -44,19 +45,19 @@ try {
     $admin->assignRole('admin');
     echo "Role assigned successfully\n";
 } catch (Exception $e) {
-    echo "Error assigning role: " . $e->getMessage() . "\n";
+    echo 'Error assigning role: '.$e->getMessage()."\n";
 }
 
 // Verify role assignment
 $hasRole = $admin->hasRole('admin');
-echo "User has admin role: " . ($hasRole ? "Yes" : "No") . "\n";
+echo 'User has admin role: '.($hasRole ? 'Yes' : 'No')."\n";
 
 // Check direct database entry
 $roleAssignment = DB::table('model_has_roles')
     ->where('model_id', $admin->id)
     ->where('model_type', get_class($admin))
     ->first();
-echo "Role assignment in database: " . ($roleAssignment ? "Yes" : "No") . "\n";
+echo 'Role assignment in database: '.($roleAssignment ? 'Yes' : 'No')."\n";
 
 if ($roleAssignment) {
     echo "Database role_id: {$roleAssignment->role_id}\n";

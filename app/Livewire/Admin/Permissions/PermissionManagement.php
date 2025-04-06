@@ -13,7 +13,7 @@ class PermissionManagement extends AdminComponent
     {
         return ['access admin dashboard', 'view permissions'];
     }
-    
+
     /**
      * Render the component
      */

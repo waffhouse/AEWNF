@@ -3,28 +3,35 @@
 namespace App\Livewire\Admin\Roles;
 
 use App\Livewire\Admin\AdminComponent;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Spatie\Permission\Models\Role;
 
 class RoleList extends AdminComponent
 {
     // For infinite scroll
     public array $items = [];
+
     public bool $hasMorePages = true;
+
     public bool $isLoading = false;
+
     public int $totalCount = 0;
+
     public int $loadedCount = 0;
+
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
+
     public int $perPage = 10;
-    
+
     // For filtering
     public $roleSearch = '';
-    
+
     // For deletion
     public $deleteRoleId = null;
-    
+
     /**
      * Define the permissions required for this component
      */
@@ -32,7 +39,7 @@ class RoleList extends AdminComponent
     {
         return ['access admin dashboard', 'view roles'];
     }
-    
+
     /**
      * Initialize component
      */
@@ -40,7 +47,7 @@ class RoleList extends AdminComponent
     {
         $this->loadInitialRoles();
     }
-    
+
     /**
      * Load initial roles data
      */
@@ -48,66 +55,66 @@ class RoleList extends AdminComponent
     {
         $this->resetItems();
     }
-    
+
     /**
      * Load items with pagination
      */
     public function loadItems()
     {
         $this->isLoading = true;
-        
+
         try {
             $query = $this->getRoleQuery();
-            
+
             // Clone query to avoid modifying the original
             $countQuery = clone $query;
-            
+
             // Use a paginator for better performance
             $paginator = $query->simplePaginate(
-                $this->perPage, 
-                ['id', 'name', 'created_at', 'updated_at'], 
-                'page', 
+                $this->perPage,
+                ['id', 'name', 'created_at', 'updated_at'],
+                'page',
                 ceil($this->loadedCount / $this->perPage) + 1
             );
-            
+
             // Only count total rows when needed
             if ($this->loadedCount === 0) {
                 $this->totalCount = $countQuery->count();
             }
-            
+
             $newItems = $paginator->items();
-            
+
             // Check if there are more pages directly from the paginator
             $this->hasMorePages = $paginator->hasMorePages();
-            
+
             // Append new items to existing collection
             foreach ($newItems as $item) {
                 $this->items[] = $item;
             }
-            
+
             // Update loaded count
             $this->loadedCount += count($newItems);
         } catch (\Exception $e) {
-            Log::error('Error loading roles: ' . $e->getMessage());
+            Log::error('Error loading roles: '.$e->getMessage());
             // Fail gracefully in production
-            if (!app()->environment('production')) {
+            if (! app()->environment('production')) {
                 throw $e;
             }
         } finally {
             $this->isLoading = false;
         }
     }
-    
+
     /**
      * Load more items when scrolling
      */
     public function loadMore()
     {
-        if ($this->hasMorePages && !$this->isLoading) {
+        if ($this->hasMorePages && ! $this->isLoading) {
             $this->loadItems();
         }
     }
-    
+
     /**
      * Reset items when filters change
      */
@@ -118,7 +125,7 @@ class RoleList extends AdminComponent
         $this->hasMorePages = true;
         $this->loadItems();
     }
-    
+
     /**
      * Sort items by field
      */
@@ -131,34 +138,34 @@ class RoleList extends AdminComponent
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
-        
+
         $this->resetItems();
     }
-    
+
     /**
      * Get the base query for roles with optimized field selection
      */
     private function getRoleQuery()
     {
         $query = Role::query();
-        
+
         // Filter by search term if provided
-        if (!empty($this->roleSearch)) {
-            $query->where('name', 'like', '%' . $this->roleSearch . '%');
+        if (! empty($this->roleSearch)) {
+            $query->where('name', 'like', '%'.$this->roleSearch.'%');
         }
-        
+
         // Add eager loading with specific fields
         $query->with(['permissions:id,name']);
-        
+
         // Add withCount to know how many users have this role
         $query->withCount('users');
-        
+
         // Add sorting
         $query->orderBy($this->sortField, $this->sortDirection);
-        
+
         return $query;
     }
-    
+
     /**
      * Search roles with form submission
      */
@@ -166,7 +173,7 @@ class RoleList extends AdminComponent
     {
         $this->resetItems();
     }
-    
+
     /**
      * Clear role search
      */
@@ -175,7 +182,7 @@ class RoleList extends AdminComponent
         $this->roleSearch = '';
         $this->resetItems();
     }
-    
+
     /**
      * Open edit form for a role
      */
@@ -183,11 +190,11 @@ class RoleList extends AdminComponent
     {
         // Use the central method to authorize this action
         $this->authorizeAction('manage roles', null, 'roles');
-        
+
         // Dispatch event to the form component
         $this->dispatch('open-role-edit', $id)->to('admin.roles.role-form');
     }
-    
+
     /**
      * Confirm role deletion
      */
@@ -195,15 +202,15 @@ class RoleList extends AdminComponent
     {
         // Use the central method to authorize this action
         $this->authorizeAction('manage roles', null, 'roles');
-        
+
         $user = auth()->user();
-        Log::info('User ' . $user->name . ' confirming deletion of role ID: ' . $id);
-        
+        Log::info('User '.$user->name.' confirming deletion of role ID: '.$id);
+
         // Store the ID and open the confirmation modal
         $this->deleteRoleId = $id;
         $this->dispatch('open-modal', 'delete-role-confirmation');
     }
-    
+
     /**
      * Delete a role
      */
@@ -211,36 +218,37 @@ class RoleList extends AdminComponent
     {
         // Use the central method to authorize this action
         $this->authorizeAction('manage roles', null, 'roles');
-        
+
         $user = auth()->user();
-        Log::info('User ' . $user->name . ' deleting role ID: ' . $this->deleteRoleId);
-        
-        if (!$this->deleteRoleId) {
+        Log::info('User '.$user->name.' deleting role ID: '.$this->deleteRoleId);
+
+        if (! $this->deleteRoleId) {
             return;
         }
-        
+
         try {
             $role = Role::findById($this->deleteRoleId);
-            
+
             // Check if the role is in use by users
             if ($role->users()->count() > 0) {
-                $this->flashError('Cannot delete the role "' . $role->name . '" because it is assigned to ' . $role->users()->count() . ' user(s). Please remove the role from all users first.');
+                $this->flashError('Cannot delete the role "'.$role->name.'" because it is assigned to '.$role->users()->count().' user(s). Please remove the role from all users first.');
+
                 return;
             }
-            
+
             $role->delete();
-            
+
             $this->flashSuccess('Role deleted successfully!');
             $this->dispatch('close-modal', 'delete-role-confirmation');
-            
+
             // Reset the roles list to remove the deleted role
             $this->resetItems();
         } catch (\Exception $e) {
-            Log::error('Role deletion failed: ' . $e->getMessage());
-            $this->flashError('Role deletion failed: ' . $e->getMessage());
+            Log::error('Role deletion failed: '.$e->getMessage());
+            $this->flashError('Role deletion failed: '.$e->getMessage());
         }
     }
-    
+
     /**
      * Listen for role created event
      */
@@ -253,7 +261,7 @@ class RoleList extends AdminComponent
                 ->withCount('users')
                 ->select(['id', 'name', 'created_at', 'updated_at'])
                 ->find($roleData['id']);
-            
+
             if ($newRole) {
                 // Add to beginning of list if sorted by newest first
                 if ($this->sortField === 'created_at' && $this->sortDirection === 'desc') {
@@ -269,7 +277,7 @@ class RoleList extends AdminComponent
             $this->resetItems();
         }
     }
-    
+
     /**
      * Listen for role updated event
      */
@@ -282,22 +290,23 @@ class RoleList extends AdminComponent
                 ->withCount('users')
                 ->select(['id', 'name', 'created_at', 'updated_at'])
                 ->find($roleData['id']);
-            
+
             if ($updatedRole) {
                 // Find and update the role in the current list
                 foreach ($this->items as $index => $role) {
                     if ($role->id === $updatedRole->id) {
                         $this->items[$index] = $updatedRole;
+
                         return;
                     }
                 }
             }
         }
-        
+
         // Fallback to reload if role not found in list or no data provided
         $this->resetItems();
     }
-    
+
     /**
      * Render the component
      */

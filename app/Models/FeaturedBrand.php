@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class FeaturedBrand extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,7 +21,7 @@ class FeaturedBrand extends Model
         'is_active',
         'created_by',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -31,7 +31,7 @@ class FeaturedBrand extends Model
         'display_order' => 'integer',
         'is_active' => 'boolean',
     ];
-    
+
     /**
      * Get the user who created this featured brand.
      */
@@ -39,7 +39,7 @@ class FeaturedBrand extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-    
+
     /**
      * Scope a query to only include active featured brands.
      */
@@ -47,7 +47,7 @@ class FeaturedBrand extends Model
     {
         return $query->where('is_active', true);
     }
-    
+
     /**
      * Scope a query to order brands by their display order.
      */

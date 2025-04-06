@@ -2,25 +2,25 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
-use App\Traits\AdminAuthorization;
-use App\Models\User;
 use App\Models\Order;
-use Spatie\Permission\Models\Role;
+use App\Models\User;
+use App\Traits\AdminAuthorization;
+use Livewire\Component;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class Dashboard extends Component
 {
     use AdminAuthorization;
-    
+
     // Active tab tracking
     public $activeTab = '';
-    
+
     // Listeners for events
     protected $listeners = [
-        'tabChanged' => 'setActiveTab'
+        'tabChanged' => 'setActiveTab',
     ];
-    
+
     // Tab definitions with their metadata
     protected $tabs = [
         'users' => [
@@ -28,115 +28,115 @@ class Dashboard extends Component
             'permissions' => ['access admin dashboard'],
             'icon' => 'users',
             'color' => 'blue',
-            'countModel' => \App\Models\User::class
+            'countModel' => \App\Models\User::class,
         ],
         'customers' => [
             'name' => 'Customers',
             'permissions' => ['view customers'],
             'icon' => 'office-building',
             'color' => 'cyan',
-            'countModel' => \App\Models\Customer::class
+            'countModel' => \App\Models\Customer::class,
         ],
         'roles' => [
             'name' => 'Roles',
             'permissions' => ['manage roles'],
             'icon' => 'role',
             'color' => 'green',
-            'countModel' => \Spatie\Permission\Models\Role::class
+            'countModel' => \Spatie\Permission\Models\Role::class,
         ],
         'permissions' => [
             'name' => 'Permissions',
             'permissions' => ['manage permissions'],
             'icon' => 'key',
             'color' => 'purple',
-            'countModel' => \Spatie\Permission\Models\Permission::class
+            'countModel' => \Spatie\Permission\Models\Permission::class,
         ],
         'inventory-sync' => [
             'name' => 'Inventory',
             'permissions' => ['sync inventory'],
             'icon' => 'tag',
             'color' => 'amber',
-            'countModel' => null
+            'countModel' => null,
         ],
         'orders' => [
             'name' => 'Orders',
             'permissions' => ['manage orders', 'view all orders'],
             'icon' => 'shopping-bag',
             'color' => 'red',
-            'countModel' => \App\Models\Order::class
+            'countModel' => \App\Models\Order::class,
         ],
         'sales' => [
             'name' => 'Sales Sync',
             'permissions' => ['sync netsuite sales data'],
             'icon' => 'refresh',
             'color' => 'teal',
-            'countModel' => null
+            'countModel' => null,
         ],
         'featured-brands' => [
             'name' => 'Featured Brands',
             'permissions' => ['access admin dashboard'],
             'icon' => 'sparkles',
             'color' => 'indigo',
-            'countModel' => \App\Models\FeaturedBrand::class
-        ]
+            'countModel' => \App\Models\FeaturedBrand::class,
+        ],
     ];
-    
+
     public function mount()
     {
         // Basic check - only users with appropriate permissions can access this dashboard
         $this->authorizeAdminAccess();
-        
+
         // Set default active tab based on permissions
         $this->activeTab = $this->determineDefaultTab();
     }
-    
+
     /**
      * Determine the default tab based on user permissions
      */
     protected function determineDefaultTab(): string
     {
         $user = auth()->user();
-        
+
         // Priority order for tabs
         $priorities = ['orders', 'sales', 'customers', 'users', 'inventory-sync', 'roles', 'permissions'];
-        
+
         foreach ($priorities as $tabId) {
             if ($this->userCanAccessTab($tabId)) {
                 return $tabId;
             }
         }
-        
+
         // Fallback to first available tab
         foreach ($this->tabs as $tabId => $tab) {
             if ($this->userCanAccessTab($tabId)) {
                 return $tabId;
             }
         }
-        
+
         return '';
     }
-    
+
     /**
      * Check if user can access a specific tab
      */
     protected function userCanAccessTab(string $tabId): bool
     {
-        if (!isset($this->tabs[$tabId])) {
+        if (! isset($this->tabs[$tabId])) {
             return false;
         }
-        
+
         $user = auth()->user();
         $permissions = $this->tabs[$tabId]['permissions'] ?? [];
-        
+
         foreach ($permissions as $permission) {
             if ($user->hasPermissionTo($permission)) {
                 return true;
             }
         }
-        
+
         return empty($permissions);
     }
-    
+
     /**
      * Set the active tab
      */
@@ -147,17 +147,17 @@ class Dashboard extends Component
             $this->dispatch('activeTabChanged', $tab);
         }
     }
-    
+
     /**
      * Get the list of tabs user can access
      */
     protected function getAccessibleTabs(): array
     {
-        return array_filter($this->tabs, function($tab, $tabId) {
+        return array_filter($this->tabs, function ($tab, $tabId) {
             return $this->userCanAccessTab($tabId);
         }, ARRAY_FILTER_USE_BOTH);
     }
-    
+
     /**
      * Get the count for a model associated with a tab
      */
@@ -167,19 +167,20 @@ class Dashboard extends Component
         if ($modelClass && class_exists($modelClass)) {
             return $modelClass::count();
         }
+
         return null;
     }
-    
+
     public function render()
     {
         $accessibleTabs = $this->getAccessibleTabs();
         $tabCounts = [];
-        
+
         // Get counts for tabs
         foreach ($accessibleTabs as $tabId => $tab) {
             $tabCounts[$tabId] = $this->getTabCount($tabId);
         }
-        
+
         return view('livewire.admin.dashboard', [
             'accessibleTabs' => $accessibleTabs,
             'tabCounts' => $tabCounts,

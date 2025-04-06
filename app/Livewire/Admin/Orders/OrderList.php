@@ -11,14 +11,19 @@ use Livewire\Component;
 class OrderList extends Component
 {
     public $orders = [];
+
     public $hasMorePages = true;
+
     public $isLoading = false;
+
     public $totalCount = 0;
+
     public $loadedCount = 0;
+
     public $search = '';
-    
+
     protected OrderService $orderService;
-    
+
     /**
      * Component initialization
      */
@@ -26,7 +31,7 @@ class OrderList extends Component
     {
         $this->orderService = $orderService;
     }
-    
+
     /**
      * Initialize component properties from parent
      */
@@ -39,7 +44,7 @@ class OrderList extends Component
         $this->isLoading = $isLoading;
         $this->search = $search;
     }
-    
+
     /**
      * Listen for order data updates from parent
      */
@@ -49,7 +54,7 @@ class OrderList extends Component
         // Accept the orders as-is, since we're now handling arrays in the template
         $this->orders = $orders;
     }
-    
+
     /**
      * Load more orders (called from JavaScript)
      */
@@ -57,7 +62,7 @@ class OrderList extends Component
     {
         $this->dispatch('loadMore');
     }
-    
+
     /**
      * Open order details
      */
@@ -65,20 +70,21 @@ class OrderList extends Component
     {
         $this->dispatch('viewOrderDetails', $orderId);
     }
-    
+
     /**
      * Update order status
      */
     public function updateStatus($orderId, $status)
     {
-        if (!Auth::user()->can('manage orders')) {
+        if (! Auth::user()->can('manage orders')) {
             $this->dispatch('error', 'You do not have permission to update order status');
+
             return;
         }
-        
+
         $this->dispatch('updateStatus', [$orderId, $status]);
     }
-    
+
     /**
      * Render the component
      */

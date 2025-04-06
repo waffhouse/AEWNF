@@ -13,7 +13,7 @@ class RoleManagement extends AdminComponent
     {
         return ['access admin dashboard', 'view roles'];
     }
-    
+
     /**
      * Render the component
      */

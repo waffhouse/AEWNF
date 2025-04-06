@@ -1,4 +1,5 @@
 <?php
+
 // Check permissions and roles
 require 'vendor/autoload.php';
 
@@ -27,18 +28,18 @@ foreach ($permissions as $permission) {
 $staff = App\Models\User::role('staff')->first();
 if ($staff) {
     echo "\nChecking permissions for staff user: {$staff->name}\n";
-    echo "Has 'view users' permission: " . ($staff->can('view users') ? 'Yes' : 'No') . "\n";
-    echo "Has 'create users' permission: " . ($staff->can('create users') ? 'Yes' : 'No') . "\n";
-    echo "Has 'edit users' permission: " . ($staff->can('edit users') ? 'Yes' : 'No') . "\n";
-    echo "Has 'delete users' permission: " . ($staff->can('delete users') ? 'Yes' : 'No') . "\n";
+    echo "Has 'view users' permission: ".($staff->can('view users') ? 'Yes' : 'No')."\n";
+    echo "Has 'create users' permission: ".($staff->can('create users') ? 'Yes' : 'No')."\n";
+    echo "Has 'edit users' permission: ".($staff->can('edit users') ? 'Yes' : 'No')."\n";
+    echo "Has 'delete users' permission: ".($staff->can('delete users') ? 'Yes' : 'No')."\n";
 }
 
 // Original admin permission checks
 $admin = App\Models\User::role('admin')->first();
 if ($admin) {
     echo "\nChecking permissions for admin user: {$admin->name}\n";
-    echo "Has 'view users' permission: " . ($admin->can('view users') ? 'Yes' : 'No') . "\n";
-    echo "Has 'create users' permission: " . ($admin->can('create users') ? 'Yes' : 'No') . "\n";
-    echo "Has 'edit users' permission: " . ($admin->can('edit users') ? 'Yes' : 'No') . "\n";
-    echo "Has 'delete users' permission: " . ($admin->can('delete users') ? 'Yes' : 'No') . "\n";
+    echo "Has 'view users' permission: ".($admin->can('view users') ? 'Yes' : 'No')."\n";
+    echo "Has 'create users' permission: ".($admin->can('create users') ? 'Yes' : 'No')."\n";
+    echo "Has 'edit users' permission: ".($admin->can('edit users') ? 'Yes' : 'No')."\n";
+    echo "Has 'delete users' permission: ".($admin->can('delete users') ? 'Yes' : 'No')."\n";
 }

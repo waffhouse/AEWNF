@@ -7,7 +7,7 @@ use App\Livewire\Admin\AdminComponent;
 class CustomerManagement extends AdminComponent
 {
     public $activeTab = 'list';
-    
+
     /**
      * Define the permissions required for this component
      */
@@ -15,7 +15,7 @@ class CustomerManagement extends AdminComponent
     {
         return ['access admin dashboard', 'view customers'];
     }
-    
+
     /**
      * Switch to the customer sync tab
      */
@@ -23,7 +23,7 @@ class CustomerManagement extends AdminComponent
     {
         $this->activeTab = 'sync';
     }
-    
+
     /**
      * Switch to the customer list tab
      */
@@ -31,7 +31,7 @@ class CustomerManagement extends AdminComponent
     {
         $this->activeTab = 'list';
     }
-    
+
     public function render()
     {
         return view('livewire.admin.customers.customer-management');

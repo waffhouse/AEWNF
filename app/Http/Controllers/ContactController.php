@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -31,12 +31,13 @@ class ContactController extends Controller
                 'userMessage' => $validated['message'],
             ], function ($message) use ($validated) {
                 $message->to(env('COMPANY_EMAIL'));
-                $message->subject('New Contact Form Submission from ' . $validated['name']);
+                $message->subject('New Contact Form Submission from '.$validated['name']);
             });
 
             return redirect()->back()->with('success', 'Thank you for your message. We will contact you shortly!');
         } catch (\Exception $e) {
-            Log::error('Contact form email failed: ' . $e->getMessage());
+            Log::error('Contact form email failed: '.$e->getMessage());
+
             return redirect()->back()->with('error', 'Sorry, there was a problem sending your message. Please try again later or contact us directly.')->withInput();
         }
     }

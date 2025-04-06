@@ -1,17 +1,20 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Contact Us') }}
-        </h2>
-    </x-slot>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="max-w-3xl mx-auto">
-        <h1 class="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-8 text-center">
-            <span class="block">Contact Us</span>
-            <span class="block text-red-600 text-2xl mt-2">We're here to help</span>
-        </h1>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Hero Banner with Red Gradient Background -->
+            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 sm:rounded-t-lg shadow-md">
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Contact Us</h2>
+                        <p class="text-sm text-red-100 mt-1">We're here to help. Send us a message and we'll get back to you.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-b-lg">
+                <div class="max-w-3xl mx-auto p-6 text-gray-900">
 
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-10">
+        <div class="overflow-hidden mb-10">
             <div class="px-4 py-5 sm:p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
@@ -156,9 +159,12 @@
                             </div>
                         </form>
                     </div>
+                    </div>
+                </div>
+            </div>
+        </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </x-app-layout>

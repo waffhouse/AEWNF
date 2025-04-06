@@ -21,10 +21,10 @@ class VerifyAge
         }
 
         // Check if age verification cookie exists
-        if (!$request->cookie('age_verified')) {
+        if (! $request->cookie('age_verified')) {
             // Store the intended URL to redirect back after verification
             session()->put('intended_url', $request->url());
-            
+
             // Redirect to age verification page
             return redirect()->route('verify.age');
         }

@@ -8,16 +8,16 @@ use Livewire\Component;
 class SalesDashboard extends Component
 {
     use AdminAuthorization;
-    
+
     protected $listeners = [
-        'salesSyncCompleted' => '$refresh'
+        'salesSyncCompleted' => '$refresh',
     ];
-    
+
     public function mount()
     {
         $this->authorize('sync netsuite sales data');
     }
-    
+
     public function render()
     {
         return view('livewire.admin.sales.sales-dashboard')

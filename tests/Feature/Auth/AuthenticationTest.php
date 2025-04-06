@@ -58,7 +58,7 @@ class AuthenticationTest extends TestCase
     {
         // Seed the permissions needed for this test
         $this->seedTestDatabase();
-        
+
         $user = User::factory()->create();
         $user->givePermissionTo('access admin dashboard');
 
@@ -75,7 +75,7 @@ class AuthenticationTest extends TestCase
     {
         // Seed the permissions needed for this test
         $this->seedTestDatabase();
-        
+
         $user = User::factory()->create();
         $user->givePermissionTo('access admin dashboard');
 

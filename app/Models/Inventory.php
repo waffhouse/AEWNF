@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Inventory extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -28,7 +28,7 @@ class Inventory extends Model
         'raw_data',
         'last_synced_at',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -42,46 +42,42 @@ class Inventory extends Model
         'raw_data' => 'array',
         'last_synced_at' => 'datetime',
     ];
-    
+
     /**
      * Determine if the inventory item is available in Florida
-     * 
-     * @return bool
      */
     public function isAvailableInFlorida(): bool
     {
         return empty($this->state) || $this->state === 'Florida';
     }
-    
+
     /**
      * Determine if the inventory item is available in Georgia
-     * 
-     * @return bool
      */
     public function isAvailableInGeorgia(): bool
     {
         return empty($this->state) || $this->state === 'Georgia';
     }
-    
+
     /**
      * Scope a query to only include items available in Florida
      */
     public function scopeAvailableInFlorida($query)
     {
-        return $query->where(function($query) {
+        return $query->where(function ($query) {
             $query->where('state', '')
-                  ->orWhere('state', 'Florida');
+                ->orWhere('state', 'Florida');
         });
     }
-    
+
     /**
      * Scope a query to only include items available in Georgia
      */
     public function scopeAvailableInGeorgia($query)
     {
-        return $query->where(function($query) {
+        return $query->where(function ($query) {
             $query->where('state', '')
-                  ->orWhere('state', 'Georgia');
+                ->orWhere('state', 'Georgia');
         });
     }
 }

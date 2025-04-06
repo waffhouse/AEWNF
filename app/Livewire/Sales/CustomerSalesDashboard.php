@@ -15,18 +15,19 @@ use Livewire\Component;
 class CustomerSalesDashboard extends Component
 {
     use Filterable, InfiniteScrollable;
-    
+
     public $search = '';
+
     public $filters = [
         'type' => '',
         'date_range' => [
             'start' => '',
-            'end' => ''
+            'end' => '',
         ],
     ];
-    
+
     public $viewingSale = null;
-    
+
     protected $queryString = [
         'search' => ['except' => ''],
         'sortField' => ['except' => 'date'],
@@ -35,52 +36,52 @@ class CustomerSalesDashboard extends Component
             'type' => '',
             'date_range' => [
                 'start' => '',
-                'end' => ''
+                'end' => '',
             ],
         ]],
     ];
-    
+
     public function mount()
     {
         // Check if user is authenticated
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
-        
+
         // Check if user has admin sales data permission - they should use admin.sales instead
         if (Auth::user()->hasPermissionTo('view netsuite sales data')) {
             return redirect()->route('admin.sales');
         }
-        
+
         // Check if user has permission to view their own orders
-        if (!Auth::user()->hasPermissionTo('view own orders')) {
+        if (! Auth::user()->hasPermissionTo('view own orders')) {
             abort(403, 'Unauthorized');
         }
-        
+
         // Set default sort field and direction
         $this->sortField = 'date';
         $this->sortDirection = 'desc';
-        
+
         // Initialize items array
         $this->items = [];
         $this->itemsPerPage = 20;
-        
+
         // Load initial items
         $this->loadMore($this->getBaseQuery());
     }
-    
+
     #[Title('Sales History')]
     public function render()
     {
         $this->totalCount = $this->getTotal();
-        
+
         return view('livewire.sales.customer-sales-dashboard', [
             'sales' => $this->items,
             'transactionTypes' => $this->getTransactionTypes(),
             'summary' => $this->getSummaryData(),
         ])->layout('layouts.app');
     }
-    
+
     /**
      * Get the base query for sales with all filters applied
      */
@@ -88,7 +89,7 @@ class CustomerSalesDashboard extends Component
     {
         return Sale::query()
             ->select('id', 'tran_id', 'type', 'date', 'entity_id', 'customer_name', 'total_amount', 'created_at')
-            ->with(['items' => function($query) {
+            ->with(['items' => function ($query) {
                 $query->select('id', 'sale_id', 'sku', 'item_description', 'quantity', 'amount');
             }])
             ->when(Auth::user()->customer_number, function (Builder $query) {
@@ -97,8 +98,8 @@ class CustomerSalesDashboard extends Component
             })
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
-                    $subQuery->where('tran_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $this->search . '%');
+                    $subQuery->where('tran_id', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->filters['type'], function (Builder $query, $type) {
@@ -112,7 +113,7 @@ class CustomerSalesDashboard extends Component
             })
             ->orderBy($this->sortField, $this->sortDirection);
     }
-    
+
     /**
      * Load more sales data when scrolling
      */
@@ -120,18 +121,18 @@ class CustomerSalesDashboard extends Component
     {
         $this->loadMore($this->getBaseQuery());
     }
-    
+
     // Add explicit watchers to handle filter changes
     public function updatedSearch()
     {
         $this->resetItems();
     }
-    
+
     public function updatedFilters()
     {
         $this->resetItems();
     }
-    
+
     public function getTotal()
     {
         $query = Sale::query()
@@ -141,8 +142,8 @@ class CustomerSalesDashboard extends Component
             })
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
-                    $subQuery->where('tran_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $this->search . '%');
+                    $subQuery->where('tran_id', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->filters['type'], function (Builder $query, $type) {
@@ -154,10 +155,10 @@ class CustomerSalesDashboard extends Component
             ->when($this->filters['date_range']['end'], function (Builder $query, $endDate) {
                 $query->whereDate('date', '<=', Carbon::parse($endDate));
             });
-            
+
         return $query->count();
     }
-    
+
     public function getTransactionTypes()
     {
         return Sale::select('type')
@@ -170,13 +171,13 @@ class CustomerSalesDashboard extends Component
             ->pluck('type')
             ->toArray();
     }
-    
+
     public function resetFilters()
     {
         $this->reset('filters', 'search');
         // Will trigger resetItems through Livewire's updated hooks
     }
-    
+
     /**
      * Implement the resetItems method required by the Filterable trait
      */
@@ -185,14 +186,14 @@ class CustomerSalesDashboard extends Component
         $this->items = [];
         $this->loadedCount = 0;
         $this->hasMorePages = true;
-        
+
         // Immediately load fresh data with the current filters
         $this->loadMore($this->getBaseQuery());
-        
+
         // Optionally dispatch an event for Alpine to react to
         $this->dispatch('refresh-data');
     }
-    
+
     /**
      * Handles updating the sort field and resetting items
      */
@@ -200,7 +201,7 @@ class CustomerSalesDashboard extends Component
     {
         $this->resetItems();
     }
-    
+
     /**
      * Toggle the sort direction and reset items
      */
@@ -209,7 +210,7 @@ class CustomerSalesDashboard extends Component
         $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         $this->resetItems();
     }
-    
+
     /**
      * Legacy method for compatibility
      */
@@ -221,20 +222,20 @@ class CustomerSalesDashboard extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
-        
+
         $this->resetItems();
     }
-    
+
     public function viewSaleDetails($saleId)
     {
         $this->viewingSale = Sale::with('items')->find($saleId);
     }
-    
+
     public function closeModal()
     {
         $this->viewingSale = null;
     }
-    
+
     public function getSummaryData()
     {
         $query = Sale::query()
@@ -249,8 +250,8 @@ class CustomerSalesDashboard extends Component
             })
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
-                    $subQuery->where('tran_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $this->search . '%');
+                    $subQuery->where('tran_id', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->filters['type'], function (Builder $query, $type) {
@@ -263,7 +264,7 @@ class CustomerSalesDashboard extends Component
                 $query->whereDate('date', '<=', Carbon::parse($endDate));
             })
             ->groupBy('type');
-            
+
         return $query->get();
     }
 }

@@ -40,7 +40,7 @@ class LoginForm extends Form
         }
 
         RateLimiter::clear($this->throttleKey());
-        
+
         // Sync the cart from session to the logged-in user's database cart
         app(CartService::class)->syncFromSessionToUser(Auth::user());
     }

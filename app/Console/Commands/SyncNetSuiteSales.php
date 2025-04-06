@@ -32,62 +32,62 @@ class SyncNetSuiteSales extends Command
     {
         // Increase PHP execution time limit to match our timeout
         $timeoutOption = $this->option('timeout');
-        $executionTimeLimit = $timeoutOption ? (int)$timeoutOption : 300;
+        $executionTimeLimit = $timeoutOption ? (int) $timeoutOption : 300;
         set_time_limit($executionTimeLimit);
-        
+
         $this->info('Starting NetSuite sales sync...');
         $this->info("PHP execution time limit set to {$executionTimeLimit} seconds");
-        
+
         $options = $this->buildOptions();
-        
+
         try {
             $startTime = now();
             $results = $salesSyncService->syncSales($options);
             $duration = now()->diffInSeconds($startTime);
-            
+
             $this->displayResults($results, $duration);
-            
+
             return 0;
         } catch (\Exception $e) {
-            $this->error('Error syncing sales data from NetSuite: ' . $e->getMessage());
+            $this->error('Error syncing sales data from NetSuite: '.$e->getMessage());
             Log::error('NetSuite sales sync command failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return 1;
         }
     }
-    
+
     /**
      * Build options array from command line arguments
      */
     protected function buildOptions(): array
     {
         $options = [];
-        
+
         if ($this->option('size') !== null) {
             $options['pageSize'] = (int) $this->option('size');
         }
-        
+
         if ($this->option('date') !== null) {
             $options['date'] = $this->option('date');
         }
-        
+
         if ($this->option('timeout') !== null) {
             $options['timeout'] = (int) $this->option('timeout');
         }
-        
+
         return $options;
     }
-    
+
     /**
      * Display sync results
      */
     protected function displayResults(array $results, int $duration): void
     {
-        $this->info('NetSuite sales sync completed in ' . $duration . ' seconds');
-        
+        $this->info('NetSuite sales sync completed in '.$duration.' seconds');
+
         $tableRows = [
             ['Total transactions processed', $results['total']],
             ['Created', $results['created']],
@@ -95,25 +95,25 @@ class SyncNetSuiteSales extends Command
             ['Failed', $results['failed']],
             ['Duration', $results['duration'] ?? "$duration seconds"],
         ];
-        
+
         // Add NetSuite-specific metrics if available
         if (isset($results['netsuite_pages'])) {
             $tableRows[] = ['NetSuite Pages', $results['netsuite_pages']];
         }
-        
+
         if (isset($results['netsuite_processed'])) {
             $tableRows[] = ['NetSuite Records Processed', $results['netsuite_processed']];
         }
-        
+
         $this->table(
             ['Metric', 'Value'],
             $tableRows
         );
-        
+
         if (isset($results['error'])) {
-            $this->error('Error: ' . $results['error']);
+            $this->error('Error: '.$results['error']);
         }
-        
+
         if ($results['failed'] > 0) {
             $this->warn('Some transactions failed to sync. Check the logs for details.');
         }

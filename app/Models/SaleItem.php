@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SaleItem extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,7 +22,7 @@ class SaleItem extends Model
         'quantity',
         'amount',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -35,7 +35,7 @@ class SaleItem extends Model
             'amount' => 'decimal:2',
         ];
     }
-    
+
     /**
      * Get the sale that owns the item.
      */
@@ -43,7 +43,7 @@ class SaleItem extends Model
     {
         return $this->belongsTo(Sale::class);
     }
-    
+
     /**
      * Get related inventory item if available
      */

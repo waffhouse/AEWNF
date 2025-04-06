@@ -27,7 +27,7 @@ class AgeVerificationController extends Controller
             'confirm_age.accepted' => 'You must confirm that you are at least 21 years old to continue.',
         ]);
 
-        if (!$validated['confirm_age']) {
+        if (! $validated['confirm_age']) {
             return back()->with('error', 'You must confirm that you are at least 21 years old to continue.');
         }
 
@@ -37,7 +37,7 @@ class AgeVerificationController extends Controller
         // Redirect to the intended URL or default to catalog
         $redirectUrl = session('intended_url') ?? route('inventory.catalog');
         session()->forget('intended_url');
-        
+
         return redirect($redirectUrl);
     }
 }

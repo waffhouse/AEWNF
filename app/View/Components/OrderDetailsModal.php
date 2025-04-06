@@ -17,7 +17,6 @@ class OrderDetailsModal extends Component
     /**
      * Create a new component instance.
      *
-     * @param  \App\Models\Order  $order
      * @return void
      */
     public function __construct(Order $order)

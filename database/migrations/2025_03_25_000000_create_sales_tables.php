@@ -22,7 +22,7 @@ return new class extends Migration
             $table->json('raw_data')->nullable()->comment('Raw JSON data from NetSuite');
             $table->timestamp('last_synced_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('entity_id');
             $table->index('date');
             $table->index('type');
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->decimal('quantity', 12, 2)->default(0);
             $table->decimal('amount', 12, 2)->default(0);
             $table->timestamps();
-            
+
             $table->index('sku');
         });
     }

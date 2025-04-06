@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Sale extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -25,7 +25,7 @@ class Sale extends Model
         'raw_data',
         'last_synced_at',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -40,7 +40,7 @@ class Sale extends Model
             'last_synced_at' => 'datetime',
         ];
     }
-    
+
     /**
      * Get the line items for the sale.
      */

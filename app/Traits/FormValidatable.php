@@ -7,7 +7,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Trait FormValidatable
- * 
+ *
  * Provides standardized form validation and error handling functionality
  * for Livewire components that manage forms. Centralizes validation logic
  * and error handling patterns.
@@ -16,92 +16,76 @@ trait FormValidatable
 {
     /**
      * Indicates whether the form is in create or update mode
-     *
-     * @var bool
      */
     public bool $isEditMode = false;
-    
+
     /**
      * The ID of the record being edited (when in edit mode)
      *
      * @var mixed
      */
     public $editId = null;
-    
+
     /**
      * Form validation errors
      *
      * @var array
      */
     public $formErrors = [];
-    
+
     /**
      * Define base validation rules that apply to all scenarios
-     * 
-     * @return array
      */
     abstract protected function baseRules(): array;
-    
+
     /**
      * Define rules that only apply when creating a new record
-     * 
-     * @return array
      */
     protected function createRules(): array
     {
         return [];
     }
-    
+
     /**
      * Define rules that only apply when updating an existing record
-     * 
-     * @return array
      */
     protected function updateRules(): array
     {
         return [];
     }
-    
+
     /**
      * Define custom error messages for validation rules
-     * 
-     * @return array
      */
     protected function customMessages(): array
     {
         return [];
     }
-    
+
     /**
      * Get the appropriate validation rules based on form mode
-     * 
-     * @return array
      */
     public function rules(): array
     {
         $baseRules = $this->baseRules();
-        
+
         if ($this->isEditMode) {
             return array_merge($baseRules, $this->updateRules());
         } else {
             return array_merge($baseRules, $this->createRules());
         }
     }
-    
+
     /**
      * Get custom messages for validation errors
-     * 
-     * @return array
      */
     public function messages(): array
     {
         return $this->customMessages();
     }
-    
+
     /**
      * Set component to create mode
-     * 
-     * @return void
      */
     public function enterCreateMode(): void
     {
@@ -110,12 +94,11 @@ trait FormValidatable
         $this->formErrors = [];
         $this->resetForm();
     }
-    
+
     /**
      * Set component to edit mode with specified record ID
-     * 
-     * @param mixed $id
-     * @return void
+     *
+     * @param  mixed  $id
      */
     public function enterEditMode($id): void
     {
@@ -124,13 +107,11 @@ trait FormValidatable
         $this->formErrors = [];
         $this->loadRecord($id);
     }
-    
+
     /**
      * Reset the form to its default state
-     * 
+     *
      * Child components should override this to reset their specific properties
-     * 
-     * @return void
      */
     public function resetForm(): void
     {
@@ -138,61 +119,63 @@ trait FormValidatable
         $this->isEditMode = false;
         $this->editId = null;
     }
-    
+
     /**
      * Load a record for editing
-     * 
+     *
      * Child components must implement this to load specific model data
-     * 
-     * @param mixed $id
-     * @return void
+     *
+     * @param  mixed  $id
      */
     abstract protected function loadRecord($id): void;
-    
+
     /**
      * Validate form data with standardized error handling
-     * 
-     * @param array|null $rules Custom rules to use instead of the default rules
-     * @param array|null $messages Custom messages to use instead of the default messages
+     *
+     * @param  array|null  $rules  Custom rules to use instead of the default rules
+     * @param  array|null  $messages  Custom messages to use instead of the default messages
      * @return bool Whether validation passed
      */
     protected function validateForm(?array $rules = null, ?array $messages = null): bool
     {
         $this->formErrors = [];
-        
+
         try {
             $rules = $rules ?? $this->rules();
             $messages = $messages ?? $this->messages();
-            
+
             // Perform validation
             $validatedData = $this->validate($rules, $messages);
+
             return true;
         } catch (ValidationException $e) {
             $this->formErrors = $e->validator->errors()->toArray();
-            
+
             // Log validation errors in development/staging environments
-            if (!app()->environment('production')) {
-                Log::debug('Validation failed: ' . json_encode($this->formErrors));
+            if (! app()->environment('production')) {
+                Log::debug('Validation failed: '.json_encode($this->formErrors));
             }
-            
+
             $this->dispatch('validation-failed', $this->formErrors);
+
             return false;
         } catch (\Exception $e) {
-            Log::error('Unexpected error during validation: ' . $e->getMessage());
-            
+            Log::error('Unexpected error during validation: '.$e->getMessage());
+
             // Add a generic error
             $this->formErrors['general'] = ['An unexpected error occurred during validation.'];
             $this->dispatch('validation-failed', $this->formErrors);
+
             return false;
         }
     }
-    
+
     /**
      * Save form data with standardized error handling
-     * 
-     * @param callable $saveFunction Function that performs the actual save operation
-     * @param string $successMessage Message to display on success
-     * @param string $errorPrefix Prefix for error messages
+     *
+     * @param  callable  $saveFunction  Function that performs the actual save operation
+     * @param  string  $successMessage  Message to display on success
+     * @param  string  $errorPrefix  Prefix for error messages
      * @return bool Whether the save operation succeeded
      */
     protected function saveWithErrorHandling(callable $saveFunction, string $successMessage, string $errorPrefix = 'Error'): bool
@@ -200,50 +183,52 @@ trait FormValidatable
         try {
             // Execute the save function passed in
             $result = $saveFunction();
-            
+
             // Flash success message
             session()->flash('message', $successMessage);
             $this->dispatch('message', $successMessage);
-            
+
             return true;
         } catch (ValidationException $e) {
             $this->formErrors = $e->validator->errors()->toArray();
-            Log::error($errorPrefix . ' validation failed: ' . json_encode($this->formErrors));
+            Log::error($errorPrefix.' validation failed: '.json_encode($this->formErrors));
             $this->dispatch('validation-failed', $this->formErrors);
+
             return false;
         } catch (\Exception $e) {
-            Log::error($errorPrefix . ': ' . $e->getMessage());
-            session()->flash('error', $errorPrefix . ': ' . $e->getMessage());
-            $this->dispatch('error', $errorPrefix . ': ' . $e->getMessage());
+            Log::error($errorPrefix.': '.$e->getMessage());
+            session()->flash('error', $errorPrefix.': '.$e->getMessage());
+            $this->dispatch('error', $errorPrefix.': '.$e->getMessage());
+
             return false;
         }
     }
-    
+
     /**
      * Helper method to get specific form error message
-     * 
-     * @param string $field The form field to get errors for
+     *
+     * @param  string  $field  The form field to get errors for
      * @return string|null First error message for field or null
      */
     public function getFormError(string $field): ?string
     {
         return isset($this->formErrors[$field]) ? $this->formErrors[$field][0] : null;
     }
-    
+
     /**
      * Check if a field has validation errors
-     * 
-     * @param string $field The form field to check
+     *
+     * @param  string  $field  The form field to check
      * @return bool Whether the field has errors
      */
     public function hasFormError(string $field): bool
     {
         return isset($this->formErrors[$field]);
     }
-    
+
     /**
      * Get all validation errors
-     * 
+     *
      * @return array All validation errors
      */
     public function getAllFormErrors(): array

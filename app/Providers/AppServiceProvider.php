@@ -19,15 +19,15 @@ class AppServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../../config/netsuite.php', 'netsuite'
         );
-        
+
         // Register CartService as a singleton
         $this->app->singleton(CartService::class, function ($app) {
-            return new CartService();
+            return new CartService;
         });
-        
+
         // Register OrderService as a singleton
         $this->app->singleton(\App\Services\OrderService::class, function ($app) {
-            return new \App\Services\OrderService();
+            return new \App\Services\OrderService;
         });
     }
 
@@ -43,19 +43,19 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('admin.permissions.permission-management', \App\Livewire\Admin\Permissions\PermissionManagement::class);
         \Livewire\Livewire::component('admin.inventory.inventory-sync', \App\Livewire\Admin\Inventory\InventorySync::class);
         \Livewire\Livewire::component('admin.orders.order-management', \App\Livewire\Admin\Orders\OrderManagement::class);
-        
+
         // Sales dashboard components
         \Livewire\Livewire::component('sales.top-brands-dashboard', \App\Livewire\Sales\TopBrandsDashboard::class);
-        
+
         // Cart components
         \Livewire\Livewire::component('cart.add-to-cart', \App\Livewire\Cart\AddToCart::class);
         \Livewire\Livewire::component('cart.cart-page', \App\Livewire\Cart\CartPage::class);
         \Livewire\Livewire::component('cart.cart-counter', \App\Livewire\Cart\CartCounter::class);
-        
+
         // Modal components
         \Livewire\Livewire::component('modals.order-detail-modal', \App\Livewire\Modals\OrderDetailModal::class);
         \Livewire\Livewire::component('modals.transaction-detail-modal', \App\Livewire\Modals\TransactionDetailModal::class);
-        
+
         // Set default timezone for Carbon
         Carbon::setToStringFormat('m/d/Y g:i A');
 
@@ -68,12 +68,12 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('formatdateonly', function ($expression) {
             return "<?php echo \Carbon\Carbon::parse($expression)->format('m/d/Y'); ?>";
         });
-        
+
         // Create a Blade directive for time only
         Blade::directive('formattime', function ($expression) {
             return "<?php echo \Carbon\Carbon::parse($expression)->format('g:i A'); ?>";
         });
-        
+
         // Create a custom Vite directive that loads scripts synchronously
         Blade::directive('vitesync', function () {
             return "<?php \$viteTags = vite(['resources/css/app.css', 'resources/js/app.js']); echo str_replace([' defer', ' async'], '', \$viteTags); ?>";

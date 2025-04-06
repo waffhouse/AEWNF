@@ -24,7 +24,7 @@ new class extends Component
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center">
+                    <a href="{{ url('/') }}" wire:navigate class="flex items-center">
                         <div class="flex items-center justify-center bg-white rounded-md p-2 shadow-sm">
                             <x-application-logo class="block h-7 w-auto" />
                         </div>
@@ -178,10 +178,12 @@ new class extends Component
          x-cloak>
         <div class="flex justify-between items-center p-4 border-b border-red-900">
             <div class="flex items-center">
-                <div class="flex items-center justify-center bg-white rounded-md p-1.5 shadow-sm">
-                    <x-application-logo class="block h-8 w-auto" />
-                </div>
-                <span class="ml-2 text-sm font-semibold text-white">A&E Wholesale</span>
+                <a href="{{ url('/') }}" wire:navigate class="flex items-center">
+                    <div class="flex items-center justify-center bg-white rounded-md p-1.5 shadow-sm">
+                        <x-application-logo class="block h-8 w-auto" />
+                    </div>
+                    <span class="ml-2 text-sm font-semibold text-white">A&E Wholesale</span>
+                </a>
             </div>
             <button @click="open = false" class="text-white hover:text-red-200">
                 <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">

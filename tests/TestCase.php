@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use Illuminate\Support\Facades\Response;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Testing\TestResponse;
 
@@ -16,15 +15,17 @@ abstract class TestCase extends BaseTestCase
         TestResponse::macro('assertSeeLivewire', function ($component) {
             $this->assertSee('wire:id');
             $this->assertSee($component);
+
             return $this;
         });
-        
+
         TestResponse::macro('assertSeeVolt', function ($component) {
             $this->assertSee('wire:id');
+
             return $this;
         });
     }
-    
+
     /**
      * Seed the database with test data
      */

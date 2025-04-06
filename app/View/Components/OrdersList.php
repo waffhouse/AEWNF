@@ -2,7 +2,6 @@
 
 namespace App\View\Components;
 
-use App\Models\Order;
 use Illuminate\View\Component;
 
 class OrdersList extends Component
@@ -48,7 +47,7 @@ class OrdersList extends Component
      * @var bool
      */
     public $isLoading;
-    
+
     /**
      * Search term for filtering orders.
      *

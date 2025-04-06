@@ -119,7 +119,7 @@
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                             <!-- Logo & Catalog Title -->
                             <div class="flex items-center justify-center sm:justify-start">
-                                <a href="/" class="flex items-center">
+                                <a href="{{ url('/') }}" class="flex items-center">
                                     <div class="flex items-center justify-center bg-white rounded-md p-2 shadow-sm">
                                         <img src="{{ asset('images/logo.png') }}" alt="A&E Wholesale" class="h-9 w-auto">
                                     </div>
@@ -130,8 +130,14 @@
                                 </a>
                             </div>
                             
-                            <!-- Login button -->
-                            <div class="mt-3 sm:mt-0 text-center sm:text-right">
+                            <!-- Navigation buttons -->
+                            <div class="mt-3 sm:mt-0 text-center sm:text-right flex flex-wrap gap-2 justify-center sm:justify-end">
+                                <a href="{{ url('/') }}" class="px-3 py-2 text-sm font-medium text-white hover:bg-red-800 rounded-md">
+                                    Home
+                                </a>
+                                <a href="{{ route('contact') }}" class="px-3 py-2 text-sm font-medium text-white hover:bg-red-800 rounded-md">
+                                    Contact Us
+                                </a>
                                 <a href="{{ route('login') }}" class="px-5 py-2 bg-white text-red-700 rounded-md text-sm font-medium hover:bg-red-50 inline-block border border-red-100 shadow-sm">
                                     Log in for Pricing
                                 </a>

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             // Indexes for faster lookups and filtering
             $table->index('user_id');
             $table->index('status');

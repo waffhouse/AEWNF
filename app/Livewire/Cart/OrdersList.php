@@ -11,20 +11,21 @@ use Livewire\Component;
 class OrdersList extends Component
 {
     public $viewingOrderDetails = false;
+
     public $selectedOrder = null;
-    
+
     public function mount()
     {
         // Check if user is authenticated and has permission to view orders
-        if (!Auth::check() || !Auth::user()->can('view own orders')) {
+        if (! Auth::check() || ! Auth::user()->can('view own orders')) {
             return redirect()->route('login');
         }
     }
 
     /**
      * View order details - redirected to use the global modal system
-     * 
-     * @param int|array $orderId The order ID or event data containing orderId
+     *
+     * @param  int|array  $orderId  The order ID or event data containing orderId
      */
     #[On('viewOrderDetails')]
     public function viewOrderDetails($orderId)
@@ -33,7 +34,7 @@ class OrdersList extends Component
         if (is_array($orderId) && isset($orderId['orderId'])) {
             $orderId = $orderId['orderId'];
         }
-        
+
         // Instead of loading the order here, dispatch the global event
         // that will be caught by the global OrderDetailModal component
         $this->dispatch('showOrderDetail', $orderId);
@@ -43,9 +44,9 @@ class OrdersList extends Component
     public function render()
     {
         $orders = Auth::user()->orders()->latest()->get();
-        
+
         return view('livewire.cart.orders-list', [
-            'orders' => $orders
+            'orders' => $orders,
         ])->layout('layouts.app');
     }
 }

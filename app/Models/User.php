@@ -6,13 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -50,40 +49,34 @@ class User extends Authenticatable
             'last_refreshed_at' => 'datetime',
         ];
     }
-    
+
     /**
      * Check if user can view Florida items
-     *
-     * @return bool
      */
     public function canViewFloridaItems(): bool
     {
         // Allow if user has explicit permission to view Florida items
         return $this->hasPermissionTo('view florida items');
     }
-    
+
     /**
      * Check if user can view Georgia items
-     *
-     * @return bool
      */
     public function canViewGeorgiaItems(): bool
     {
         // Allow if user has explicit permission to view Georgia items
         return $this->hasPermissionTo('view georgia items');
     }
-    
+
     /**
      * Check if user can view unrestricted items
-     * 
-     * @return bool
      */
     public function canViewUnrestrictedItems(): bool
     {
         // Allow if user has explicit permission to view unrestricted items
         return $this->hasPermissionTo('view unrestricted items');
     }
-    
+
     /**
      * Get the cart associated with the user.
      */
@@ -91,7 +84,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Cart::class)->with('items');
     }
-    
+
     /**
      * Get the orders for the user.
      */
@@ -99,7 +92,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class)->latest();
     }
-    
+
     /**
      * Get the customer associated with the user.
      */
@@ -107,56 +100,56 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Customer::class, 'customer_number', 'entity_id');
     }
-    
+
     /**
      * Get the active cart for the user or create one if it doesn't exist.
      */
     public function getOrCreateCart()
     {
-        if (!$this->cart) {
+        if (! $this->cart) {
             return $this->cart()->create();
         }
-        
+
         return $this->cart;
     }
-    
+
     /**
      * Determine the appropriate price field based on user's state permissions.
      */
     public function getPriceFieldAttribute(): string
     {
-        if ($this->canViewFloridaItems() && !$this->canViewGeorgiaItems()) {
+        if ($this->canViewFloridaItems() && ! $this->canViewGeorgiaItems()) {
             return 'fl_price';
         }
-        
-        if ($this->canViewGeorgiaItems() && !$this->canViewFloridaItems()) {
+
+        if ($this->canViewGeorgiaItems() && ! $this->canViewFloridaItems()) {
             return 'ga_price';
         }
-        
+
         // Default to Florida price for staff/admin (who can view both states)
         return 'fl_price';
     }
-    
+
     /**
      * Get this user's most frequently purchased items.
-     * 
-     * @param int $limit Maximum number of items to return
+     *
+     * @param  int  $limit  Maximum number of items to return
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getTopPurchasedItems($limit = 5)
     {
-        if (!$this->customer_number) {
+        if (! $this->customer_number) {
             return collect([]);
         }
-        
+
         // Find all sales for this customer
         $salesIds = Sale::where('entity_id', $this->customer_number)
             ->pluck('id');
-            
+
         if ($salesIds->isEmpty()) {
             return collect([]);
         }
-        
+
         // Get top items by quantity purchased
         return SaleItem::whereIn('sale_id', $salesIds)
             ->select('sku', \DB::raw('SUM(quantity) as total_quantity'))

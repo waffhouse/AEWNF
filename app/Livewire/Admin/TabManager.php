@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 class TabManager
 {
     private Collection $tabs;
+
     private string $activeTab;
 
     public function __construct()
@@ -26,9 +27,9 @@ class TabManager
             'icon' => $icon,
             'color' => $color,
             'permissions' => $permissions,
-            'countMethod' => $countMethod
+            'countMethod' => $countMethod,
         ]);
-        
+
         return $this;
     }
 
@@ -38,20 +39,20 @@ class TabManager
     public function getAuthorizedTabs(): Collection
     {
         $user = auth()->user();
-        
+
         return $this->tabs->filter(function ($tab) use ($user) {
             // If no permissions required, tab is always visible
             if (empty($tab['permissions'])) {
                 return true;
             }
-            
+
             // Otherwise check each permission
             foreach ($tab['permissions'] as $permission) {
                 if ($user->hasPermissionTo($permission)) {
                     return true;
                 }
             }
-            
+
             return false;
         });
     }
@@ -85,16 +86,16 @@ class TabManager
     {
         $user = auth()->user();
         $tabs = $this->getAuthorizedTabs();
-        
+
         // Priority order for tabs
         $priorities = ['orders', 'users', 'inventory-sync', 'roles', 'permissions'];
-        
+
         foreach ($priorities as $tabId) {
             if ($tabs->has($tabId)) {
                 return $tabId;
             }
         }
-        
+
         // Fallback to first available tab
         return $tabs->keys()->first() ?? '';
     }

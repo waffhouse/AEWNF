@@ -4,11 +4,11 @@ namespace App\Services;
 
 use App\Models\Customer;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Carbon;
 
 class CustomerSyncService
 {
     protected $netsuiteService;
+
     protected $stats;
 
     public function __construct(NetSuiteService $netsuiteService)
@@ -19,8 +19,6 @@ class CustomerSyncService
 
     /**
      * Reset synchronization statistics
-     *
-     * @return void
      */
     public function resetStats(): void
     {
@@ -37,8 +35,6 @@ class CustomerSyncService
 
     /**
      * Get synchronization statistics
-     *
-     * @return array
      */
     public function getStats(): array
     {
@@ -54,35 +50,35 @@ class CustomerSyncService
     {
         Log::info('Starting customer sync from NetSuite');
         $this->resetStats();
-        
+
         try {
             // Call the NetSuite RESTlet to get all customers using the getCustomers method
             $timeout = config('netsuite.timeout', 300);
-            
+
             Log::info('Calling NetSuite customer RESTlet', [
-                'timeout' => $timeout
+                'timeout' => $timeout,
             ]);
-            
+
             $customersData = $this->netsuiteService->getCustomers(['timeout' => $timeout]);
-            
-            if (empty($customersData) || !is_array($customersData)) {
+
+            if (empty($customersData) || ! is_array($customersData)) {
                 Log::error('Invalid response from NetSuite customer RESTlet', [
-                    'response' => $customersData
+                    'response' => $customersData,
                 ]);
                 throw new \Exception('Invalid response from NetSuite customer RESTlet');
             }
-            
+
             Log::info('Received customer data from NetSuite', [
-                'count' => is_array($customersData) ? count($customersData) : 0
+                'count' => is_array($customersData) ? count($customersData) : 0,
             ]);
-            
+
             // Use a transaction to ensure data consistency
             \DB::beginTransaction();
-            
+
             try {
                 // Track processed NetSuite IDs
                 $processedIds = [];
-                
+
                 // Process each customer
                 foreach ($customersData as $customerData) {
                     $customer = $this->syncCustomer($customerData);
@@ -91,28 +87,30 @@ class CustomerSyncService
                     }
                     $this->stats['total']++;
                 }
-                
+
                 // Remove customers that no longer exist in NetSuite
                 $this->removeDeletedCustomers($processedIds);
-                
+
                 // Commit the transaction
                 \DB::commit();
-                
+
                 Log::info('Completed customer sync', $this->stats);
+
                 return $this->stats;
             } catch (\Exception $e) {
                 // Rollback the transaction if anything goes wrong
                 \DB::rollBack();
                 throw $e;
             }
-            
+
         } catch (\Exception $e) {
             Log::error('Error during customer sync', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             $this->stats['errors'][] = $e->getMessage();
+
             return $this->stats;
         }
     }
@@ -120,46 +118,48 @@ class CustomerSyncService
     /**
      * Synchronize a specific customer from NetSuite
      *
-     * @param string $customerId NetSuite internal ID
+     * @param  string  $customerId  NetSuite internal ID
      * @return array Synchronization result
      */
     public function syncCustomerById(string $customerId): array
     {
         Log::info('Starting sync for specific customer', ['id' => $customerId]);
         $this->resetStats();
-        
+
         try {
             // Call the NetSuite RESTlet to get a single customer using the getCustomers method
             $timeout = config('netsuite.timeout', 300);
-            
+
             $customerData = $this->netsuiteService->getCustomers([
                 'id' => $customerId,
-                'timeout' => $timeout
+                'timeout' => $timeout,
             ]);
-            
+
             if (empty($customerData) || isset($customerData['error'])) {
                 Log::error('Error retrieving customer from NetSuite', [
                     'id' => $customerId,
-                    'response' => $customerData
+                    'response' => $customerData,
                 ]);
-                throw new \Exception('Error retrieving customer from NetSuite: ' . 
+                throw new \Exception('Error retrieving customer from NetSuite: '.
                     (isset($customerData['error']) ? $customerData['error'] : 'Unknown error'));
             }
-            
+
             $this->syncCustomer($customerData);
             $this->stats['total'] = 1;
-            
+
             Log::info('Completed specific customer sync', $this->stats);
+
             return $this->stats;
-            
+
         } catch (\Exception $e) {
             Log::error('Error during specific customer sync', [
                 'id' => $customerId,
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             $this->stats['errors'][] = $e->getMessage();
+
             return $this->stats;
         }
     }
@@ -167,19 +167,18 @@ class CustomerSyncService
     /**
      * Process and save a single customer from NetSuite data
      *
-     * @param array $data Customer data from NetSuite
-     * @return Customer
+     * @param  array  $data  Customer data from NetSuite
      */
     protected function syncCustomer(array $data): ?Customer
     {
         if (empty($data['id']) || empty($data['entityId'])) {
             Log::warning('Skipping customer with missing ID', [
-                'data' => $data
+                'data' => $data,
             ]);
             $this->stats['skipped']++;
             throw new \Exception('Customer data missing required fields');
         }
-        
+
         try {
             // Map NetSuite data to our model
             $customerData = [
@@ -197,51 +196,51 @@ class CustomerSyncService
                 'terms' => $data['terms'] ?? null,
                 'last_sync_at' => now(),
             ];
-            
+
             // Find existing customer or create new one
             $customer = Customer::updateOrCreate(
                 ['netsuite_id' => $data['id']],
                 $customerData
             );
-            
+
             // Update stats
             if ($customer->wasRecentlyCreated) {
                 $this->stats['created']++;
                 Log::info('Created new customer', [
                     'netsuite_id' => $data['id'],
                     'entity_id' => $data['entityId'],
-                    'company_name' => $data['companyName'] ?? null
+                    'company_name' => $data['companyName'] ?? null,
                 ]);
             } else {
                 $this->stats['updated']++;
                 Log::info('Updated existing customer', [
                     'netsuite_id' => $data['id'],
                     'entity_id' => $data['entityId'],
-                    'company_name' => $data['companyName'] ?? null
+                    'company_name' => $data['companyName'] ?? null,
                 ]);
             }
-            
+
             return $customer;
-            
+
         } catch (\Exception $e) {
             $this->stats['failed']++;
             Log::error('Failed to sync customer', [
                 'netsuite_id' => $data['id'] ?? 'unknown',
                 'entity_id' => $data['entityId'] ?? 'unknown',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-            
-            $this->stats['errors'][] = 'Failed to sync customer ' . 
-                ($data['entityId'] ?? 'unknown') . ': ' . $e->getMessage();
-                
+
+            $this->stats['errors'][] = 'Failed to sync customer '.
+                ($data['entityId'] ?? 'unknown').': '.$e->getMessage();
+
             throw $e;
         }
     }
-    
+
     /**
      * Remove customer records that no longer exist in NetSuite
      *
-     * @param array $processedIds Array of NetSuite IDs that were processed
+     * @param  array  $processedIds  Array of NetSuite IDs that were processed
      * @return int Number of deleted customers
      */
     protected function removeDeletedCustomers(array $processedIds): int
@@ -249,15 +248,15 @@ class CustomerSyncService
         if (empty($processedIds)) {
             return 0;
         }
-        
+
         // Find and delete customers that aren't in the current NetSuite data
         $deleted = Customer::whereNotIn('netsuite_id', $processedIds)->delete();
         $this->stats['deleted'] = $deleted;
-        
+
         if ($deleted > 0) {
             Log::info("Deleted {$deleted} customers that were no longer active in NetSuite");
         }
-        
+
         return $deleted;
     }
 }

@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('terms')->nullable();
             $table->timestamp('last_sync_at')->nullable();
             $table->timestamps();
-            
+
             // Add index for faster lookups
             $table->index('entity_id');
             $table->index('home_state');

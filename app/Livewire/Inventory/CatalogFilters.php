@@ -2,41 +2,42 @@
 
 namespace App\Livewire\Inventory;
 
-use Livewire\Component;
-use Livewire\Attributes\Url;
 use App\Traits\Filterable;
 use App\ViewModels\CatalogViewModel;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class CatalogFilters extends Component
 {
     use Filterable;
-    
+
     #[Url]
     public $search = '';
-    
+
     #[Url]
     public $brand = '';
-    
+
     #[Url]
     public $class = '';
-    
+
     #[Url]
     public $state = 'all';
-    
+
     // For filter UI
     public $brands = [];
+
     public $classes = [];
-    
+
     // View model instance
     protected CatalogViewModel $viewModel;
-    
+
     /**
      * Initialize component with filter configurations
      */
     public function boot()
     {
-        $this->viewModel = new CatalogViewModel();
-        
+        $this->viewModel = new CatalogViewModel;
+
         // Set up filter configuration
         $this->filterConfig = [
             'search' => [
@@ -55,15 +56,15 @@ class CatalogFilters extends Component
             'state' => [
                 'type' => 'custom',
                 'default' => 'all',
-                'apply' => function($query, $value) {
+                'apply' => function ($query, $value) {
                     // State filtering is handled in the view model
                     // This is just a placeholder for the filter configuration
                     return $query;
-                }
+                },
             ],
         ];
     }
-    
+
     /**
      * Initialize component
      */
@@ -72,21 +73,21 @@ class CatalogFilters extends Component
         // Load filter options from view model
         $this->brands = $this->viewModel->getBrands();
         $this->classes = $this->viewModel->getClasses();
-        
+
         // Set initial class filter to the default category if no filter is set
         // This ensures it only happens on the first page load
         // The default category can be changed in CatalogViewModel::DEFAULT_CATEGORY
         if (empty($this->class) && empty($this->search) && empty($this->brand)) {
             $this->class = CatalogViewModel::DEFAULT_CATEGORY;
-            $this->filtersApplied = !empty($this->class);
-            
+            $this->filtersApplied = ! empty($this->class);
+
             // Only notify other components if we actually set a filter
-            if (!empty($this->class)) {
+            if (! empty($this->class)) {
                 $this->resetItems();
             }
         }
     }
-    
+
     /**
      * Implementation of the abstract method from Filterable trait
      */
@@ -97,21 +98,21 @@ class CatalogFilters extends Component
             'search' => $this->search,
             'brand' => $this->brand,
             'class' => $this->class,
-            'state' => $this->state
+            'state' => $this->state,
         ]);
-        
+
         // Also send the filter-changed event for backward compatibility
         $this->dispatch('filter-changed', [
             'search' => $this->search,
             'brand' => $this->brand,
             'class' => $this->class,
-            'state' => $this->state
+            'state' => $this->state,
         ]);
-        
+
         // Also close any mobile filter modal using Alpine event
         $this->dispatch('closeFilterModal');
     }
-    
+
     /**
      * When search changes, notify the parent component
      */
@@ -120,7 +121,7 @@ class CatalogFilters extends Component
         $this->filtersApplied = true;
         $this->resetItems();
     }
-    
+
     /**
      * When brand changes, notify the parent component
      */
@@ -129,7 +130,7 @@ class CatalogFilters extends Component
         $this->filtersApplied = true;
         $this->resetItems();
     }
-    
+
     /**
      * When class changes, notify the parent component
      */
@@ -138,7 +139,7 @@ class CatalogFilters extends Component
         $this->filtersApplied = true;
         $this->resetItems();
     }
-    
+
     /**
      * When state changes, notify the parent component
      */
@@ -149,11 +150,11 @@ class CatalogFilters extends Component
             $this->filtersApplied = true;
         } else {
             // When setting back to 'all', check if other filters are applied
-            $this->filtersApplied = !empty($this->search) || !empty($this->brand) || !empty($this->class);
+            $this->filtersApplied = ! empty($this->search) || ! empty($this->brand) || ! empty($this->class);
         }
         $this->resetItems();
     }
-    
+
     /**
      * This method is kept for backward compatibility but will always return false
      * since we no longer show the state filter to users
@@ -163,7 +164,7 @@ class CatalogFilters extends Component
         // Always return false since state filter is removed from UI
         return false;
     }
-    
+
     /**
      * Override clearFilters method from Filterable trait
      */
@@ -174,13 +175,13 @@ class CatalogFilters extends Component
             $defaultValue = $config['default'] ?? '';
             $this->{$filter} = $defaultValue;
         }
-        
+
         $this->filtersApplied = false;
-        
+
         // This will call resetItems which will notify the parent
         $this->resetItems();
     }
-    
+
     /**
      * Handle mobile search form submission
      */
@@ -188,10 +189,10 @@ class CatalogFilters extends Component
     {
         // This method triggers a refresh with the current search term
         // Since the search term is already bound to the property, we just need to trigger resetItems
-        $this->filtersApplied = !empty($this->search);
+        $this->filtersApplied = ! empty($this->search);
         $this->resetItems();
     }
-    
+
     /**
      * Render the component
      */

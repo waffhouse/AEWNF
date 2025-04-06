@@ -8,7 +8,6 @@ use App\Traits\Filterable;
 use App\Traits\InfiniteScrollable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -16,19 +15,20 @@ use Livewire\Component;
 class SalesView extends Component
 {
     use AdminAuthorization, Filterable, InfiniteScrollable;
-    
+
     public $search = '';
+
     public $filters = [
         'type' => '',
         'customer' => '',
         'date_range' => [
             'start' => '',
-            'end' => ''
+            'end' => '',
         ],
     ];
-    
+
     public $viewingSale = null;
-    
+
     protected $queryString = [
         'search' => ['except' => ''],
         'sortField' => ['except' => 'date'],
@@ -38,33 +38,33 @@ class SalesView extends Component
             'customer' => '',
             'date_range' => [
                 'start' => '',
-                'end' => ''
+                'end' => '',
             ],
         ]],
     ];
-    
+
     public function mount()
     {
         // Ensure user has admin permissions
         $this->authorize('view netsuite sales data');
-        
+
         // Set default sort field and direction
         $this->sortField = 'date';
         $this->sortDirection = 'desc';
-        
+
         // Initialize items array
         $this->items = [];
         $this->itemsPerPage = 20;
-        
+
         // Load initial items
         $this->loadMore($this->getBaseQuery());
     }
-    
+
     #[Title('All Sales History')]
     public function render()
     {
         $this->totalCount = $this->getTotal();
-        
+
         return view('livewire.admin.sales.sales-view', [
             'sales' => $this->items,
             'transactionTypes' => $this->getTransactionTypes(),
@@ -72,7 +72,7 @@ class SalesView extends Component
             'summary' => $this->getSummaryData(),
         ])->layout('layouts.app');
     }
-    
+
     /**
      * Get the base query for sales with all filters applied
      */
@@ -80,14 +80,14 @@ class SalesView extends Component
     {
         return Sale::query()
             ->select('id', 'tran_id', 'type', 'date', 'entity_id', 'customer_name', 'total_amount', 'created_at')
-            ->with(['items' => function($query) {
+            ->with(['items' => function ($query) {
                 $query->select('id', 'sale_id', 'sku', 'item_description', 'quantity', 'amount');
             }])
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
-                    $subQuery->where('tran_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('entity_id', 'like', '%' . $this->search . '%');
+                    $subQuery->where('tran_id', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('entity_id', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->filters['type'], function (Builder $query, $type) {
@@ -104,7 +104,7 @@ class SalesView extends Component
             })
             ->orderBy($this->sortField, $this->sortDirection);
     }
-    
+
     /**
      * Load more sales data when scrolling
      */
@@ -112,15 +112,15 @@ class SalesView extends Component
     {
         $this->loadMore($this->getBaseQuery());
     }
-    
+
     public function getTotal()
     {
         $query = Sale::query()
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
-                    $subQuery->where('tran_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('entity_id', 'like', '%' . $this->search . '%');
+                    $subQuery->where('tran_id', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('entity_id', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->filters['type'], function (Builder $query, $type) {
@@ -135,10 +135,10 @@ class SalesView extends Component
             ->when($this->filters['date_range']['end'], function (Builder $query, $endDate) {
                 $query->whereDate('date', '<=', Carbon::parse($endDate));
             });
-            
+
         return $query->count();
     }
-    
+
     public function getTransactionTypes()
     {
         return Sale::select('type')
@@ -147,7 +147,7 @@ class SalesView extends Component
             ->pluck('type')
             ->toArray();
     }
-    
+
     public function getUniqueCustomers()
     {
         return Sale::select('entity_id', 'customer_name')
@@ -157,17 +157,17 @@ class SalesView extends Component
             ->map(function ($item) {
                 return [
                     'id' => $item->entity_id,
-                    'name' => $item->customer_name . ' (' . $item->entity_id . ')'
+                    'name' => $item->customer_name.' ('.$item->entity_id.')',
                 ];
             });
     }
-    
+
     public function resetFilters()
     {
         $this->reset('filters', 'search');
         // Will trigger resetItems through Livewire's updated hooks
     }
-    
+
     /**
      * Implement the resetItems method required by the Filterable trait
      */
@@ -176,25 +176,25 @@ class SalesView extends Component
         $this->items = [];
         $this->loadedCount = 0;
         $this->hasMorePages = true;
-        
+
         // Immediately load fresh data with the current filters
         $this->loadMore($this->getBaseQuery());
-        
+
         // Dispatch an event for Alpine to react to
         $this->dispatch('refresh-data');
     }
-    
+
     // Add explicit watchers to handle filter changes
     public function updatedSearch()
     {
         $this->resetItems();
     }
-    
+
     public function updatedFilters()
     {
         $this->resetItems();
     }
-    
+
     /**
      * Handles updating the sort field and resetting items
      */
@@ -202,7 +202,7 @@ class SalesView extends Component
     {
         $this->resetItems();
     }
-    
+
     /**
      * Toggle the sort direction and reset items
      */
@@ -211,7 +211,7 @@ class SalesView extends Component
         $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         $this->resetItems();
     }
-    
+
     /**
      * Sort by a specific field (legacy method for backwards compatibility)
      */
@@ -223,20 +223,20 @@ class SalesView extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
-        
+
         $this->resetItems();
     }
-    
+
     public function viewSaleDetails($saleId)
     {
         $this->viewingSale = Sale::with('items')->find($saleId);
     }
-    
+
     public function closeModal()
     {
         $this->viewingSale = null;
     }
-    
+
     public function getSummaryData()
     {
         $query = Sale::query()
@@ -247,9 +247,9 @@ class SalesView extends Component
             )
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $subQuery) {
-                    $subQuery->where('tran_id', 'like', '%' . $this->search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('entity_id', 'like', '%' . $this->search . '%');
+                    $subQuery->where('tran_id', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('entity_id', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->filters['type'], function (Builder $query, $type) {
@@ -265,7 +265,7 @@ class SalesView extends Component
                 $query->whereDate('date', '<=', Carbon::parse($endDate));
             })
             ->groupBy('type');
-            
+
         return $query->get();
     }
 }

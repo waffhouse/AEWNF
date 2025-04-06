@@ -1,4 +1,5 @@
 <?php
+
 // Script to fix admin user role and permissions
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
@@ -10,7 +11,7 @@ app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 // Get admin user
 $admin = \App\Models\User::where('email', 'admin@example.com')->first();
 
-if (!$admin) {
+if (! $admin) {
     echo "Admin user not found. Creating one...\n";
     $admin = \App\Models\User::create([
         'name' => 'Admin User',
@@ -23,10 +24,10 @@ if (!$admin) {
 // Check if admin role exists
 $adminRole = \Spatie\Permission\Models\Role::where('name', 'admin')->first();
 
-if (!$adminRole) {
+if (! $adminRole) {
     echo "Admin role not found. Creating one...\n";
     $adminRole = \Spatie\Permission\Models\Role::create(['name' => 'admin']);
-    
+
     // Assign all permissions to admin role
     $permissions = \Spatie\Permission\Models\Permission::all();
     $adminRole->syncPermissions($permissions);
@@ -36,7 +37,7 @@ if (!$adminRole) {
 }
 
 // Remove all previous roles from admin user
-echo "Current roles: " . implode(', ', $admin->getRoleNames()->toArray()) . "\n";
+echo 'Current roles: '.implode(', ', $admin->getRoleNames()->toArray())."\n";
 foreach ($admin->roles as $role) {
     $admin->removeRole($role);
 }
@@ -46,12 +47,12 @@ $admin->assignRole('admin');
 
 // Verify role assignment
 $hasRole = $admin->hasRole('admin');
-echo "User has admin role: " . ($hasRole ? "Yes" : "No") . "\n";
+echo 'User has admin role: '.($hasRole ? 'Yes' : 'No')."\n";
 
 // Check permissions
 $permissions = $admin->getAllPermissions();
-echo "Permissions count: " . count($permissions) . "\n";
-echo "Has 'access admin dashboard' permission: " . ($admin->hasPermissionTo('access admin dashboard') ? "Yes" : "No") . "\n";
+echo 'Permissions count: '.count($permissions)."\n";
+echo "Has 'access admin dashboard' permission: ".($admin->hasPermissionTo('access admin dashboard') ? 'Yes' : 'No')."\n";
 
 // Print important permissions
 $keyPermissions = [
@@ -64,12 +65,12 @@ $keyPermissions = [
     'manage permissions',
     'sync inventory',
     'manage orders',
-    'view all orders'
+    'view all orders',
 ];
 
 echo "\nKey permissions check:\n";
 foreach ($keyPermissions as $permission) {
-    echo "- $permission: " . ($admin->hasPermissionTo($permission) ? "Yes" : "No") . "\n";
+    echo "- $permission: ".($admin->hasPermissionTo($permission) ? 'Yes' : 'No')."\n";
 }
 
 // Show login information
