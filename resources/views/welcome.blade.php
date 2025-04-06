@@ -15,19 +15,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="antialiased bg-gray-50 font-sans">
-        <div class="min-h-screen flex flex-col">
-            <!-- Dashboard link for authenticated users -->
-            @auth
-            <div class="bg-white shadow-sm">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="py-3 flex justify-end">
-                        <a href="{{ url('/dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
-                            Go to Dashboard
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @endauth
+        <!-- Navigation -->
+        <livewire:layout.navigation />
+        
+        <div class="min-h-screen flex flex-col pt-16">
 
             <!-- Hero Section -->
             <div class="relative py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-red-50 to-white">

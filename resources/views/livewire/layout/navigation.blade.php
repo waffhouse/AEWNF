@@ -42,6 +42,7 @@ new class extends Component
 
                 <!-- Navigation Links -->
                 <div class="hidden sm:flex space-x-1 sm:ms-4 sm:items-center h-full">
+                    @auth
                     <a href="{{ route('dashboard') }}" wire:navigate 
                        class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('dashboard') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
                         {{ __('Dashboard') }}
@@ -61,12 +62,13 @@ new class extends Component
                     </a>
                     @endcan
                     
-                    @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
+                    @if(auth()->check() && !auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
                     <a href="{{ route('admin.dashboard') }}" wire:navigate
                        class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
                         {{ __('Orders') }}
                     </a>
                     @endif
+                    @endauth
                     
                     <a href="{{ route('inventory.catalog') }}" wire:navigate
                        class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('inventory.catalog') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
@@ -78,6 +80,14 @@ new class extends Component
                         {{ __('Contact Us') }}
                     </a>
                     
+                    @guest
+                    <a href="{{ route('login') }}" wire:navigate
+                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors text-white hover:bg-red-800/60 border border-red-400">
+                        {{ __('Login') }}
+                    </a>
+                    @endguest
+                    
+                    @auth
                     @can('add to cart')
                     <a href="{{ route('customer.cart') }}" wire:navigate
                        class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('customer.cart') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
@@ -85,11 +95,13 @@ new class extends Component
                         <livewire:cart.cart-counter location="desktop" :showTotal="true" />
                     </a>
                     @endcan
+                    @endauth
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-2">
+                @auth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-1.5 border border-red-100 text-sm font-medium rounded-md text-white bg-red-800 hover:bg-red-900 focus:outline-none transition ease-in-out duration-150 shadow-sm">
@@ -102,7 +114,6 @@ new class extends Component
                             </div>
                         </button>
                     </x-slot>
-
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
@@ -114,7 +125,7 @@ new class extends Component
                         </x-dropdown-link>
                         @endcan
                         
-                        @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+                        @if(auth()->check() && auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
                         <x-dropdown-link :href="route('sales')" wire:navigate>
                             {{ __('Sales History') }}
                         </x-dropdown-link>
@@ -134,6 +145,7 @@ new class extends Component
                         </button>
                     </x-slot>
                 </x-dropdown>
+                @endauth
             </div>
 
             <!-- Mobile Cart Icon and Hamburger -->
@@ -199,7 +211,7 @@ new class extends Component
             </a>
             @endcan
             
-            @if(!auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
+            @if(auth()->check() && !auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
             <a href="{{ route('admin.dashboard') }}" wire:navigate @click="open = false"
                class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
                 {{ __('Order Management') }}
@@ -227,10 +239,12 @@ new class extends Component
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-red-900">
+            @if(auth()->check())
             <div class="px-4">
                 <div class="font-medium text-base text-white" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
                 <div class="font-medium text-sm text-red-200">{{ auth()->user()->email }}</div>
             </div>
+            @endif
 
             <div class="mt-3 space-y-0.5">
                 <a href="{{ route('profile') }}" wire:navigate @click="open = false"
@@ -245,7 +259,7 @@ new class extends Component
                 </a>
                 @endcan
                 
-                @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+                @if(auth()->check() && auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
                 <a href="{{ route('sales') }}" wire:navigate @click="open = false"
                    class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('sales') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
                     {{ __('Sales History') }}
