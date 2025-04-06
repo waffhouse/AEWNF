@@ -56,8 +56,10 @@
             <!-- Used for viewing transaction details across the dashboard and sales history pages -->
             <livewire:modals.transaction-detail-modal />
             
-            <!-- Scroll to Top Component -->
-            <x-scroll-to-top />
+            <!-- Scroll to Top Component - Not shown on catalog page which has its own -->
+            @if(!request()->routeIs('inventory.catalog'))
+                <x-scroll-to-top />
+            @endif
         </div>
     </body>
 </html>

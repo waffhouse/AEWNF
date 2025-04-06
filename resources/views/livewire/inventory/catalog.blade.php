@@ -100,8 +100,7 @@
     }" 
     class="py-6"
 >
-    <!-- Removing the default scroll to top button as we'll add a custom one in the sticky filter -->
-    <!-- <x-scroll-to-top /> -->
+    <!-- Removing the default scroll to top button as we have one in the sticky filter -->
     
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
