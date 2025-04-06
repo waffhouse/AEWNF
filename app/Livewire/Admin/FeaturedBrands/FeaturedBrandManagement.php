@@ -11,61 +11,34 @@ class FeaturedBrandManagement extends AdminComponent
 {
     use WithPagination;
 
-    public $showAddBrandModal = false;
-
-    public $showEditBrandModal = false;
-
-    public $showDeleteModal = false;
-
-    public $brandToAdd = '';
-
-    public $displayOrder = 1;
-
-    public $brandId = null;
-
-    // This is a model object, so we need to make sure it's properly handled during serialization
-    public $currentBrand = null;
+    // For adding new brands
+    public $showAddBrandForm = false;
+    public $newBrandName = '';
+    public $newDisplayOrder = 1;
+    public $newIsActive = true;
     
-    protected function cleanupState()
-    {
-        $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
-    }
+    // For confirmation and editing
+    public $brandToDelete = null;
+    public $editingBrandId = null;
+    public $editBrandName = '';
+    public $editDisplayOrder = 1;
+    public $editIsActive = true; // Boolean value for active status
     
-    // Special handling for model serialization
-    public function dehydrate()
-    {
-        // Ensure that currentBrand is null when we leave the component
-        // This prevents serialization issues with the Eloquent model
-        $this->currentBrand = null;
-    }
-    
-    // Handle modal close events (from ESC key or other global close events)
-    public function handleModalClose()
-    {
-        if ($this->showDeleteModal) {
-            $this->cancelDelete();
-        } else if ($this->showEditBrandModal) {
-            $this->cancelEdit();
-        } else if ($this->showAddBrandModal) {
-            $this->cancelAdd();
-        }
-    }
-
-    // Use the searchQuery from parent class
+    // Available brands for dropdown
     public $availableBrands = [];
-
-    protected $listeners = [
-        'refreshBrands' => '$refresh',
-        'close-this-modal' => 'handleModalClose'
-    ];
-
+    
     protected $rules = [
-        'brandToAdd' => 'required|string|max:255',
-        'displayOrder' => 'required|integer|min:1',
+        'editBrandName' => 'required|string|max:255',
+        'editDisplayOrder' => 'required|integer|min:1',
+        'editIsActive' => 'required|in:0,1',
+        'newBrandName' => 'required|string|max:255',
+        'newDisplayOrder' => 'required|integer|min:1',
+        'newIsActive' => 'required|boolean',
     ];
 
     protected $messages = [
-        'displayOrder.min' => 'The display order must be at least 1.',
+        'editDisplayOrder.min' => 'The display order must be at least 1.',
+        'newDisplayOrder.min' => 'The display order must be at least 1.',
     ];
 
     public function getRequiredPermissions(): array
@@ -76,7 +49,41 @@ class FeaturedBrandManagement extends AdminComponent
     protected function mountComponent(): void
     {
         $this->resetPage();
-        $this->currentBrand = null;
+        $this->loadAvailableBrands();
+    }
+    
+    /**
+     * Load unique brands from inventory for the dropdown
+     */
+    private function loadAvailableBrands(): void
+    {
+        // Get all existing featured brand names
+        $existingBrands = FeaturedBrand::pluck('brand')->toArray();
+        
+        // If we're editing, don't exclude the current brand being edited
+        if ($this->editingBrandId) {
+            $currentBrand = FeaturedBrand::find($this->editingBrandId);
+            if ($currentBrand) {
+                $existingBrands = array_diff($existingBrands, [$currentBrand->brand]);
+            }
+        }
+        
+        // Get all unique brands from inventory table and exclude ones already featured
+        $this->availableBrands = Inventory::select('brand')
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->whereNotIn('brand', $existingBrands)
+            ->groupBy('brand')
+            ->pluck('brand')
+            ->toArray();
+    }
+    
+    // Special handling for hydrating property values
+    public function hydrate()
+    {
+        // Ensure editIsActive is properly cast to boolean
+        // We intentionally don't cast here to ensure select values work correctly
+        // The value will be cast to boolean when saving in the saveEdit method
     }
 
     public function render()
@@ -85,138 +92,160 @@ class FeaturedBrandManagement extends AdminComponent
             ->with('creator')
             ->ordered()
             ->paginate(10);
-
+            
         return view('livewire.admin.featured-brands.featured-brand-management', [
             'featuredBrands' => $featuredBrands,
         ]);
     }
 
-    public function openAddModal()
+    /**
+     * Show the add brand form
+     */
+    public function showAddForm()
     {
-        $this->resetValidation();
-        $this->reset(['brandToAdd', 'displayOrder', 'currentBrand', 'brandId']);
-
-        // Count total brands and set the new one to be the next in sequence
-        $count = FeaturedBrand::count();
-        $this->displayOrder = $count + 1;
-
-        // Load all available brands for dropdown (excluding already featured brands)
+        $this->showAddBrandForm = true;
+        $this->newDisplayOrder = FeaturedBrand::count() + 1;
+        $this->newIsActive = true;
         $this->loadAvailableBrands();
-
-        $this->showAddBrandModal = true;
     }
     
+    /**
+     * Cancel adding a new brand
+     */
     public function cancelAdd()
     {
-        $this->showAddBrandModal = false;
-        $this->cleanupState();
-    }
-
-    /**
-     * Load available brands for dropdown
-     */
-    private function loadAvailableBrands()
-    {
-        // Get brands that are already featured
-        $featuredBrands = FeaturedBrand::pluck('brand')->toArray();
-
-        // Get all unique brands from inventory, excluding already featured ones
-        $this->availableBrands = Inventory::select('brand')
-            ->whereNotNull('brand')
-            ->where('brand', '!=', '')
-            ->whereNotIn('brand', $featuredBrands)
-            ->groupBy('brand')
-            ->orderBy('brand')
-            ->pluck('brand', 'brand')
-            ->toArray();
-    }
-
-    // Brand search functionality removed in favor of dropdown
-
-    public function addBrand()
-    {
-        $this->validate();
-
-        FeaturedBrand::create([
-            'brand' => $this->brandToAdd,
-            'display_order' => $this->displayOrder,
-            'is_active' => true,
-            'created_by' => auth()->id(),
-        ]);
-
-        $this->showAddBrandModal = false;
-        $this->cleanupState();
-
-        $this->dispatch('close-modal', 'add-brand-modal');
-        session()->flash('message', 'Brand added to featured brands successfully.');
-    }
-
-    public function openEditModal($id)
-    {
-        $this->resetValidation();
-        $this->brandId = $id;
-        $this->currentBrand = FeaturedBrand::findOrFail($id);
-        $this->brandToAdd = $this->currentBrand->brand;
-        $this->displayOrder = $this->currentBrand->display_order;
-
-        // We'll load all brands plus the current one for edit
-        $this->loadAvailableBrandsForEdit();
-
-        $this->showEditBrandModal = true;
+        $this->reset(['showAddBrandForm', 'newBrandName', 'newDisplayOrder', 'newIsActive']);
     }
     
-    public function cancelEdit()
+    /**
+     * Add a new featured brand
+     */
+    public function addBrand()
     {
-        $this->showEditBrandModal = false;
-        $this->cleanupState();
+        $this->validate([
+            'newBrandName' => 'required|string|max:255',
+            'newDisplayOrder' => 'required|integer|min:1',
+            'newIsActive' => 'required|boolean',
+        ]);
+        
+        try {
+            // Check if brand already exists
+            $existingBrand = FeaturedBrand::where('brand', $this->newBrandName)->first();
+            if ($existingBrand) {
+                session()->flash('error', 'This brand is already featured.');
+                return;
+            }
+            
+            // Handle display order conflicts
+            $existingOrder = FeaturedBrand::where('display_order', $this->newDisplayOrder)->first();
+            if ($existingOrder) {
+                // Make room for the new brand by incrementing orders >= newDisplayOrder
+                FeaturedBrand::where('display_order', '>=', $this->newDisplayOrder)
+                    ->increment('display_order');
+            }
+            
+            // Create the new featured brand
+            FeaturedBrand::create([
+                'brand' => $this->newBrandName,
+                'display_order' => $this->newDisplayOrder,
+                'is_active' => $this->newIsActive,
+                'created_by' => auth()->id(),
+            ]);
+            
+            $this->reset(['showAddBrandForm', 'newBrandName', 'newDisplayOrder', 'newIsActive']);
+            session()->flash('message', 'Brand added successfully.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error adding brand: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Load available brands for edit modal dropdown
-     * (includes the current brand that's being edited)
+     * Toggle brand active status
      */
-    private function loadAvailableBrandsForEdit()
+    public function toggleActive($id)
     {
-        // Get brands that are already featured (excluding the current one)
-        $featuredBrands = FeaturedBrand::where('id', '!=', $this->brandId)
-            ->pluck('brand')
-            ->toArray();
-
-        // Get all unique brands from inventory, excluding already featured ones
-        $this->availableBrands = Inventory::select('brand')
-            ->whereNotNull('brand')
-            ->where('brand', '!=', '')
-            ->where(function ($query) use ($featuredBrands) {
-                $query->whereNotIn('brand', $featuredBrands)
-                    ->orWhere('brand', $this->brandToAdd);
-            })
-            ->groupBy('brand')
-            ->orderBy('brand')
-            ->pluck('brand', 'brand')
-            ->toArray();
+        try {
+            $brand = FeaturedBrand::findOrFail($id);
+            $brand->update([
+                'is_active' => !$brand->is_active,
+            ]);
+    
+            session()->flash('message', 'Brand status updated successfully.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error updating brand status: ' . $e->getMessage());
+        }
     }
 
-    public function updateBrand()
+    /**
+     * Confirm deletion of a brand
+     */
+    public function confirmDelete($id)
     {
-        $this->validate();
-
-        if (!$this->brandId || !$this->currentBrand) {
-            $this->showEditBrandModal = false;
-            $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
-            $this->dispatch('close-modal', 'edit-brand-modal');
-            session()->flash('error', 'Error updating brand: brand not found.');
+        $this->brandToDelete = $id;
+    }
+    
+    /**
+     * Cancel brand deletion
+     */
+    public function cancelDelete()
+    {
+        $this->brandToDelete = null;
+    }
+    
+    /**
+     * Start editing a brand
+     */
+    public function startEdit($id)
+    {
+        try {
+            $brand = FeaturedBrand::findOrFail($id);
+            $this->editingBrandId = $id;
+            $this->editBrandName = $brand->brand;
+            $this->editDisplayOrder = $brand->display_order;
+            // Convert boolean to string for the dropdown
+            $this->editIsActive = $brand->is_active ? '1' : '0';
+            
+            // Load available brands for the dropdown
+            $this->loadAvailableBrands();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error preparing edit: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Cancel brand editing
+     */
+    public function cancelEdit()
+    {
+        $this->reset(['editingBrandId', 'editBrandName', 'editDisplayOrder', 'editIsActive']);
+    }
+    
+    /**
+     * Save edited brand
+     */
+    public function saveEdit()
+    {
+        if (!$this->editingBrandId) {
+            session()->flash('error', 'No brand selected for editing.');
             return;
         }
-
+        
+        $this->validate([
+            'editBrandName' => 'required|string|max:255',
+            'editDisplayOrder' => 'required|integer|min:1',
+            'editIsActive' => 'required|in:0,1',
+        ]);
+        
         try {
-            $oldOrder = $this->currentBrand->display_order;
-            $newOrder = $this->displayOrder;
-
-            // If the display order has changed
+            $brand = FeaturedBrand::findOrFail($this->editingBrandId);
+            $oldOrder = $brand->display_order;
+            $newOrder = $this->editDisplayOrder;
+            
+            // Handle order change
             if ($oldOrder != $newOrder) {
                 // Check if the new order already exists
                 $existingBrand = FeaturedBrand::where('display_order', $newOrder)
-                    ->where('id', '!=', $this->currentBrand->id)
+                    ->where('id', '!=', $this->editingBrandId)
                     ->first();
 
                 if ($existingBrand) {
@@ -225,97 +254,55 @@ class FeaturedBrandManagement extends AdminComponent
                         // Moving down: shift all brands between old and new position up
                         FeaturedBrand::where('display_order', '>', $oldOrder)
                             ->where('display_order', '<=', $newOrder)
-                            ->where('id', '!=', $this->currentBrand->id)
+                            ->where('id', '!=', $this->editingBrandId)
                             ->decrement('display_order');
                     } else {
                         // Moving up: shift all brands between new and old position down
                         FeaturedBrand::where('display_order', '>=', $newOrder)
                             ->where('display_order', '<', $oldOrder)
-                            ->where('id', '!=', $this->currentBrand->id)
+                            ->where('id', '!=', $this->editingBrandId)
                             ->increment('display_order');
                     }
                 }
             }
-
-            // Update the brand with new values
-            $this->currentBrand->update([
-                'brand' => $this->brandToAdd,
-                'display_order' => $newOrder,
+            
+            // Convert select value to boolean
+            // For select elements, "0" is falsy but we need to convert it explicitly
+            $isActive = $this->editIsActive === "1";
+            
+            // Update brand
+            $brand->update([
+                'brand' => $this->editBrandName,
+                'display_order' => $this->editDisplayOrder,
+                'is_active' => $isActive,
             ]);
-
-            $this->showEditBrandModal = false;
-            $this->cleanupState();
-
-            $this->dispatch('close-modal', 'edit-brand-modal');
-            session()->flash('message', 'Featured brand updated successfully.');
+            
+            $this->reset(['editingBrandId', 'editBrandName', 'editDisplayOrder', 'editIsActive']);
+            session()->flash('message', 'Brand updated successfully.');
         } catch (\Exception $e) {
-            $this->showEditBrandModal = false;
-            $this->cleanupState();
-            $this->dispatch('close-modal', 'edit-brand-modal');
             session()->flash('error', 'Error updating brand: ' . $e->getMessage());
         }
     }
 
-    public function toggleActive($id)
+    /**
+     * Delete a featured brand
+     */
+    public function deleteBrand($id = null)
     {
-        $brand = FeaturedBrand::findOrFail($id);
-        $brand->update([
-            'is_active' => ! $brand->is_active,
-        ]);
-
-        session()->flash('message', 'Brand status updated successfully.');
-    }
-
-    public function confirmDelete($id)
-    {
-        $this->brandId = $id;
-        $this->currentBrand = FeaturedBrand::findOrFail($id);
-        $this->showDeleteModal = true;
-    }
-    
-    public function cancelDelete()
-    {
-        $this->showDeleteModal = false;
-        $this->cleanupState();
-    }
-
-    public function deleteBrand()
-    {
-        if (!$this->brandId) {
-            $this->showDeleteModal = false;
-            $this->cleanupState();
-            $this->dispatch('close-modal', 'delete-brand-modal');
+        $idToDelete = $id ?? $this->brandToDelete;
+        
+        if (!$idToDelete) {
             session()->flash('error', 'No brand selected for deletion.');
             return;
         }
         
         try {
-            // Get the display order of the brand to be deleted
-            $brandToDelete = FeaturedBrand::find($this->brandId);
-            
-            if (!$brandToDelete) {
-                $this->showDeleteModal = false;
-                $this->cleanupState();
-                $this->dispatch('close-modal', 'delete-brand-modal');
-                session()->flash('error', 'Featured brand not found.');
-                return;
-            }
-            
-            // Delete the brand
-            FeaturedBrand::destroy($this->brandId);
-
-            // Reorder all remaining brands to ensure sequential ordering
+            FeaturedBrand::destroy($idToDelete);
             $this->reorderBrands();
-
-            $this->showDeleteModal = false;
-            $this->cleanupState();
-
-            $this->dispatch('close-modal', 'delete-brand-modal');
+            $this->brandToDelete = null;
+            
             session()->flash('message', 'Featured brand removed successfully.');
         } catch (\Exception $e) {
-            $this->showDeleteModal = false;
-            $this->cleanupState();
-            $this->dispatch('close-modal', 'delete-brand-modal');
             session()->flash('error', 'Error deleting brand: ' . $e->getMessage());
         }
     }
@@ -325,7 +312,7 @@ class FeaturedBrandManagement extends AdminComponent
      */
     private function reorderBrands(): void
     {
-        // Get all active brands ordered by current display_order
+        // Get all brands ordered by current display_order
         $brands = FeaturedBrand::orderBy('display_order')->get();
 
         // Reassign display_order sequentially starting from 1
@@ -339,31 +326,45 @@ class FeaturedBrandManagement extends AdminComponent
         }
     }
 
+    /**
+     * Move a brand up in the order
+     */
     public function moveUp($id)
     {
-        $currentBrand = FeaturedBrand::findOrFail($id);
-        $previousBrand = FeaturedBrand::where('display_order', '<', $currentBrand->display_order)
-            ->orderBy('display_order', 'desc')
-            ->first();
-
-        if ($previousBrand) {
-            $tempOrder = $previousBrand->display_order;
-            $previousBrand->update(['display_order' => $currentBrand->display_order]);
-            $currentBrand->update(['display_order' => $tempOrder]);
+        try {
+            $currentBrand = FeaturedBrand::findOrFail($id);
+            $previousBrand = FeaturedBrand::where('display_order', '<', $currentBrand->display_order)
+                ->orderBy('display_order', 'desc')
+                ->first();
+    
+            if ($previousBrand) {
+                $tempOrder = $previousBrand->display_order;
+                $previousBrand->update(['display_order' => $currentBrand->display_order]);
+                $currentBrand->update(['display_order' => $tempOrder]);
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error moving brand: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Move a brand down in the order
+     */
     public function moveDown($id)
     {
-        $currentBrand = FeaturedBrand::findOrFail($id);
-        $nextBrand = FeaturedBrand::where('display_order', '>', $currentBrand->display_order)
-            ->orderBy('display_order', 'asc')
-            ->first();
-
-        if ($nextBrand) {
-            $tempOrder = $nextBrand->display_order;
-            $nextBrand->update(['display_order' => $currentBrand->display_order]);
-            $currentBrand->update(['display_order' => $tempOrder]);
+        try {
+            $currentBrand = FeaturedBrand::findOrFail($id);
+            $nextBrand = FeaturedBrand::where('display_order', '>', $currentBrand->display_order)
+                ->orderBy('display_order', 'asc')
+                ->first();
+    
+            if ($nextBrand) {
+                $tempOrder = $nextBrand->display_order;
+                $nextBrand->update(['display_order' => $currentBrand->display_order]);
+                $currentBrand->update(['display_order' => $tempOrder]);
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error moving brand: ' . $e->getMessage());
         }
     }
 }
