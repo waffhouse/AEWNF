@@ -295,7 +295,7 @@
             <p class="mb-4 text-sm text-gray-600">
                 Are you sure you want to delete this featured brand? This action cannot be undone.
                 <br><br>
-                <strong>Brand:</strong> {{ isset($currentBrand) && $currentBrand ? $currentBrand->brand : '' }}
+                <strong>Brand:</strong> {{ isset($currentBrand) && is_object($currentBrand) ? $currentBrand->brand : '' }}
             </p>
             
             <div class="mt-6 flex justify-end space-x-3">

@@ -23,7 +23,21 @@ class FeaturedBrandManagement extends AdminComponent
 
     public $brandId = null;
 
+    // This is a model object, so we need to make sure it's properly handled during serialization
     public $currentBrand = null;
+    
+    protected function cleanupState()
+    {
+        $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+    }
+    
+    // Special handling for model serialization
+    public function dehydrate()
+    {
+        // Ensure that currentBrand is null when we leave the component
+        // This prevents serialization issues with the Eloquent model
+        $this->currentBrand = null;
+    }
 
     // Use the searchQuery from parent class
     public $availableBrands = [];
@@ -80,7 +94,7 @@ class FeaturedBrandManagement extends AdminComponent
     public function cancelAdd()
     {
         $this->showAddBrandModal = false;
-        $this->reset(['brandToAdd', 'displayOrder', 'currentBrand', 'brandId']);
+        $this->cleanupState();
     }
 
     /**
@@ -116,7 +130,7 @@ class FeaturedBrandManagement extends AdminComponent
         ]);
 
         $this->showAddBrandModal = false;
-        $this->reset(['brandToAdd', 'displayOrder']);
+        $this->cleanupState();
 
         $this->dispatch('close-modal', 'add-brand-modal');
         session()->flash('message', 'Brand added to featured brands successfully.');
@@ -139,7 +153,7 @@ class FeaturedBrandManagement extends AdminComponent
     public function cancelEdit()
     {
         $this->showEditBrandModal = false;
-        $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+        $this->cleanupState();
     }
 
     /**
@@ -215,13 +229,13 @@ class FeaturedBrandManagement extends AdminComponent
             ]);
 
             $this->showEditBrandModal = false;
-            $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+            $this->cleanupState();
 
             $this->dispatch('close-modal', 'edit-brand-modal');
             session()->flash('message', 'Featured brand updated successfully.');
         } catch (\Exception $e) {
             $this->showEditBrandModal = false;
-            $this->reset(['brandId', 'currentBrand', 'brandToAdd', 'displayOrder']);
+            $this->cleanupState();
             $this->dispatch('close-modal', 'edit-brand-modal');
             session()->flash('error', 'Error updating brand: ' . $e->getMessage());
         }
@@ -247,14 +261,14 @@ class FeaturedBrandManagement extends AdminComponent
     public function cancelDelete()
     {
         $this->showDeleteModal = false;
-        $this->reset(['brandId', 'currentBrand']);
+        $this->cleanupState();
     }
 
     public function deleteBrand()
     {
         if (!$this->brandId) {
             $this->showDeleteModal = false;
-            $this->reset(['brandId', 'currentBrand']);
+            $this->cleanupState();
             $this->dispatch('close-modal', 'delete-brand-modal');
             session()->flash('error', 'No brand selected for deletion.');
             return;
@@ -266,7 +280,7 @@ class FeaturedBrandManagement extends AdminComponent
             
             if (!$brandToDelete) {
                 $this->showDeleteModal = false;
-                $this->reset(['brandId', 'currentBrand']);
+                $this->cleanupState();
                 $this->dispatch('close-modal', 'delete-brand-modal');
                 session()->flash('error', 'Featured brand not found.');
                 return;
@@ -279,13 +293,13 @@ class FeaturedBrandManagement extends AdminComponent
             $this->reorderBrands();
 
             $this->showDeleteModal = false;
-            $this->reset(['brandId', 'currentBrand']);
+            $this->cleanupState();
 
             $this->dispatch('close-modal', 'delete-brand-modal');
             session()->flash('message', 'Featured brand removed successfully.');
         } catch (\Exception $e) {
             $this->showDeleteModal = false;
-            $this->reset(['brandId', 'currentBrand']);
+            $this->cleanupState();
             $this->dispatch('close-modal', 'delete-brand-modal');
             session()->flash('error', 'Error deleting brand: ' . $e->getMessage());
         }
