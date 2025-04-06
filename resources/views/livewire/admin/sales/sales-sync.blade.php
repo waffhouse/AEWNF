@@ -35,6 +35,13 @@
                             <span class="text-xs text-red-700">Last updated {{ $lastSyncStats['time_since_sync'] }}</span>
                         </div>
                         
+                        @if(isset($lastSyncStats['date_range']) && $lastSyncStats['date_range'])
+                        <div class="bg-gray-50 p-2 rounded mb-3 text-sm">
+                            <span class="font-medium">Transaction Date Range:</span> 
+                            {{ $lastSyncStats['date_range']['oldest'] }} to {{ $lastSyncStats['date_range']['newest'] }}
+                        </div>
+                        @endif
+                        
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div class="bg-white p-3 rounded-md shadow-sm border border-red-200">
                                 <div class="text-xl lg:text-2xl font-bold text-gray-800 truncate">{{ number_format($lastSyncStats['total_sales']) }}</div>
@@ -66,7 +73,7 @@
             </div>
             @endif
             
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="mt-4">
                 <div>
                     <label for="pageSize" class="block text-sm font-medium text-gray-700">Items Per Page</label>
                     <input type="number" 
@@ -76,15 +83,6 @@
                         max="1000"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500">Maximum 1000</p>
-                </div>
-                
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700">Transaction Date (Optional)</label>
-                    <input type="date" 
-                        id="date" 
-                        wire:model.defer="options.date"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500">Filter by specific date</p>
                 </div>
             </div>
             
@@ -188,7 +186,8 @@
                                 <li>Updates existing sales records with latest information</li>
                                 <li>Synchronizes all line items for each transaction</li>
                             </ul>
-                            <p class="mt-2">The sync can be filtered by date if needed. For full history, leave the date field empty.</p>
+                            <p class="mt-2">This sync retrieves the complete dataset as configured in NetSuite.</p>
+                            <p class="mt-2">Any filtering or data selection should be configured directly in NetSuite. Changes to the dataset should be made within the NetSuite environment, not through this interface.</p>
                         </div>
                     </div>
                 </div>

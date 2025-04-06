@@ -25,7 +25,6 @@ class SalesSync extends Component
 
     public $options = [
         'pageSize' => 1000,
-        'date' => null,
     ];
 
     public function mount()
@@ -47,6 +46,21 @@ class SalesSync extends Component
 
             // Calculate time since last sync
             $timeSinceSync = $lastSyncedSale->last_synced_at->diffForHumans();
+            
+            // Get date range of transactions in database
+            $oldestDate = \App\Models\Sale::min('date');
+            $newestDate = \App\Models\Sale::max('date');
+            
+            // Format dates if not null
+            $dateRange = null;
+            if ($oldestDate && $newestDate) {
+                $oldestDate = Carbon::parse($oldestDate)->format('M d, Y');
+                $newestDate = Carbon::parse($newestDate)->format('M d, Y');
+                $dateRange = [
+                    'oldest' => $oldestDate,
+                    'newest' => $newestDate,
+                ];
+            }
 
             // Get basic counts about the sales data
             $totalSales = \App\Models\Sale::count() ?: 0;
@@ -73,6 +87,7 @@ class SalesSync extends Component
                 'net_total' => $netTotal,
                 'type_stats' => $typeStats,
                 'time_since_sync' => $timeSinceSync,
+                'date_range' => $dateRange,
             ];
         } else {
             // Handle case where no sync has occurred yet
@@ -98,12 +113,7 @@ class SalesSync extends Component
         $this->error = null;
 
         try {
-            // Format date if provided
-            if (! empty($this->options['date'])) {
-                $this->options['date'] = Carbon::parse($this->options['date'])->format('Y-m-d');
-            } else {
-                unset($this->options['date']);
-            }
+            // Date filtering is handled in NetSuite
 
             // Convert string values to integers
             $this->options['pageSize'] = (int) $this->options['pageSize'];
