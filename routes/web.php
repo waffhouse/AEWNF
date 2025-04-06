@@ -207,6 +207,13 @@ Route::middleware('guest')->group(function () {
         ->name('verify.age.submit');
 });
 
+// Contact page routes
+Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])
+    ->middleware('verify.age')
+    ->name('contact');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'submit'])
+    ->name('contact.submit');
+
 // Unified Catalog - accessible to both guests and authenticated users
 // The component will handle different layouts and permission-based content
 Route::get('/catalog', \App\Livewire\Inventory\Catalog::class)

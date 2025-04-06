@@ -73,6 +73,11 @@ new class extends Component
                         {{ __('Catalog') }}
                     </a>
                     
+                    <a href="{{ route('contact') }}" wire:navigate
+                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('contact') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                        {{ __('Contact Us') }}
+                    </a>
+                    
                     @can('add to cart')
                     <a href="{{ route('customer.cart') }}" wire:navigate
                        class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('customer.cart') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
@@ -204,6 +209,11 @@ new class extends Component
             <a href="{{ route('inventory.catalog') }}" wire:navigate @click="open = false"
                class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('inventory.catalog') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
                 {{ __('Product Catalog') }}
+            </a>
+            
+            <a href="{{ route('contact') }}" wire:navigate @click="open = false"
+               class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('contact') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
+                {{ __('Contact Us') }}
             </a>
             
             @can('add to cart')
