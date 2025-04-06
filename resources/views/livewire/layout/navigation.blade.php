@@ -17,7 +17,7 @@ new class extends Component
 }; ?>
 
 <nav x-data="{ open: false }" 
-     class="bg-gradient-to-r from-red-700 to-red-600 fixed w-full top-0 z-40 shadow-md">
+     class="bg-gradient-to-r from-gray-900 to-black fixed w-full top-0 z-40 shadow-md border-b-2 border-red-600">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -25,12 +25,10 @@ new class extends Component
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ url('/') }}" wire:navigate class="flex items-center">
-                        <div class="flex items-center justify-center bg-white rounded-md p-2 shadow-sm">
-                            <x-application-logo class="block h-7 w-auto" />
-                        </div>
-                        <div class="ml-3 pl-3 border-l border-red-400 hidden sm:block">
+                        <x-application-logo class="block h-8 w-auto" />
+                        <div class="ml-3 pl-3 border-l border-red-500 hidden sm:block">
                             <div class="text-sm font-semibold text-white">A&E Wholesale of North Florida</div>
-                            <div class="text-xs text-red-100">Business Portal</div>
+                            <div class="text-xs text-red-600">Business Portal</div>
                         </div>
                     </a>
                 </div>
@@ -44,45 +42,45 @@ new class extends Component
                 <div class="hidden sm:flex space-x-1 sm:ms-4 sm:items-center h-full">
                     @auth
                     <a href="{{ route('dashboard') }}" wire:navigate 
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('dashboard') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('dashboard') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Dashboard') }}
                     </a>
                     
                     @can('access admin dashboard')
                     <a href="{{ route('admin.dashboard') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('admin.dashboard') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Admin') }}
                     </a>
                     @endcan
                     
                     @can('sync netsuite sales data')
                     <a href="{{ route('sales.analytics') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('sales.analytics') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('sales.analytics') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Analytics') }}
                     </a>
                     @endcan
                     
                     @if(auth()->check() && !auth()->user()->hasPermissionTo('access admin dashboard') && auth()->user()->hasAnyPermission(['manage orders', 'view all orders']))
                     <a href="{{ route('admin.dashboard') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('admin.dashboard') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Orders') }}
                     </a>
                     @endif
                     @endauth
                     
                     <a href="{{ route('inventory.catalog') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('inventory.catalog') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('inventory.catalog') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Catalog') }}
                     </a>
                     
                     <a href="{{ route('contact') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('contact') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('contact') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Contact Us') }}
                     </a>
                     
                     @guest
                     <a href="{{ route('login') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors text-white hover:bg-red-800/60 border border-red-400">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('login') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         {{ __('Login') }}
                     </a>
                     @endguest
@@ -90,7 +88,7 @@ new class extends Component
                     @auth
                     @can('add to cart')
                     <a href="{{ route('customer.cart') }}" wire:navigate
-                       class="px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors {{ request()->routeIs('customer.cart') ? 'bg-red-800 text-white' : 'text-white hover:bg-red-800/60' }}">
+                       class="px-3 py-2 text-sm font-medium flex items-center transition-colors {{ request()->routeIs('customer.cart') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                         <span>{{ __('Cart') }}</span>
                         <livewire:cart.cart-counter location="desktop" :showTotal="true" />
                     </a>
@@ -104,7 +102,7 @@ new class extends Component
                 @auth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-1.5 border border-red-100 text-sm font-medium rounded-md text-white bg-red-800 hover:bg-red-900 focus:outline-none transition ease-in-out duration-150 shadow-sm">
+                        <button class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white hover:text-red-600 focus:outline-none transition ease-in-out duration-150">
                             <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name" class="max-w-[150px] truncate"></div>
 
                             <div class="ms-1">
@@ -151,10 +149,10 @@ new class extends Component
             <!-- Mobile Cart Icon and Hamburger -->
             <div class="flex items-center sm:hidden space-x-2">
                 @can('add to cart')
-                <a href="{{ route('customer.cart') }}" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-red-800 focus:outline-none focus:bg-red-800 transition duration-150 ease-in-out" wire:navigate>
+                <a href="{{ route('customer.cart') }}" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-red-600 focus:outline-none transition duration-150 ease-in-out" wire:navigate>
                     <div class="relative">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <livewire:cart.cart-counter location="mobile-icon" :showTotal="true" />
                     </div>
@@ -162,7 +160,7 @@ new class extends Component
                 @endcan
                 
                 <!-- Hamburger -->
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-red-600 focus:outline-none transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -174,18 +172,16 @@ new class extends Component
 
     <!-- Responsive Navigation Menu - Slide Out -->
     <div :class="{'translate-x-0': open, '-translate-x-full': ! open}" 
-         class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-red-700 to-red-800 transform transition duration-300 ease-in-out sm:hidden"
+         class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-gray-800 to-black transform transition duration-300 ease-in-out sm:hidden"
          x-cloak>
-        <div class="flex justify-between items-center p-4 border-b border-red-900">
+        <div class="flex justify-between items-center p-4 border-b border-gray-700">
             <div class="flex items-center">
                 <a href="{{ url('/') }}" wire:navigate class="flex items-center">
-                    <div class="flex items-center justify-center bg-white rounded-md p-1.5 shadow-sm">
-                        <x-application-logo class="block h-8 w-auto" />
-                    </div>
+                    <x-application-logo class="block h-8 w-auto" />
                     <span class="ml-2 text-sm font-semibold text-white">A&E Wholesale</span>
                 </a>
             </div>
-            <button @click="open = false" class="text-white hover:text-red-200">
+            <button @click="open = false" class="text-white hover:text-red-600">
                 <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -240,37 +236,38 @@ new class extends Component
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-red-900">
-            @if(auth()->check())
+        <div class="pt-4 pb-1 border-t border-gray-700">
+            @auth
             <div class="px-4">
                 <div class="font-medium text-base text-white" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-red-200">{{ auth()->user()->email }}</div>
+                <div class="font-medium text-sm text-gray-300">{{ auth()->user()->email }}</div>
             </div>
-            @endif
+            @endauth
 
             <div class="mt-3 space-y-0.5">
+                @auth
                 <a href="{{ route('profile') }}" wire:navigate @click="open = false"
-                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('profile') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
+                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('profile') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                     {{ __('Profile') }}
                 </a>
                 
                 @can('view own orders')
                 <a href="{{ route('customer.orders') }}" wire:navigate @click="open = false"
-                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('customer.orders') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
+                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('customer.orders') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                     {{ __('My Web Orders') }}
                 </a>
                 @endcan
                 
-                @if(auth()->check() && auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
+                @if(auth()->user()->hasAnyPermission(['view netsuite sales data', 'view own orders']))
                 <a href="{{ route('sales') }}" wire:navigate @click="open = false"
-                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('sales') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
+                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('sales') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                     {{ __('Sales History') }}
                 </a>
                 @endif
                 
                 @can('sync netsuite sales data')
                 <a href="{{ route('sales.analytics') }}" wire:navigate @click="open = false"
-                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('sales.analytics') ? 'bg-red-900 text-white' : 'text-white hover:bg-red-900/70' }}">
+                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('sales.analytics') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
                     {{ __('Sales Analytics') }}
                 </a>
                 @endcan
@@ -282,6 +279,14 @@ new class extends Component
                         {{ __('Log Out') }}
                     </button>
                 </div>
+                @endauth
+                
+                @guest
+                <a href="{{ route('login') }}" wire:navigate @click="open = false" 
+                   class="block px-4 py-2 text-base font-medium transition-colors {{ request()->routeIs('login') ? 'text-red-600' : 'text-white hover:text-red-600' }}">
+                    {{ __('Log In') }}
+                </a>
+                @endguest
             </div>
         </div>
     </div>
